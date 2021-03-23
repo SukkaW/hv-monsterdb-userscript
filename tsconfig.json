@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "target": "es2020",
+    "module": "commonjs",
+    "declaration": false,
+    "outDir": ".",
+    "strict": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+  },
+  "include": ["src"],
+  "exclude": ["dist", "test"]
+}

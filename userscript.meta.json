@@ -1,0 +1,15 @@
+{
+  "name": "HentaiVerse Monster Database UserScript",
+  "namespace": "https://hentaiverse.org",
+  "grant": [
+    "unsafeWindow",
+    "GM.getValue",
+    "GM.setValue",
+    "GM.deleteValue"
+  ],
+  "run-at": "document-end",
+  "compatible": [
+    "Chrome/Chromium + Tampermonkey",
+    "Firefox + Greasemonkey"
+  ]
+}

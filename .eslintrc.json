@@ -1,0 +1,38 @@
+
+{
+  "root": true,
+  "extends": "sukka/node",
+  "parserOptions": {
+    "sourceType": "module"
+  },
+  "ignorePatterns": ["dist/**/*", "test/**/*"],
+  "overrides": [
+    {
+      "files": [
+        "**/*.ts"
+      ],
+      "parserOptions": {
+        "project": "./tsconfig.json",
+        "sourceType": "module"
+      },
+      "extends": "sukka/typescript",
+      "rules": {
+        "node/no-unsupported-features/es-syntax": [
+          "error",
+          { "ignores": ["modules"] }
+        ]
+      },
+      "settings": {
+        "node": {
+          "resolvePaths": ["__dirname"],
+          "tryExtensions": [".js", ".json", ".node", ".ts", ".d.ts"]
+        }
+      }
+    }, {
+      "files": "src/settings.js",
+      "rules": {
+        "no-unused-vars": "off"
+      }
+    }
+  ]
+}
