@@ -6,6 +6,8 @@ import pkgJson from './package.json';
 import MagicString from 'magic-string';
 import { readFileSync } from 'fs';
 
+let cache;
+
 const userScriptMetaBlockConfig = {
   file: './userscript.meta.json',
   override: {
@@ -38,26 +40,44 @@ function rollupPluginSettingLiteral() {
 
 export default [{
   input: 'src/index.ts',
+  output: [{
+    format: 'iife',
+    file: 'dist/hv-monsterdb.es2020.user.js',
+    name: 'unsafeWindow.HVMonsterDB',
+    sourcemap: false
+  }, {
+    format: 'iife',
+    file: 'dist/hv-monsterdb.es2020.user.min.js',
+    name: 'unsafeWindow.HVMonsterDB',
+    sourcemap: false,
+    plugins: [terser({ format: { comments: false } })]
+  }],
+  plugins: [
+    typescript({
+      target: 'ES2020',
+      tsconfig: './tsconfig.json'
+    }),
+    rollupPluginSettingLiteral(),
+    metablock(userScriptMetaBlockConfig)
+  ],
+  cache
+}, {
+  input: 'src/index.ts',
   output: {
     format: 'iife',
-    file: 'dist/userscript/hv-monsterdb.user.js',
-    name: 'unsafeWindow.HVUserLandApi',
-    globals: {
-      document: 'document',
-      window: 'window'
-    },
-    plugins: [
-      // terser(),
-      /** Custom plugin for generating settings */
-      rollupPluginSettingLiteral(),
-      metablock(userScriptMetaBlockConfig)
-    ],
-    sourcemap: false
+    file: 'dist/hv-monsterdb.es5.user.min.js',
+    name: 'unsafeWindow.HVMonsterDB',
+    sourcemap: false,
+    plugins: [terser({ format: { comments: false } })]
   },
   plugins: [
     typescript({
-      module: 'ES2015',
+      target: 'ES5',
+      downlevelIteration: true,
       tsconfig: './tsconfig.json'
-    })
-  ]
+    }),
+    rollupPluginSettingLiteral(),
+    metablock(userScriptMetaBlockConfig)
+  ],
+  cache
 }];
