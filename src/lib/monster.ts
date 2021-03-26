@@ -1,5 +1,5 @@
 import { HVMonsterDatabase } from '../types';
-import { convertEncodedMonsterInfoToMonsterInfo } from './localDataBase';
+import { convertEncodedMonsterInfoToMonsterInfo, EncodedMonsterDatabase } from './monsterDataEncode';
 import { LOCAL_MONSTER_DATABASE, MONSTER_NAME_ID_MAP } from './store';
 
 const EFFECTS_AFFECTING_SCAN_REAULT = ['nbardead.png', 'imperil.png', 'firedot.png', 'coldslow.png', 'coldslow.png', 'windmiss.png', 'holybreach.png', 'darknerf.png'];
@@ -31,7 +31,11 @@ export class MonsterStatus {
 
   getInfoLastUpdate(): number | undefined {
     if (LOCAL_MONSTER_DATABASE) {
-      return LOCAL_MONSTER_DATABASE[this.name]?.l;
+      const encodedMonsterInfo = LOCAL_MONSTER_DATABASE[this.name];
+
+      if (encodedMonsterInfo) {
+        return encodedMonsterInfo[EncodedMonsterDatabase.EMonsterInfo.lastUpdate];
+      }
     }
   }
 

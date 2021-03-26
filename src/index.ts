@@ -41,3 +41,5 @@ polyfill();
 })();
 
 export * from './lib/api';
+export type { HVMonsterDatabase } from './types';
+export type { EncodedMonsterDatabase } from './lib/monsterDataEncode';

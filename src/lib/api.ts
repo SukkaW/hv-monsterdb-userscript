@@ -1,7 +1,8 @@
 import { HVMonsterDatabase } from '../types';
 import { logger } from '../util/logger';
 import { MONSTERS, MONSTERS_NEED_SCAN } from './battle';
-import { convertEncodedMonsterInfoToMonsterInfo, updateLocalDatabase } from './localDataBase';
+import { updateLocalDatabase } from './localDataBase';
+import { convertEncodedMonsterInfoToMonsterInfo } from './monsterDataEncode';
 import { LOCAL_MONSTER_DATABASE, MONSTER_NAME_ID_MAP } from './store';
 
 /**
@@ -69,7 +70,7 @@ export function getCurrentNeedScannedMonsters(): {
 
 /** DEBUG Method, force update local database from the server (only avaliable when "debug" setting is enabled) */
 export function forceUpdateLocalDatabase(): Promise<void> {
-  if (SETTINGS.debug) {
+  if (!SETTINGS.debug) {
     logger.error('"forceUpdateLocalDatabase" method is only avaliable when "debug" setting is enabled');
     return Promise.reject(new Error('"forceUpdateLocalDatabase" method is only avaliable when "debug" setting is enabled'));
   }
@@ -78,7 +79,7 @@ export function forceUpdateLocalDatabase(): Promise<void> {
 
 /** DEBUG Method, dump raw local data base (only avaliable when "debug" setting is enabled) */
 export function dumpRawLocalDataBase(): HVMonsterDatabase.LocalDatabase {
-  if (SETTINGS.debug) {
+  if (!SETTINGS.debug) {
     logger.error('"dumpRawLocalDataBase" method is only avaliable when "debug" setting is enabled');
     throw new Error('"dumpRawLocalDataBase" method is only avaliable when "debug" setting is enabled');
   } else {

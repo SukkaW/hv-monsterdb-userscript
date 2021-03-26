@@ -1,13 +1,14 @@
 import { HVMonsterDatabase } from '../types';
-import { getMonsterDatabaseCompatibleDate, getUTCDate, isIsekai, showPopup } from '../util/common';
+import { getUTCDate, isIsekai, showPopup } from '../util/common';
 import { logger } from '../util/logger';
 import { getStoredValue, setStoredValue } from '../util/store';
+import { convertMonsterInfoToEncodedMonsterInfo } from './monsterDataEncode';
 import { setLocalDatabaseTmpValue } from './store';
 
 interface ApiResponse {
   monsters: (HVMonsterDatabase.MonsterInfo & {
     /**
-     * @description - Last time update (can be parsed through Date)
+     * @description Last time update (can be parsed through Date)
      */
     lastUpdate: string
   })[]
@@ -73,45 +74,4 @@ export async function updateLocalDatabase(force = false): Promise<void> {
 
     showPopup('There is something wrong when trying to update the local database!');
   }
-}
-
-export function convertMonsterInfoToEncodedMonsterInfo(monster: HVMonsterDatabase.MonsterInfo): HVMonsterDatabase.EncodedMonsterInfo {
-  return {
-    id: monster.monsterId,
-    cl: HVMonsterDatabase.Encoder.IMonsterClass[monster.monsterClass],
-    pl: monster.plvl,
-    a: HVMonsterDatabase.Encoder.IMonsterAttack[monster.attack],
-    tr: monster.trainer,
-    p: monster.piercing,
-    c: monster.crushing,
-    s: monster.slashing,
-    co: monster.cold,
-    w: monster.wind,
-    e: monster.elec,
-    f: monster.fire,
-    d: monster.dark,
-    h: monster.holy,
-    l: new Date(monster.lastUpdate).getTime()
-  };
-}
-
-export function convertEncodedMonsterInfoToMonsterInfo(monsterName: string, simpleMonster: HVMonsterDatabase.EncodedMonsterInfo): HVMonsterDatabase.MonsterInfo {
-  return {
-    monsterName,
-    monsterId: simpleMonster.id,
-    monsterClass: HVMonsterDatabase.Encoder.kMonsterClass[simpleMonster.cl],
-    plvl: simpleMonster.pl,
-    attack: HVMonsterDatabase.Encoder.kMonsterAttack[simpleMonster.a],
-    trainer: simpleMonster.tr,
-    piercing: simpleMonster.p,
-    crushing: simpleMonster.c,
-    slashing: simpleMonster.s,
-    cold: simpleMonster.co,
-    wind: simpleMonster.w,
-    elec: simpleMonster.e,
-    fire: simpleMonster.f,
-    dark: simpleMonster.d,
-    holy: simpleMonster.h,
-    lastUpdate: getMonsterDatabaseCompatibleDate(simpleMonster.l)
-  };
 }

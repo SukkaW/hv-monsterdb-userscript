@@ -2,7 +2,7 @@ import { MonsterStatus } from './monster';
 import { parseMonsterNameAndId, parseScanResult } from './parseLog';
 import { LOCAL_MONSTER_DATABASE, MONSTER_NAME_ID_MAP, retrieveTmpValue } from './store';
 import { createMonsterInfoBox, makeMonsterInfoTable } from './monsterInfoUI';
-import { convertMonsterInfoToEncodedMonsterInfo } from './localDataBase';
+import { convertMonsterInfoToEncodedMonsterInfo } from './monsterDataEncode';
 import { logger } from '../util/logger';
 import { submitScanResults } from './submitScan';
 
