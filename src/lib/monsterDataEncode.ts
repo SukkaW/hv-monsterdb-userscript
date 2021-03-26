@@ -113,9 +113,9 @@ export function convertEncodedMonsterInfoToMonsterInfo(monsterName: string, simp
   return {
     monsterName,
     monsterId: simpleMonster[EncodedMonsterDatabase.EMonsterInfo.monsterId],
-    monsterClass: EncodedMonsterDatabase.EMonsterClass[EncodedMonsterDatabase.EMonsterInfo.monsterId] as HVMonsterDatabase.MonsterClass,
+    monsterClass: EncodedMonsterDatabase.EMonsterClass[simpleMonster[EncodedMonsterDatabase.EMonsterInfo.monsterClass]] as HVMonsterDatabase.MonsterClass,
     plvl: simpleMonster[EncodedMonsterDatabase.EMonsterInfo.plvl],
-    attack: EncodedMonsterDatabase.EMonsterClass[EncodedMonsterDatabase.EMonsterInfo.attack] as HVMonsterDatabase.MonsterAttack,
+    attack: EncodedMonsterDatabase.EMonsterAttack[simpleMonster[EncodedMonsterDatabase.EMonsterInfo.attack]] as HVMonsterDatabase.MonsterAttack,
     trainer: simpleMonster[EncodedMonsterDatabase.EMonsterInfo.trainer],
     piercing: simpleMonster[EncodedMonsterDatabase.EMonsterInfo.piercing],
     crushing: simpleMonster[EncodedMonsterDatabase.EMonsterInfo.crushing],

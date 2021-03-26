@@ -20,7 +20,6 @@ export const MONSTERS_NEED_SCAN: Set<{
 /** Will execute at per round start */
 export async function inBattle(): Promise<void> {
   tasksRunAtStartOfPerRound();
-  showMonsterInfoAndHighlightExpiredMonster();
 
   const logEl = document.getElementById('textlog');
   if (logEl && logEl.firstChild) {
@@ -71,6 +70,8 @@ function tasksRunAtStartOfPerRound(): void {
   if (SETTINGS.showMonsterInfoBox) {
     window.requestAnimationFrame(createMonsterInfoBox);
   }
+
+  showMonsterInfoAndHighlightExpiredMonster();
 }
 
 function tasksRunDuringTheBattle(): void {
