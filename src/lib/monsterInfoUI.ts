@@ -9,7 +9,7 @@ const monsterInfoBoxStyle = `
   border: 2px solid #5c0d11;
   background-color: #eeece1;
   width: 175px;
-  height: 590px;
+  height: 599px;
   opacity: 1;
 }
 
