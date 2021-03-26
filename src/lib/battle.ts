@@ -20,6 +20,7 @@ export const MONSTERS_NEED_SCAN: Set<{
 /** Will execute at per round start */
 export async function inBattle(): Promise<void> {
   tasksRunAtStartOfPerRound();
+  showMonsterInfoAndHighlightExpiredMonster();
 
   const logEl = document.getElementById('textlog');
   if (logEl && logEl.firstChild) {
@@ -105,6 +106,10 @@ function tasksRunDuringTheBattle(): void {
     }
   }
 
+  showMonsterInfoAndHighlightExpiredMonster();
+}
+
+function showMonsterInfoAndHighlightExpiredMonster(): void {
   // Show monster info table
   const monsterInfoBoxEl = document.getElementById('monsterdb_container');
   if (monsterInfoBoxEl) {
@@ -131,12 +136,16 @@ function tasksRunDuringTheBattle(): void {
 
       // Highlight a monster hasn't been scanned for a while
       if (SETTINGS.scanHighlightColor !== false) {
-        const monsterBtm2El = monsterStatus.getElement()?.querySelector('div.btm2');
-        if (monsterBtm2El) {
-          monsterBtm2El.style.background = SETTINGS.scanHighlightColor === true ? 'coral' : SETTINGS.scanHighlightColor;
-          // Monster elements will be replaced per turn start
-          // so there is no need to restore the background color
-        }
+        const highlightColor = SETTINGS.scanHighlightColor === true ? 'coral' : SETTINGS.scanHighlightColor;
+
+        window.requestAnimationFrame(() => {
+          const monsterBtm2El = monsterStatus.getElement()?.querySelector('div.btm2');
+          if (monsterBtm2El) {
+            monsterBtm2El.style.background = highlightColor;
+            // Monster elements will be replaced per turn start
+            // so there is no need to restore the background color
+          }
+        });
       }
     }
   }
