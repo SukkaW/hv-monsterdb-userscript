@@ -1,0 +1,7 @@
+{
+  "entryPoints": ["src/index.ts"],
+  "out": "docs",
+  "name": "HV Monster Database UserScript API Guide",
+  "includeVersion": true,
+  "readme": "none"
+}

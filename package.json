@@ -8,6 +8,7 @@
   ],
   "scripts": {
     "build": "rollup -c",
+    "doc": "typedoc",
     "lint": "eslint --ext .ts --ignore-path .gitignore ./",
     "prepublishOnly": "npm run build"
   },
@@ -38,6 +39,7 @@
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-userscript-metablock": "^0.2.7",
     "typed-query-selector": "^2.4.1",
+    "typedoc": "^0.20.34",
     "typescript": "^4.2.3"
   },
   "engines": {
