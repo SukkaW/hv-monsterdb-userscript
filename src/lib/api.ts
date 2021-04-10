@@ -34,7 +34,9 @@ export function getMonsterIdByName(name: string): number | null {
  * // }
  * ```
  */
-export function getCurrentMonstersInformation(): Record<string, HVMonsterDatabase.MonsterInfo | null> {
+export function getCurrentMonstersInformation(): {
+  [key: string]: HVMonsterDatabase.MonsterInfo | null
+} {
   const results: Record<string, HVMonsterDatabase.MonsterInfo | null> = {};
   for (const [, monsterStatus] of MONSTERS) {
     results[monsterStatus.mkey] = monsterStatus.getInfo() || null;
@@ -59,7 +61,15 @@ export function getMonsterInfoByName(name: string): HVMonsterDatabase.MonsterInf
   return null;
 }
 
-/** Get a list of the monsters that require scan */
+/**
+ * Get a list of the monsters that require scan
+ *
+ * ```js
+ * window.HVMonsterDB.getCurrentMonstersInformation();
+ *
+ * []
+ * ```
+ */
 export function getCurrentNeedScannedMonsters(): {
   name: string,
   mkey: string,
