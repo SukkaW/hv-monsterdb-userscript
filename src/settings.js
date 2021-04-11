@@ -17,7 +17,7 @@ const SETTINGS = {
    * Scan Highlight Color
    *
    * Expired monsters will be highlighted
-   * Set to "false" (without quote) will disable the highlight feature.
+   * Set to "false" (without quote) will disable the highlight.
    */
   scanHighlightColor: 'coral',
   /**
