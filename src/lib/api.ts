@@ -78,7 +78,13 @@ export function getCurrentNeedScannedMonsters(): {
   return [...MONSTERS_NEED_SCAN];
 }
 
-/** DEBUG Method, force update local database from the server (only avaliable when "debug" setting is enabled) */
+/**
+ * DEBUG Method, force update local database from the server (only avaliable when "debug" setting is enabled)
+ *
+ * ```js
+ * window.HVMonsterDB.forceUpdateLocalDatabase();
+ * ```
+ */
 export function forceUpdateLocalDatabase(): Promise<void> {
   if (!SETTINGS.debug) {
     logger.error('"forceUpdateLocalDatabase" method is only avaliable when "debug" setting is enabled');
@@ -87,7 +93,13 @@ export function forceUpdateLocalDatabase(): Promise<void> {
   return updateLocalDatabase(true);
 }
 
-/** DEBUG Method, dump raw local data base (only avaliable when "debug" setting is enabled) */
+/**
+ * DEBUG Method, dump raw local data base (only avaliable when "debug" setting is enabled)
+ *
+ * ```js
+ * window.HVMonsterDB.dumpRawLocalDataBase();
+ * ```
+ */
 export function dumpRawLocalDataBase(): HVMonsterDatabase.LocalDatabase {
   if (!SETTINGS.debug) {
     logger.error('"dumpRawLocalDataBase" method is only avaliable when "debug" setting is enabled');
