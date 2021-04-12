@@ -1,7 +1,6 @@
 /* eslint-disable node/no-unsupported-features/es-syntax */
 import typescript from '@rollup/plugin-typescript';
 import metablock from 'rollup-plugin-userscript-metablock';
-import { terser } from 'rollup-plugin-terser';
 import pkgJson from './package.json';
 import MagicString from 'magic-string';
 import { readFileSync } from 'fs';
@@ -45,12 +44,6 @@ export default [{
     file: 'dist/hv-monsterdb.es2020.user.js',
     name: 'unsafeWindow.HVMonsterDB',
     sourcemap: false
-  }, {
-    format: 'iife',
-    file: 'dist/hv-monsterdb.es2020.user.min.js',
-    name: 'unsafeWindow.HVMonsterDB',
-    sourcemap: false,
-    plugins: [terser({ format: { comments: false } })]
   }],
   plugins: [
     typescript({
@@ -65,10 +58,9 @@ export default [{
   input: 'src/index.ts',
   output: {
     format: 'iife',
-    file: 'dist/hv-monsterdb.es5.user.min.js',
+    file: 'dist/hv-monsterdb.es5.user.js',
     name: 'unsafeWindow.HVMonsterDB',
-    sourcemap: false,
-    plugins: [terser({ format: { comments: false } })]
+    sourcemap: false
   },
   plugins: [
     typescript({

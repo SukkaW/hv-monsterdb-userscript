@@ -1,8 +1,8 @@
 {
   "name": "hv-monsterdb-userscript",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "M-M-M-MONSTER DATABASE!",
-  "main": "index.js",
+  "main": "dist/hv-monsterdb.es2020.user.js",
   "files": [
     "dist"
   ],
@@ -36,7 +36,6 @@
     "eslint-plugin-node": "^11.1.0",
     "magic-string": "^0.25.7",
     "rollup": "^2.41.4",
-    "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-userscript-metablock": "^0.2.7",
     "typed-query-selector": "^2.4.1",
     "typedoc": "^0.20.34",
