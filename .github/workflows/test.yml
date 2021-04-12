@@ -6,26 +6,36 @@ jobs:
   linter:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-node@v2
-      with:
-        node-version: '14'
-    - run: npm install npm -g
-    - run: npm install
-    - run: |
-        npm run lint
-      env:
-        CI: true
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+      - run: npm install npm -g
+      - run: npm install
+      - run: |
+          npm run lint
+        env:
+          CI: true
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-node@v2
-      with:
-        node-version: '14'
-    - run: npm install npm -g
-    - run: npm install
-    - run: |
-        npm run build
-      env:
-        CI: true
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+      - run: npm install npm -g
+      - run: npm install
+      - run: |
+          npm run build
+        env:
+          CI: true
+      - name: upload nightly build (es5)
+        uses: actions/upload-artifact@v2
+        with:
+          name: hv-monsterdb.es5.user.js
+          path: dist/hv-monsterdb.es5.user.js
+      - name: upload nightly build (es2020)
+        uses: actions/upload-artifact@v2
+        with:
+          name: hv-monsterdb.es2020.user.js
+          path: dist/hv-monsterdb.es2020.user.js
