@@ -38,7 +38,7 @@ There is nothing else you need to do! The script will handle everything for you!
 
 ## API
 
-If you are a script writer or an advanced player, you might be interested in the [API Documents](https://hv-monsterdb-userscript.pages.dev/).
+If you are a script writer or an advanced player, you might be interested in the [API Documents](https://suka.js.org/hv-monsterdb-userscript/).
 
 ## Build
 
