@@ -1,5 +1,7 @@
 /* eslint-disable node/no-unsupported-features/es-syntax */
 import typescript from '@rollup/plugin-typescript';
+import { babel } from '@rollup/plugin-babel';
+import commonjs from '@rollup/plugin-commonjs';
 import metablock from 'rollup-plugin-userscript-metablock';
 import pkgJson from './package.json';
 import MagicString from 'magic-string';
@@ -67,6 +69,29 @@ export default [{
       target: 'ES5',
       downlevelIteration: true,
       tsconfig: './tsconfig.json'
+    }),
+    commonjs(),
+    babel({
+      babelHelpers: 'bundled',
+      presets: [
+        ['@babel/preset-env', {
+          bugfixes: true,
+          spec: true,
+          useBuiltIns: 'usage',
+          corejs: {
+            version: 3,
+            proposals: false
+          },
+          shippedProposals: true
+        }]
+      ],
+      targets: {
+        chrome: 50,
+        firefox: 52,
+        ie: 11,
+        edge: 12,
+        safari: 10
+      }
     }),
     rollupPluginSettingLiteral(),
     metablock(userScriptMetaBlockConfig)
