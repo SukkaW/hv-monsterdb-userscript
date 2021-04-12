@@ -1,7 +1,7 @@
 {
   "entryPoints": ["src/index.ts"],
   "out": "docs",
-  "name": "HV Monster Database UserScript API Guide",
+  "name": "HentaiVerse Monster Database UserScript API",
   "includeVersion": true,
   "readme": "none"
 }

@@ -29,4 +29,8 @@ const SETTINGS = {
   showMonsterInfoBox: true
 };
 // ============= ^^^ SETTINGS ^^^ =============
+/* If you want to make some modifications, it is recommeneded to build your own script from
+ * the source code. The source code is released on GitHub under MIT License:
+ * https://github.com/SukkaW/hv-monsterdb-userscript
+ */
 // -+-+ DO NOT EDIT THE CODE BELOW THE LINE BY HAND +-+-
