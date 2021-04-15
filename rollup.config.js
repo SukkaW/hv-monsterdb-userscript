@@ -20,10 +20,9 @@ const userScriptMetaBlockConfig = {
     ],
     exclude: [
       'http*://hentaiverse.org/pages/showequip.php?*',
-      'http://alt.hentaiverse.org',
-      '*hentaiverse.org/equip/*',
       '*hentaiverse.org/equip/*'
-    ]
+    ],
+    'run-at': 'document-end'
   }
 };
 
@@ -82,7 +81,8 @@ export default [{
             version: 3,
             proposals: false
           },
-          shippedProposals: true
+          shippedProposals: true,
+          loose: true
         }]
       ],
       targets: {
