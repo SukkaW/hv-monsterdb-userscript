@@ -22,15 +22,6 @@ export function getMonsterDatabaseCompatibleDate(timestamp?: number): string {
   return result;
 }
 
-// GM.addStyle method has been removed in GreaseMonkey 4.0 spec
-// So let's make our own add style method.
-export function addStyle(cssText: string): void {
-  const styleEl = document.createElement('style');
-  styleEl.appendChild(document.createTextNode(cssText));
-
-  document.head.appendChild(styleEl);
-}
-
 export function showPopup(msgHtml: string, color = '#000', title = 'HentaiVerse Monster Datase UserScript'): void {
   const popupEl = document.body.appendChild(document.createElement('div'));
   popupEl.style.cssText = 'position:fixed;top:0;left:0;width:1236px;height:702px;padding:3px 100% 100% 3px;background-color:rgba(0,0,0,.3);z-index:1001;display:flex;justify-content:center;align-items:center';

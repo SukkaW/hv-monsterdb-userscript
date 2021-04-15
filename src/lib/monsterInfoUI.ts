@@ -1,5 +1,4 @@
 import { HVMonsterDatabase } from '../types';
-import { addStyle } from '../util/common';
 import { MONSTER_INFO_BOX_POSITION } from './store';
 
 const monsterInfoBoxStyle = `
@@ -64,7 +63,14 @@ export function createMonsterInfoBox(): void {
   // However we still have to make sure the info box won't be added again & again
   if (document.getElementById('monsterdb_info')) return;
 
-  addStyle(monsterInfoBoxStyle);
+  // GM.addStyle method has been removed in GreaseMonkey 4.0 spec
+  // So let's make our own add style method.
+  if (!document.getElementById('monsterdb_style')) {
+    const styleEl = document.createElement('style');
+    styleEl.appendChild(document.createTextNode(monsterInfoBoxStyle));
+    styleEl.id = 'monsterdb_style';
+    document.head.appendChild(styleEl);
+  }
 
   const boxEl = document.createElement('div');
   boxEl.id = 'monsterdb_info';
