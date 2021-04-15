@@ -13,17 +13,32 @@ polyfill();
   if (document.getElementById('textlog')) {
     await tasksRunOncePerPageLoad();
 
-    // Monsterbation dispatch "DOMContentLoaded" per round start.
-    document.addEventListener('DOMContentLoaded', inBattle);
-    // Both "HVReload" and "DOMContentLoaded" are listened by "HentaiVerse Chinese Translation" userscript during battle
-    // I don't know what "HVReload" is, but I guess "something" will dispatch it per round start
-    document.addEventListener('HVReload', inBattle);
+    // In Battle
+    /**
+     * We will listen 'DOMContentLoaded' soon. If the browser inject the script right before
+     * DOMContentLoaded event, we won't call inBattle(), and let event handler does its job.
+     */
+    inBattle();
 
+    // Monsterbation dispatch "DOMContentLoaded" per round start.
+    /**
+     * TamperMonkey on Chrome will inject the userscript after DOMContentLoaded event is fired
+     * TamperMonkey on Firefox will inject the userscript after document.readyState changed and
+     * before DOMContentLoaded event is fired. So in order to prevent the function being invoked
+     * twice on Firefox, only listen to the event after the page is loaded.
+     */
+    const bindInBattleToDOMContentLoaded = () => {
+      document.addEventListener('DOMContentLoaded', inBattle);
+      // Both "HVReload" and "DOMContentLoaded" are listened by "HentaiVerse Chinese Translation" userscript during battle
+      // I don't know what "HVReload" is, but I guess "something" will dispatch it per round start
+      document.addEventListener('HVReload', inBattle);
+      // Remove event listener, prevent listening over and over again
+      window.removeEventListener('load', bindInBattleToDOMContentLoaded);
+    };
+
+    window.addEventListener('load', bindInBattleToDOMContentLoaded);
     // Store in-memory value back to storage before window refresh / closes
     window.addEventListener('beforeunload', storeTmpValue);
-
-    // In Battle
-    inBattle();
   } else if (document.getElementById('riddlemaster')) {
     // Riddle Master, do nothing.
   } else {
