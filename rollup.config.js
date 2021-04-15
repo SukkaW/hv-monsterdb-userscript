@@ -26,6 +26,28 @@ const userScriptMetaBlockConfig = {
   }
 };
 
+const babelConfig = {
+  presets: [
+    ['@babel/preset-env', {
+      bugfixes: true,
+      spec: false,
+      useBuiltIns: 'usage',
+      corejs: {
+        version: '3.10'
+      },
+      shippedProposals: true,
+      loose: true
+    }]
+  ],
+  targets: {
+    chrome: 50,
+    firefox: 52,
+    edge: 14,
+    safari: 10
+  },
+  comments: false
+};
+
 function rollupPluginSettingLiteral() {
   const settingsLiteral = readFileSync('src/settings.js', 'utf-8');
   return {
@@ -72,26 +94,7 @@ export default [{
     commonjs(),
     babel({
       babelHelpers: 'bundled',
-      presets: [
-        ['@babel/preset-env', {
-          bugfixes: true,
-          spec: true,
-          useBuiltIns: 'usage',
-          corejs: {
-            version: 3,
-            proposals: false
-          },
-          shippedProposals: true,
-          loose: true
-        }]
-      ],
-      targets: {
-        chrome: 50,
-        firefox: 52,
-        ie: 11,
-        edge: 12,
-        safari: 10
-      }
+      ...babelConfig
     }),
     rollupPluginSettingLiteral(),
     metablock(userScriptMetaBlockConfig)
