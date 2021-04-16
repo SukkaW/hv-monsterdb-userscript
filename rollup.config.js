@@ -97,7 +97,23 @@ export default [{
       ...babelConfig
     }),
     rollupPluginSettingLiteral(),
-    metablock(userScriptMetaBlockConfig)
+    metablock({
+      ...userScriptMetaBlockConfig,
+      override: {
+        grant: [
+          'unsafeWindow',
+          'GM.getValue',
+          'GM_getValue', // GMv3 Legacy API support
+          'GM.setValue',
+          'GM_setValue', // GMv3 Legacy API support
+          'GM.deleteValue',
+          'GM_deleteValue' // GMv3 Legacy API support
+        ],
+        require: [
+          'https://cdn.jsdelivr.net/npm/gm4-polyfill@1.0.1/gm4-polyfill.es5.min.js'
+        ]
+      }
+    })
   ],
   cache
 }];
