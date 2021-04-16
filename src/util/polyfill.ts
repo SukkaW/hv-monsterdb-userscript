@@ -7,9 +7,11 @@ declare global {
 }
 
 export function polyfill(): void {
-  window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+  // globalThis is the "safeWindow" (no "un" here!)
 
-  window.requestIdleCallback = window.requestIdleCallback || (cb => {
+  globalThis.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+
+  globalThis.requestIdleCallback = window.requestIdleCallback || (cb => {
     const start = Date.now();
     return setTimeout(() => {
       cb({
@@ -21,13 +23,13 @@ export function polyfill(): void {
     }, 1);
   });
 
-  window.cancelIdleCallback = window.cancelIdleCallback || (id => {
+  globalThis.cancelIdleCallback = window.cancelIdleCallback || (id => {
     clearTimeout(id);
   });
 
   // A bare minimal fetch polyfill
   if (typeof fetch !== 'function') {
-    window.fetch = function (url, options) {
+    globalThis.fetch = function (url, options) {
       options = options || {};
       return new Promise((resolve, reject) => {
         const request = new XMLHttpRequest();
