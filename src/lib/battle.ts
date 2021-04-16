@@ -19,16 +19,15 @@ export const MONSTERS_NEED_SCAN: Set<{
 
 /** Will execute at per round start */
 export async function inBattle(): Promise<void> {
-  tasksRunAtStartOfPerRound();
-
   const logEl = document.getElementById('textlog');
   if (logEl && logEl.firstChild) {
+    tasksRunAtStartOfPerRound();
     const mo = new MutationObserver(tasksRunDuringTheBattle);
     mo.observe(logEl.firstChild, { childList: true });
   }
 }
 
-/** Tasks like restore tmp value & rebuild monsterIdMao only have to run once */
+/** Tasks like restore tmp value & rebuild monsterIdMap only have to run once */
 export async function tasksRunOncePerPageLoad(): Promise<void> {
   await retrieveTmpValue();
 }
@@ -67,10 +66,10 @@ function tasksRunAtStartOfPerRound(): void {
   // Monsterbation tend to replace whole document.body when ajaxRound is enabled.
   // So it is necessary to re-add Monster Info Box back to DOM per round start.
   // Use window.requestAnimationFrame, hopefully it won't cause rendering performance issue.
-  if (SETTINGS.showMonsterInfoBox) {
+  if (SETTINGS.showMonsterInfoBox && !document.getElementById('monsterdb_info')) {
     window.requestAnimationFrame(createMonsterInfoBox);
   }
-
+  // This function is related with API, so it can't be wrapped in requestAnimationFrame.
   showMonsterInfoAndHighlightExpiredMonster();
 }
 
@@ -87,9 +86,11 @@ function tasksRunDuringTheBattle(): void {
     if (logHtml.includes('Scanning')) {
       const scanResult = parseScanResult(logHtml);
       if (scanResult) {
-        logger.info('Scanned a monster:', scanResult);
-
         const { monsterName } = scanResult;
+
+        logger.info('Scanned a monster:', monsterName);
+        logger.debug('Scan result', scanResult);
+
         const monsterStatus = MONSTERS.get(monsterName);
 
         // Check if the monster is dead, being imperiled, or has spell effects
@@ -111,13 +112,16 @@ function tasksRunDuringTheBattle(): void {
 }
 
 function showMonsterInfoAndHighlightExpiredMonster(): void {
+  MONSTERS_NEED_SCAN.clear();
+
   // Show monster info table
   const monsterInfoBoxEl = document.getElementById('monsterdb_container');
   if (monsterInfoBoxEl) {
-    monsterInfoBoxEl.innerHTML = '';
+    // Wrapped clean innerHTML in requestAnimationFrame to avoid potential race condition
+    window.requestAnimationFrame(() => {
+      monsterInfoBoxEl.innerHTML = '';
+    });
   }
-
-  MONSTERS_NEED_SCAN.clear();
 
   for (const [monsterName, monsterStatus] of MONSTERS) {
     // #geiInfo method always provide latest data (including scanned)
@@ -139,14 +143,14 @@ function showMonsterInfoAndHighlightExpiredMonster(): void {
       if (SETTINGS.scanHighlightColor !== false) {
         const highlightColor = SETTINGS.scanHighlightColor === true ? 'coral' : SETTINGS.scanHighlightColor;
 
-        window.requestAnimationFrame(() => {
-          const monsterBtm2El = monsterStatus.getElement()?.querySelector('div.btm2');
-          if (monsterBtm2El) {
+        const monsterBtm2El = monsterStatus.getElement()?.querySelector('div.btm2');
+        if (monsterBtm2El) {
+          window.requestAnimationFrame(() => {
             monsterBtm2El.style.background = highlightColor;
-            // Monster elements will be replaced per turn start
-            // so there is no need to restore the background color
-          }
-        });
+          });
+          // Monster elements will be replaced per turn start
+          // so there is no need to restore the background color
+        }
       }
     }
   }
