@@ -5,6 +5,7 @@ import { createMonsterInfoBox, makeMonsterInfoTable } from './monsterInfoUI';
 import { convertMonsterInfoToEncodedMonsterInfo } from './monsterDataEncode';
 import { logger } from '../util/logger';
 import { submitScanResults } from './submitScan';
+import { HVMonsterDatabase } from '../types';
 
 import 'typed-query-selector';
 
@@ -19,6 +20,21 @@ export const MONSTERS_NEED_SCAN: Set<{
 
 /** Will execute at per round start */
 export async function inBattle(): Promise<void> {
+  /**
+   * The implementation is from Monsterbation, to prevent inBattle from calling twice
+   * It is a comfirmed tampermonkey bug, see https://github.com/Tampermonkey/tampermonkey/issues/1218
+   */
+  // Check if #monsterdb_in_battle_invoked has been injected
+  if (document.getElementById('monsterdb_in_battle_invoked')) {
+    logger.debug('Race condition of inBattle has been detected and mitigated!');
+    return;
+  }
+  // Inject #monsterdb_in_battle_invoked
+  const invokedEl = document.createElement('div');
+  invokedEl.id = 'monsterdb_in_battle_invoked';
+  invokedEl.style.display = 'none';
+  document.getElementById('battle_right')?.appendChild(invokedEl); // battle_right contains monster elements
+
   const logEl = document.getElementById('textlog');
   if (logEl && logEl.firstChild) {
     tasksRunAtStartOfPerRound();
@@ -34,9 +50,7 @@ export async function tasksRunOncePerPageLoad(): Promise<void> {
 
 /** Tasks like "get monster id and monster name" only have to run at the start of per round */
 function tasksRunAtStartOfPerRound(): void {
-  const logEls = document.querySelectorAll('#textlog > tbody > tr');
-
-  logEls.forEach(logEl => {
+  document.querySelectorAll('#textlog > tbody > tr').forEach(logEl => {
     const logHtml = logEl.innerHTML;
 
     // Get Monster Name & ID
@@ -63,12 +77,6 @@ function tasksRunAtStartOfPerRound(): void {
     }
   }
 
-  // Monsterbation tend to replace whole document.body when ajaxRound is enabled.
-  // So it is necessary to re-add Monster Info Box back to DOM per round start.
-  // Use window.requestAnimationFrame, hopefully it won't cause rendering performance issue.
-  if (SETTINGS.showMonsterInfoBox && !document.getElementById('monsterdb_info')) {
-    window.requestAnimationFrame(createMonsterInfoBox);
-  }
   // This function is related with API, so it can't be wrapped in requestAnimationFrame.
   showMonsterInfoAndHighlightExpiredMonster();
 }
@@ -112,23 +120,31 @@ function tasksRunDuringTheBattle(): void {
 }
 
 function showMonsterInfoAndHighlightExpiredMonster(): void {
+  // A queue of function to be called, to avoid race condition
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  const requestAnimationFrameCallbackQueue: Function[] = [];
+
+  const clearMonsterInfoContainer = () => {
+    const monsterInfoBoxEl = document.getElementById('monsterdb_container');
+    if (monsterInfoBoxEl) {
+      monsterInfoBoxEl.innerHTML = '';
+    }
+  };
+  const appendMonsterInfo = (info: HVMonsterDatabase.MonsterInfo | null | undefined) => () => {
+    document.getElementById('monsterdb_container')?.appendChild(makeMonsterInfoTable(info));
+  };
+
   MONSTERS_NEED_SCAN.clear();
 
-  // Show monster info table
-  const monsterInfoBoxEl = document.getElementById('monsterdb_container');
-  if (monsterInfoBoxEl) {
-    // Wrapped clean innerHTML in requestAnimationFrame to avoid potential race condition
-    window.requestAnimationFrame(() => {
-      monsterInfoBoxEl.innerHTML = '';
-    });
+  if (SETTINGS.showMonsterInfoBox && !document.getElementById('monsterdb_info')) {
+    requestAnimationFrameCallbackQueue.push(createMonsterInfoBox);
   }
+  requestAnimationFrameCallbackQueue.push(clearMonsterInfoContainer);
 
   for (const [monsterName, monsterStatus] of MONSTERS) {
     // #geiInfo method always provide latest data (including scanned)
     if (SETTINGS.showMonsterInfoBox) {
-      window.requestAnimationFrame(() => {
-        monsterInfoBoxEl?.appendChild(makeMonsterInfoTable(monsterStatus.info));
-      });
+      requestAnimationFrameCallbackQueue.push(appendMonsterInfo(monsterStatus.info));
     }
 
     // Find monster needs to be scanned
@@ -142,16 +158,17 @@ function showMonsterInfoAndHighlightExpiredMonster(): void {
       // Highlight a monster hasn't been scanned for a while
       if (SETTINGS.scanHighlightColor !== false) {
         const highlightColor = SETTINGS.scanHighlightColor === true ? 'coral' : SETTINGS.scanHighlightColor;
-
         const monsterBtm2El = monsterStatus.element?.querySelector('div.btm2');
         if (monsterBtm2El) {
-          window.requestAnimationFrame(() => {
-            monsterBtm2El.style.background = highlightColor;
-          });
-          // Monster elements will be replaced per turn start
-          // so there is no need to restore the background color
+          monsterBtm2El.style.backgroundColor = highlightColor;
         }
       }
     }
   }
+
+  window.requestAnimationFrame(() => {
+    for (const func of requestAnimationFrameCallbackQueue) {
+      func();
+    }
+  });
 }
