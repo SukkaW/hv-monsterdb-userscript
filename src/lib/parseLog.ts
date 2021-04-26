@@ -23,9 +23,9 @@ export function parseMonsterNameAndId(singleLogHtml: string): {
   }
 }
 
-export function parseScanResult(singleLogHtml: string): HVMonsterDatabase.MonsterInfo | void {
-  const isPositiveOrNegative = (modifier: string): number => (modifier === '+' ? 1 : -1);
+const isPositiveOrNegative = (modifier: string): number => (modifier === '+' ? 1 : -1);
 
+export function parseScanResult(singleLogHtml: string): HVMonsterDatabase.MonsterInfo | void {
   if (singleLogHtml.includes('Scanning')) {
 
     const matches = singleLogHtml.match(rMatchScan);

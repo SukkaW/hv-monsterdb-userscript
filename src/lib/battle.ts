@@ -51,7 +51,7 @@ function tasksRunAtStartOfPerRound(): void {
   MONSTERS.clear();
   // I am not sure the order that monster showed up in battle log
   // is consistent with actually in #battle_right. It is unstable
-  // and unreliable method, So I will manually get monster info
+  // and unreliable method. So I will manually get monster info
   // directly from DOM.
   for (const el of document.getElementsByClassName('btm1')) {
     const mkey = el.getAttribute('id');

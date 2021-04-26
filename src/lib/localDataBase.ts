@@ -72,6 +72,6 @@ export async function updateLocalDatabase(force = false): Promise<void> {
   } catch (e) {
     logger.error(e);
 
-    showPopup('There is something wrong when trying to update the local database!');
+    showPopup('There is something wrong when trying to update the local database from the server!');
   }
 }

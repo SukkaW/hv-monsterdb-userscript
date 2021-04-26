@@ -9,15 +9,14 @@ import { LOCAL_MONSTER_DATABASE, MONSTER_NAME_ID_MAP } from './store';
  * Get Monster ID by Monster Name. Could be used in some highlight matcher?
  *
  * ```js
- * window.HVMonsterDB.getMonsterIdByName('Flying Spaghetti Monster	')
+ * window.HVMonsterDB.getMonsterIdByName('Flying Spaghetti Monster')
  * // 32
  * ```
  */
 export function getMonsterIdByName(name: string): number | null {
   const monsterId = MONSTER_NAME_ID_MAP.get(name);
 
-  if (monsterId) return monsterId;
-  return null;
+  return monsterId || null;
 }
 
 /**
