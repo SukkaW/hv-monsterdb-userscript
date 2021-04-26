@@ -94,7 +94,7 @@ function tasksRunDuringTheBattle(): void {
         const monsterStatus = MONSTERS.get(monsterName);
 
         // Check if the monster is dead, being imperiled, or has spell effects
-        if (monsterStatus?.isScanResultGoingToBeLegit()) {
+        if (monsterStatus?.checkScanResultValidity()) {
           logger.info(`Scan results for ${monsterName} is now queued to submit`);
           submitScanResults(scanResult);
 
@@ -127,12 +127,12 @@ function showMonsterInfoAndHighlightExpiredMonster(): void {
     // #geiInfo method always provide latest data (including scanned)
     if (SETTINGS.showMonsterInfoBox) {
       window.requestAnimationFrame(() => {
-        monsterInfoBoxEl?.appendChild(makeMonsterInfoTable(monsterStatus.getInfo()));
+        monsterInfoBoxEl?.appendChild(makeMonsterInfoTable(monsterStatus.info));
       });
     }
 
     // Find monster needs to be scanned
-    if (monsterStatus.isNeedScan() && monsterStatus.isScanResultGoingToBeLegit()) {
+    if (monsterStatus.isNeedScan && monsterStatus.checkScanResultValidity()) {
       MONSTERS_NEED_SCAN.add({
         name: monsterName,
         mkey: monsterStatus.mkey,
@@ -143,7 +143,7 @@ function showMonsterInfoAndHighlightExpiredMonster(): void {
       if (SETTINGS.scanHighlightColor !== false) {
         const highlightColor = SETTINGS.scanHighlightColor === true ? 'coral' : SETTINGS.scanHighlightColor;
 
-        const monsterBtm2El = monsterStatus.getElement()?.querySelector('div.btm2');
+        const monsterBtm2El = monsterStatus.element?.querySelector('div.btm2');
         if (monsterBtm2El) {
           window.requestAnimationFrame(() => {
             monsterBtm2El.style.background = highlightColor;

@@ -13,14 +13,17 @@ export class MonsterStatus {
   public mkey: string;
   /** Monster MID */
   public mid?: number;
+  /** Monster Element */
+  public element: HTMLElement | null;
 
   constructor(name: string, mkey: string) {
     this.name = name;
     this.mkey = mkey;
     this.mid = MONSTER_NAME_ID_MAP.get(name);
+    this.element = document.getElementById(this.mkey);
   }
 
-  getInfo(): HVMonsterDatabase.MonsterInfo | undefined {
+  get info(): HVMonsterDatabase.MonsterInfo | undefined {
     if (LOCAL_MONSTER_DATABASE) {
       const monsterInfo = LOCAL_MONSTER_DATABASE[this.name];
       if (monsterInfo) {
@@ -29,7 +32,7 @@ export class MonsterStatus {
     }
   }
 
-  getInfoLastUpdate(): number | undefined {
+  get lastUpdate(): number | undefined {
     if (LOCAL_MONSTER_DATABASE) {
       const encodedMonsterInfo = LOCAL_MONSTER_DATABASE[this.name];
 
@@ -39,16 +42,12 @@ export class MonsterStatus {
     }
   }
 
-  getElement(): HTMLElement | null {
-    return document.getElementById(this.mkey);
+  get isDead(): boolean {
+    return Boolean(this.element?.innerHTML.includes('nbardead.png'));
   }
 
-  isDead(): boolean {
-    return Boolean(this.getElement()?.innerHTML.includes('nbardead.png'));
-  }
-
-  isScanResultGoingToBeLegit(): boolean {
-    const monsterHtml = this.getElement()?.innerHTML;
+  checkScanResultValidity(): boolean {
+    const monsterHtml = this.element?.innerHTML;
     if (monsterHtml) {
       return !EFFECTS_AFFECTING_SCAN_REAULT.some(effectImg => monsterHtml.includes(effectImg));
     }
@@ -56,11 +55,11 @@ export class MonsterStatus {
     return false;
   }
 
-  isNeedScan(): boolean {
-    if (this.isDead()) return false;
+  get isNeedScan(): boolean {
+    if (this.isDead) return false;
 
     // Update latst info from
-    const lastUpdate = this.getInfoLastUpdate();
+    const lastUpdate = this.lastUpdate;
     if (lastUpdate) {
       const passedDays = Math.round((NOW - lastUpdate) / (24 * 60 * 60 * 1000));
       if (passedDays < SETTINGS.scanExpireDays) {

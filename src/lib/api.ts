@@ -39,7 +39,7 @@ export function getCurrentMonstersInformation(): {
 } {
   const results: Record<string, HVMonsterDatabase.MonsterInfo | null> = {};
   for (const [, monsterStatus] of MONSTERS) {
-    results[monsterStatus.mkey] = monsterStatus.getInfo() || null;
+    results[monsterStatus.mkey] = monsterStatus.info || null;
   }
 
   return results;
