@@ -58,11 +58,12 @@ export class MonsterStatus {
   get isNeedScan(): boolean {
     if (this.isDead) return false;
 
-    // Update latst info from
-    const lastUpdate = this.lastUpdate;
+    const { lastUpdate } = this;
     if (lastUpdate) {
       const passedDays = Math.round((NOW - lastUpdate) / (24 * 60 * 60 * 1000));
-      if (passedDays < SETTINGS.scanExpireDays) {
+      // To prevent multiple users scan the same monster over and over again, some randomness has been added.
+      const randomness = Math.floor(Math.random() * Math.floor(SETTINGS.scanExpireDays / 7)) + 1;
+      if (passedDays < (SETTINGS.scanExpireDays + randomness)) {
         return false;
       }
     }
