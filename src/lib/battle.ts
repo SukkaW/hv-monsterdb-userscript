@@ -133,6 +133,12 @@ function showMonsterInfoAndHighlightExpiredMonster(): void {
   const appendMonsterInfo = (info: HVMonsterDatabase.MonsterInfo | null | undefined) => () => {
     document.getElementById('monsterdb_container')?.appendChild(makeMonsterInfoTable(info));
   };
+  const highlightExpireMonster = (monsterElement: HTMLElement | null, color: string) => () => {
+    const monsterBtm2El = monsterElement?.querySelector('div.btm2');
+    if (monsterBtm2El) {
+      monsterBtm2El.style.backgroundColor = color;
+    }
+  };
 
   MONSTERS_NEED_SCAN.clear();
 
@@ -158,14 +164,12 @@ function showMonsterInfoAndHighlightExpiredMonster(): void {
       // Highlight a monster hasn't been scanned for a while
       if (SETTINGS.scanHighlightColor !== false) {
         const highlightColor = SETTINGS.scanHighlightColor === true ? 'coral' : SETTINGS.scanHighlightColor;
-        const monsterBtm2El = monsterStatus.element?.querySelector('div.btm2');
-        if (monsterBtm2El) {
-          monsterBtm2El.style.backgroundColor = highlightColor;
-        }
+        requestAnimationFrameCallbackQueue.push(highlightExpireMonster(monsterStatus.element, highlightColor));
       }
     }
   }
 
+  // Batch highlightExpireMonster to avoid race condition
   window.requestAnimationFrame(() => {
     for (const func of requestAnimationFrameCallbackQueue) {
       func();
