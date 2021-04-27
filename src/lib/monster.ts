@@ -1,4 +1,5 @@
 import { HVMonsterDatabase } from '../types';
+import { isIsekai } from '../util/common';
 import { convertEncodedMonsterInfoToMonsterInfo, EncodedMonsterDatabase } from './monsterDataEncode';
 import { LOCAL_MONSTER_DATABASE, MONSTER_NAME_ID_MAP } from './store';
 
@@ -13,11 +14,17 @@ export class MonsterStatus {
   public mkey: string;
   /** Monster MID */
   public mid?: number;
+  /** randomness */
+  private _randomness: number;
 
   constructor(name: string, mkey: string) {
     this.name = name;
     this.mkey = mkey;
     this.mid = MONSTER_NAME_ID_MAP.get(name);
+
+    // To prevent multiple users scan the same monster over and over again, some randomness has been added.
+    // Generate it once per monster
+    this._randomness = Math.floor(Math.random() * Math.floor(SETTINGS.scanExpireDays / 7)) + 1;
   }
 
   get element(): HTMLElement | null {
@@ -61,10 +68,14 @@ export class MonsterStatus {
 
     const { lastUpdate } = this;
     if (lastUpdate) {
+      if (isIsekai()) {
+        // In isekai monsters won't get update. If lastUpdate is not undefined,
+        // it means the monster is already in the database, no need to scan it again
+        return false;
+      }
+
       const passedDays = Math.round((NOW - lastUpdate) / (24 * 60 * 60 * 1000));
-      // To prevent multiple users scan the same monster over and over again, some randomness has been added.
-      const randomness = Math.floor(Math.random() * Math.floor(SETTINGS.scanExpireDays / 7)) + 1;
-      if (passedDays < (SETTINGS.scanExpireDays + randomness)) {
+      if (passedDays < (SETTINGS.scanExpireDays + this._randomness)) {
         return false;
       }
     }
