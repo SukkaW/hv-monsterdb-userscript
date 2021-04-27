@@ -13,14 +13,15 @@ export class MonsterStatus {
   public mkey: string;
   /** Monster MID */
   public mid?: number;
-  /** Monster Element */
-  public element: HTMLElement | null;
 
   constructor(name: string, mkey: string) {
     this.name = name;
     this.mkey = mkey;
     this.mid = MONSTER_NAME_ID_MAP.get(name);
-    this.element = document.getElementById(this.mkey);
+  }
+
+  get element(): HTMLElement | null {
+    return document.getElementById(this.mkey);
   }
 
   get info(): HVMonsterDatabase.MonsterInfo | undefined {
