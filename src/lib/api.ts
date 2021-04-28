@@ -1,10 +1,32 @@
 import { HVMonsterDatabase } from '../types';
 import { isFightingInBattle } from '../util/common';
 import { logger } from '../util/logger';
-import { MONSTERS, MONSTERS_NEED_SCAN } from './battle';
+import { MONSTERS, MONSTERS_NEED_SCAN, inBattle as inBattleFunc } from './battle';
 import { updateLocalDatabase } from './localDataBase';
 import { convertEncodedMonsterInfoToMonsterInfo } from './monsterDataEncode';
 import { LOCAL_MONSTER_DATABASE, MONSTER_NAME_ID_MAP } from './store';
+
+/**
+ * Although Monster Database script have tried best to be compatible with Monsterbation's ajaxRound feature, in order to workaround TamperMonkey on Firefox cross userscript sandbox event handler issue (one userscript can't recevied a document Event event from another one), a fallback API is provided.
+ * There is no need to worry about if "inBattle" will be called serveral time as it has a built-in race condition mitigation approach.
+ *
+ * ```js
+ * window.HVMonsterDB?.inBattle();
+ *
+ * // If your prefer ES5 approach (no optional chain)
+ * if (window.HVMonsterDB && window.HVMonsterDB.inBattle) {
+ *   window.HVMonsterDB.inBattle();
+ * }
+ * ```
+ */
+export function inBattle(): void {
+  if (!isFightingInBattle()) {
+    logger.error('"inBattle" method is only avaliable during the battle!');
+    throw new Error('"inBattle" method is only avaliable during the battle!');
+  }
+
+  inBattleFunc();
+}
 
 /**
  * Get Monster ID by Monster Name. Could be used in some highlight matcher?
@@ -38,8 +60,8 @@ export function getCurrentMonstersInformation(): {
   [key: string]: HVMonsterDatabase.MonsterInfo | null
 } {
   if (!isFightingInBattle()) {
-    logger.error('"getCurrentMonstersInformation" method is only avaliable during the battle');
-    throw new Error('"getCurrentMonstersInformation" method is only avaliable during the battle');
+    logger.error('"getCurrentMonstersInformation" method is only avaliable during the battle!');
+    throw new Error('"getCurrentMonstersInformation" method is only avaliable during the battle!');
   }
 
   const results: Record<string, HVMonsterDatabase.MonsterInfo | null> = {};
@@ -81,8 +103,8 @@ export function getCurrentNeedScannedMonsters(): {
   mid?: number
 }[] {
   if (!isFightingInBattle()) {
-    logger.error('"getCurrentNeedScannedMonsters" method is only avaliable during the battle');
-    throw new Error('"getCurrentNeedScannedMonsters" method is only avaliable during the battle');
+    logger.error('"getCurrentNeedScannedMonsters" method is only avaliable during the battle!');
+    throw new Error('"getCurrentNeedScannedMonsters" method is only avaliable during the battle!');
   }
   return [...MONSTERS_NEED_SCAN];
 }
@@ -96,8 +118,8 @@ export function getCurrentNeedScannedMonsters(): {
  */
 export function forceUpdateLocalDatabase(): Promise<void> {
   if (!SETTINGS.debug) {
-    logger.error('"forceUpdateLocalDatabase" method is only avaliable when "debug" setting is enabled');
-    return Promise.reject(new Error('"forceUpdateLocalDatabase" method is only avaliable when "debug" setting is enabled'));
+    logger.error('"forceUpdateLocalDatabase" method is only avaliable when "debug" setting is enabled!');
+    return Promise.reject(new Error('"forceUpdateLocalDatabase" method is only avaliable when "debug" setting is enabled!'));
   }
   return updateLocalDatabase(true);
 }
@@ -111,8 +133,8 @@ export function forceUpdateLocalDatabase(): Promise<void> {
  */
 export function dumpRawLocalDataBase(): HVMonsterDatabase.LocalDatabase {
   if (!SETTINGS.debug) {
-    logger.error('"dumpRawLocalDataBase" method is only avaliable when "debug" setting is enabled');
-    throw new Error('"dumpRawLocalDataBase" method is only avaliable when "debug" setting is enabled');
+    logger.error('"dumpRawLocalDataBase" method is only avaliable when "debug" setting is enabled!');
+    throw new Error('"dumpRawLocalDataBase" method is only avaliable when "debug" setting is enabled!');
   } else {
     return LOCAL_MONSTER_DATABASE;
   }
