@@ -24,7 +24,7 @@ export class MonsterStatus {
 
     // To prevent multiple users scan the same monster over and over again, some randomness has been added.
     // Generate it once per monster
-    this._randomness = Math.floor(Math.random() * Math.floor(SETTINGS.scanExpireDays / 7)) + 1;
+    this._randomness = Math.floor(Math.random() * Math.floor(SETTINGS.scanExpireDays / 5)) + 1;
   }
 
   get element(): HTMLElement | null {
@@ -67,6 +67,8 @@ export class MonsterStatus {
     if (this.isDead) return false;
 
     const { lastUpdate } = this;
+    // When lastUpdate is undefined, it means it is not in local database.
+    // That also means it requires scan.
     if (lastUpdate) {
       if (isIsekai()) {
         // In isekai monsters won't get update. If lastUpdate is not undefined,
