@@ -1,6 +1,6 @@
 import { MonsterStatus } from './monster';
 import { parseMonsterNameAndId, parseScanResult } from './parseLog';
-import { LOCAL_MONSTER_DATABASE, MONSTER_NAME_ID_MAP, retrieveTmpValue } from './store';
+import { LOCAL_MONSTER_DATABASE, MONSTER_NAME_ID_MAP } from './store';
 import { createMonsterInfoBox, makeMonsterInfoTable } from './monsterInfoUI';
 import { convertMonsterInfoToEncodedMonsterInfo } from './monsterDataEncode';
 import { logger } from '../util/logger';
@@ -41,11 +41,6 @@ export async function inBattle(): Promise<void> {
     const mo = new MutationObserver(tasksRunDuringTheBattle);
     mo.observe(logEl.firstChild, { childList: true });
   }
-}
-
-/** Tasks like restore tmp value & rebuild monsterIdMap only have to run once */
-export async function tasksRunOncePerPageLoad(): Promise<void> {
-  await retrieveTmpValue();
 }
 
 /** Tasks like "get monster id and monster name" only have to run at the start of per round */

@@ -1,6 +1,6 @@
-import { inBattle, tasksRunOncePerPageLoad } from './lib/battle';
+import { inBattle } from './lib/battle';
 import { updateLocalDatabase } from './lib/localDataBase';
-import { storeTmpValue } from './lib/store';
+import { retrieveTmpValue, storeTmpValue } from './lib/store';
 import { isFightingInBattle } from './util/common';
 import { logger } from './util/logger';
 import { polyfill } from './util/polyfill';
@@ -14,9 +14,10 @@ polyfill();
   const hasTextLog = isFightingInBattle();
   const hasRiddleMaster = Boolean(document.getElementById('riddlemaster'));
 
-  if (hasTextLog || hasRiddleMaster) {
-    await tasksRunOncePerPageLoad();
+  // Load monster database & monster id => name map
+  await retrieveTmpValue();
 
+  if (hasTextLog || hasRiddleMaster) {
     // Store in-memory value back to storage before window refresh / closes
     window.addEventListener('beforeunload', storeTmpValue);
 
