@@ -1,6 +1,7 @@
 import { inBattle, tasksRunOncePerPageLoad } from './lib/battle';
 import { updateLocalDatabase } from './lib/localDataBase';
 import { storeTmpValue } from './lib/store';
+import { isFightingInBattle } from './util/common';
 import { logger } from './util/logger';
 import { polyfill } from './util/polyfill';
 
@@ -10,7 +11,7 @@ polyfill();
 (async () => {
   logger.setDebugMode(SETTINGS.debug);
 
-  const hasTextLog = Boolean(document.getElementById('textlog'));
+  const hasTextLog = isFightingInBattle();
   const hasRiddleMaster = Boolean(document.getElementById('riddlemaster'));
 
   if (hasTextLog || hasRiddleMaster) {

@@ -2,6 +2,10 @@ export function isIsekai(): boolean {
   return window.location.pathname.includes('isekai');
 }
 
+export function isFightingInBattle(): boolean {
+  return Boolean(document.getElementById('textlog'));
+}
+
 export function getUTCDate(): string {
   return new Date().toISOString().split('T')[0];
 }
