@@ -17,18 +17,26 @@ interface ApiResponse {
 export async function updateLocalDatabase(force = false): Promise<void> {
   const currentDate = getUTCDate();
   const lastUpdateDate = await getStoredValue('lastUpdate');
+  const lastUpdateIsekaiDate = await getStoredValue('lastUpdateIsekai');
 
   if (!force) {
-    logger.info(`Local database last updated: ${lastUpdateDate}`);
-    // Only update the data once per day.
-    if (lastUpdateDate === currentDate) {
-      logger.info('There is no need to update local database.');
-      return;
+    if (isIsekai()) {
+      logger.info(`Local database (isekai) last updated: ${lastUpdateIsekaiDate}`);
+      if (lastUpdateIsekaiDate === currentDate) {
+        logger.info('There is no need to update local database (isekai).');
+        return;
+      }
+    } else {
+      logger.info(`Local database last updated: ${lastUpdateDate}`);
+      if (lastUpdateDate === currentDate) {
+        logger.info('There is no need to update local database.');
+        return;
+      }
     }
   }
 
   try {
-    logger.info('Downloading Monster Database...');
+    logger.info('Downloading Monster Database from the server...');
 
     const resp = isIsekai()
       // In Isekai
@@ -58,16 +66,17 @@ export async function updateLocalDatabase(force = false): Promise<void> {
       // it is possible that storage will be overwritten by in-memory data
       // By foring update in-memory data the edge case can be bypassed.
       setLocalDatabaseTmpValue(db);
+
       if (isIsekai()) {
         await setStoredValue('databaseIsekai', db);
+        await setStoredValue('lastUpdateIsekai', getUTCDate());
       } else {
         await setStoredValue('database', db);
+        await setStoredValue('lastUpdate', getUTCDate());
       }
 
       // Store monster id map back to storage again.
       await setStoredValue('monsterIdMap', Object.fromEntries(monsterIdMap));
-      // Update lastUpdate
-      await setStoredValue('lastUpdate', getUTCDate());
     }, { timeout: 10000 });
   } catch (e) {
     logger.error(e);

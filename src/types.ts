@@ -44,6 +44,7 @@ export namespace HVMonsterDatabase {
      * @example "2021-03-17"
      */
     lastUpdate?: string
+    lastUpdateIsekai?: string
     /** Local Monsterbase */
     database?: LocalDatabase
     /** Local Isekai Monsterbase */

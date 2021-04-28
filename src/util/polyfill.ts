@@ -29,8 +29,7 @@ export function polyfill(): void {
 
   // A bare minimal fetch polyfill
   if (typeof fetch !== 'function') {
-    globalThis.fetch = function (url, options) {
-      options = options || {};
+    globalThis.fetch = function (url, options = {}) {
       return new Promise((resolve, reject) => {
         const request = new XMLHttpRequest();
         const keys: string[] = [];
