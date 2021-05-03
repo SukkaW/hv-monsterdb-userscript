@@ -32,17 +32,17 @@ export class MonsterStatus {
   }
 
   get info(): HVMonsterDatabase.MonsterInfo | undefined {
-    if (LOCAL_MONSTER_DATABASE) {
-      const monsterInfo = LOCAL_MONSTER_DATABASE[this.name];
+    if (LOCAL_MONSTER_DATABASE && this.mid) {
+      const monsterInfo = LOCAL_MONSTER_DATABASE[this.mid];
       if (monsterInfo) {
-        return convertEncodedMonsterInfoToMonsterInfo(this.name, monsterInfo);
+        return convertEncodedMonsterInfoToMonsterInfo(this.mid, monsterInfo);
       }
     }
   }
 
   get lastUpdate(): number | undefined {
-    if (LOCAL_MONSTER_DATABASE) {
-      const encodedMonsterInfo = LOCAL_MONSTER_DATABASE[this.name];
+    if (LOCAL_MONSTER_DATABASE && this.mid) {
+      const encodedMonsterInfo = LOCAL_MONSTER_DATABASE[this.mid];
 
       if (encodedMonsterInfo) {
         return encodedMonsterInfo[EncodedMonsterDatabase.EMonsterInfo.lastUpdate];

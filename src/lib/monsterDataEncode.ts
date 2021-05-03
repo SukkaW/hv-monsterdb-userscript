@@ -54,8 +54,8 @@ export namespace EncodedMonsterDatabase {
   }
 
   export interface MonsterInfo {
-    /** Monster ID */
-    [EMonsterInfo.monsterId]: number
+    /** Monster Name */
+    [EMonsterInfo.monsterName]: string
     /** Monster Class */
     [EMonsterInfo.monsterClass]: EMonsterClass
     /** Monster PL */
@@ -91,7 +91,7 @@ export namespace EncodedMonsterDatabase {
 
 export function convertMonsterInfoToEncodedMonsterInfo(monster: HVMonsterDatabase.MonsterInfo): EncodedMonsterDatabase.MonsterInfo {
   return {
-    [EncodedMonsterDatabase.EMonsterInfo.monsterId]: monster.monsterId,
+    [EncodedMonsterDatabase.EMonsterInfo.monsterName]: monster.monsterName,
     [EncodedMonsterDatabase.EMonsterInfo.monsterClass]: EncodedMonsterDatabase.EMonsterClass[monster.monsterClass],
     [EncodedMonsterDatabase.EMonsterInfo.plvl]: monster.plvl,
     [EncodedMonsterDatabase.EMonsterInfo.attack]: EncodedMonsterDatabase.EMonsterAttack[monster.attack],
@@ -109,10 +109,10 @@ export function convertMonsterInfoToEncodedMonsterInfo(monster: HVMonsterDatabas
   };
 }
 
-export function convertEncodedMonsterInfoToMonsterInfo(monsterName: string, simpleMonster: EncodedMonsterDatabase.MonsterInfo): HVMonsterDatabase.MonsterInfo {
+export function convertEncodedMonsterInfoToMonsterInfo(monsterId: number, simpleMonster: EncodedMonsterDatabase.MonsterInfo): HVMonsterDatabase.MonsterInfo {
   return {
-    monsterName,
-    monsterId: simpleMonster[EncodedMonsterDatabase.EMonsterInfo.monsterId],
+    monsterId,
+    monsterName: simpleMonster[EncodedMonsterDatabase.EMonsterInfo.monsterName],
     monsterClass: EncodedMonsterDatabase.EMonsterClass[simpleMonster[EncodedMonsterDatabase.EMonsterInfo.monsterClass]] as HVMonsterDatabase.MonsterClass,
     plvl: simpleMonster[EncodedMonsterDatabase.EMonsterInfo.plvl],
     attack: EncodedMonsterDatabase.EMonsterAttack[simpleMonster[EncodedMonsterDatabase.EMonsterInfo.attack]] as HVMonsterDatabase.MonsterAttack,

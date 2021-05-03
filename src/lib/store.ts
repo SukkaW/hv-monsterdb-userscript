@@ -4,7 +4,7 @@ import { getStoredValue, setStoredValue } from '../util/store';
 
 /** Monster Name => Monster Id */
 export let MONSTER_NAME_ID_MAP: Map<string, number> = new Map();
-export let LOCAL_MONSTER_DATABASE: HVMonsterDatabase.LocalDatabase = {};
+export let LOCAL_MONSTER_DATABASE: HVMonsterDatabase.LocalDatabaseVersion2 = {};
 /** The position of monster info box */
 export let MONSTER_INFO_BOX_POSITION = { x: 10, y: 10 };
 
@@ -23,9 +23,9 @@ export async function storeTmpValue(): Promise<void> {
   setStoredValue('monsterInfoBoxPosition', MONSTER_INFO_BOX_POSITION);
 
   if (isIsekai()) {
-    setStoredValue('databaseIsekai', LOCAL_MONSTER_DATABASE);
+    setStoredValue('databaseIsekaiV2', LOCAL_MONSTER_DATABASE);
   } else {
-    setStoredValue('database', LOCAL_MONSTER_DATABASE);
+    setStoredValue('databaseV2', LOCAL_MONSTER_DATABASE);
   }
 }
 
@@ -34,12 +34,12 @@ export async function retrieveTmpValue(): Promise<void> {
   MONSTER_INFO_BOX_POSITION = await getStoredValue('monsterInfoBoxPosition') || { x: 10, y: 10 };
 
   if (isIsekai()) {
-    LOCAL_MONSTER_DATABASE = await getStoredValue('databaseIsekai') || {};
+    LOCAL_MONSTER_DATABASE = await getStoredValue('databaseIsekaiV2') || {};
   } else {
-    LOCAL_MONSTER_DATABASE = await getStoredValue('database') || {};
+    LOCAL_MONSTER_DATABASE = await getStoredValue('databaseV2') || {};
   }
 }
 
-export function setLocalDatabaseTmpValue(db: HVMonsterDatabase.LocalDatabase): void {
+export function setLocalDatabaseTmpValue(db: HVMonsterDatabase.LocalDatabaseVersion2): void {
   LOCAL_MONSTER_DATABASE = db;
 }

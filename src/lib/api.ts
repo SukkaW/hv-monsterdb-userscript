@@ -81,10 +81,15 @@ export function getCurrentMonstersInformation(): {
  * ```
  */
 export function getMonsterInfoByName(name: string): HVMonsterDatabase.MonsterInfo | null {
-  const compressedMonsterInfo = LOCAL_MONSTER_DATABASE[name];
-  if (compressedMonsterInfo) {
-    return convertEncodedMonsterInfoToMonsterInfo(name, compressedMonsterInfo);
+  const monsterId = MONSTER_NAME_ID_MAP.get(name);
+
+  if (monsterId) {
+    const encodedMonsterInfo = LOCAL_MONSTER_DATABASE[monsterId];
+    if (encodedMonsterInfo) {
+      return convertEncodedMonsterInfoToMonsterInfo(monsterId, encodedMonsterInfo);
+    }
   }
+
   return null;
 }
 
@@ -131,7 +136,7 @@ export function forceUpdateLocalDatabase(): Promise<void> {
  * window.HVMonsterDB.dumpRawLocalDataBase();
  * ```
  */
-export function dumpRawLocalDataBase(): HVMonsterDatabase.LocalDatabase {
+export function dumpRawLocalDataBase(): HVMonsterDatabase.LocalDatabaseVersion2 {
   if (!SETTINGS.debug) {
     logger.error('"dumpRawLocalDataBase" method is only avaliable when "debug" setting is enabled!');
     throw new Error('"dumpRawLocalDataBase" method is only avaliable when "debug" setting is enabled!');

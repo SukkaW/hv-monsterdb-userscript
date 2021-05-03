@@ -34,21 +34,28 @@ export namespace HVMonsterDatabase {
     lastUpdate: string
   }
 
-  export interface LocalDatabase {
-    [key: string]: EncodedMonsterDatabase.MonsterInfo
+  export interface LocalDatabaseVersion2 {
+    [key: number]: EncodedMonsterDatabase.MonsterInfo
   }
 
   export interface StoredValue {
+    /** @deprecated - Last Update Date of version 1 database */
+    lastUpdate?: string
+    lastUpdateIsekai?: string
+    /** @deprecated - Local Monsterbase version 1 */
+    database?: unknown
+    /** @deprecated - Local Isekai Monsterbase version 1 */
+    databaseIsekai?: unknown
+
     /**
      * @description Last Update Date
      * @example "2021-03-17"
      */
-    lastUpdate?: string
-    lastUpdateIsekai?: string
-    /** Local Monsterbase */
-    database?: LocalDatabase
-    /** Local Isekai Monsterbase */
-    databaseIsekai?: LocalDatabase
+    lastUpdateV2?: string
+    lastUpdateIsekaiV2?: string
+
+    databaseV2?: LocalDatabaseVersion2
+    databaseIsekaiV2?: LocalDatabaseVersion2
 
     /** MonsterInfoBox position */
     monsterInfoBoxPosition?: { x: number, y: number }

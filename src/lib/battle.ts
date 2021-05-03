@@ -52,6 +52,7 @@ function tasksRunAtStartOfPerRound(): void {
     if (logHtml.includes('Spawned')) {
       const monsterNameAndId = parseMonsterNameAndId(logHtml);
       if (monsterNameAndId) {
+        logger.debug('Monster Name & ID', monsterNameAndId.monsterId, monsterNameAndId.monsterName);
         MONSTER_NAME_ID_MAP.set(monsterNameAndId.monsterName, monsterNameAndId.monsterId);
       }
     }
@@ -71,6 +72,8 @@ function tasksRunAtStartOfPerRound(): void {
       MONSTERS.set(name, monster);
     }
   }
+
+  logger.debug('Monsters in the round', MONSTERS);
 
   // This function is related with API, so it can't be wrapped in requestAnimationFrame.
   showMonsterInfoAndHighlightExpiredMonster();
@@ -103,7 +106,9 @@ function tasksRunDuringTheBattle(): void {
 
           const simplifiedScanResult = convertMonsterInfoToEncodedMonsterInfo(scanResult);
           // Update local database first, it will be used to update UI
-          LOCAL_MONSTER_DATABASE[monsterName] = simplifiedScanResult;
+          if (monsterStatus.mid) {
+            LOCAL_MONSTER_DATABASE[monsterStatus.mid] = simplifiedScanResult;
+          }
         } else {
           logger.warn(`${monsterName} is not legible for scan, ignoring the scan result!`);
         }

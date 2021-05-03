@@ -1,7 +1,7 @@
 import { HVMonsterDatabase } from '../types';
 import { getUTCDate, isIsekai, showPopup } from '../util/common';
 import { logger } from '../util/logger';
-import { getStoredValue, setStoredValue } from '../util/store';
+import { getStoredValue, removeStoredValue, setStoredValue } from '../util/store';
 import { convertMonsterInfoToEncodedMonsterInfo } from './monsterDataEncode';
 import { setLocalDatabaseTmpValue } from './store';
 
@@ -16,8 +16,8 @@ interface ApiResponse {
 
 export async function updateLocalDatabase(force = false): Promise<void> {
   const currentDate = getUTCDate();
-  const lastUpdateDate = await getStoredValue('lastUpdate');
-  const lastUpdateIsekaiDate = await getStoredValue('lastUpdateIsekai');
+  const lastUpdateDate = await getStoredValue('lastUpdateV2');
+  const lastUpdateIsekaiDate = await getStoredValue('lastUpdateIsekaiV2');
 
   if (!force) {
     if (isIsekai()) {
@@ -57,7 +57,7 @@ export async function updateLocalDatabase(force = false): Promise<void> {
         monsterIdMap.set(monster.monsterName, monster.monsterId);
 
         const EncodedMonsterInfo = convertMonsterInfoToEncodedMonsterInfo(monster);
-        return [monster.monsterName, EncodedMonsterInfo];
+        return [monster.monsterId, EncodedMonsterInfo];
       }));
 
       logger.info(`${data.monsters.length} monsters' information processed.`);
@@ -68,11 +68,11 @@ export async function updateLocalDatabase(force = false): Promise<void> {
       setLocalDatabaseTmpValue(db);
 
       if (isIsekai()) {
-        await setStoredValue('databaseIsekai', db);
-        await setStoredValue('lastUpdateIsekai', getUTCDate());
+        await setStoredValue('databaseIsekaiV2', db);
+        await setStoredValue('lastUpdateIsekaiV2', getUTCDate());
       } else {
-        await setStoredValue('database', db);
-        await setStoredValue('lastUpdate', getUTCDate());
+        await setStoredValue('databaseV2', db);
+        await setStoredValue('lastUpdateV2', getUTCDate());
       }
 
       // Store monster id map back to storage again.
@@ -83,4 +83,11 @@ export async function updateLocalDatabase(force = false): Promise<void> {
 
     showPopup('There is something wrong when trying to update the local database from the server!');
   }
+
+  /** Database Migration */
+  // Remove old database
+  removeStoredValue('database');
+  removeStoredValue('databaseIsekai');
+  removeStoredValue('lastUpdate');
+  removeStoredValue('lastUpdateIsekai');
 }
