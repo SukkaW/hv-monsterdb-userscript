@@ -7,7 +7,7 @@ const monsterInfoBoxStyle = `
   z-index: 3;
   border: 2px solid #5c0d11;
   background-color: #eeece1;
-  width: 175px;
+  width: ${SETTINGS.compactMonsterInfoBox ? '75px' : '175px'};
   height: 599px;
   opacity: 1;
 }
@@ -100,25 +100,36 @@ export function makeMonsterInfoTable(monsterInfo?: HVMonsterDatabase.MonsterInfo
   if (monsterInfo) {
     const tableEl = tableContainerEl.appendChild(document.createElement('table'));
     tableEl.className = 'monsterdb_table';
-    tableEl.appendChild(document.createElement('tbody')).innerHTML = `
-    <tr>
+
+    let tableHtml = '';
+    tableHtml += '<tr>';
+    if (!SETTINGS.compactMonsterInfoBox) {
+      tableHtml += `
       <td class="fire">f:${symbolNum(monsterInfo.fire)}${padStr(monsterInfo.fire)}</td>
       <td class="cold">c:${symbolNum(monsterInfo.cold)}${padStr(monsterInfo.cold)}</td>
-      <td class="elec">e:${symbolNum(monsterInfo.elec)}${padStr(monsterInfo.elec)}</td>
-      <td>${monsterInfo.monsterClass?.toLocaleLowerCase()?.substring(0, 5)}(${monsterInfo.attack?.toLocaleLowerCase()?.substring(0, 4)})</td>
-    </tr>
-    <tr>
+      <td class="elec">e:${symbolNum(monsterInfo.elec)}${padStr(monsterInfo.elec)}</td>`;
+    }
+    tableHtml += `<td>${monsterInfo.monsterClass?.toLocaleLowerCase()?.substring(0, 5)}(${monsterInfo.attack?.toLocaleLowerCase()?.substring(0, 4)})</td>`;
+    tableHtml += '</tr><tr>';
+    if (!SETTINGS.compactMonsterInfoBox) {
+      tableHtml += `
       <td class="wind">w:${symbolNum(monsterInfo.wind)}${padStr(monsterInfo.wind)}</td>
       <td class="holy">h:${symbolNum(monsterInfo.holy)}${padStr(monsterInfo.holy)}</td>
-      <td class="dark">d:${symbolNum(monsterInfo.dark)}${padStr(monsterInfo.dark)}</td>
-      <td>PL: ${monsterInfo.plvl}</td>
-    </tr>
-    <tr>
+      <td class="dark">d:${symbolNum(monsterInfo.dark)}${padStr(monsterInfo.dark)}</td>`;
+    }
+    tableHtml += `<td>PL: ${monsterInfo.plvl}</td>`;
+    tableHtml += '</tr><tr>';
+    if (!SETTINGS.compactMonsterInfoBox) {
+      tableHtml += `
       <td>C:${symbolNum(monsterInfo.crushing)}${padStr(monsterInfo.crushing)}</td>
       <td>S:${symbolNum(monsterInfo.slashing)}${padStr(monsterInfo.slashing)}</td>
-      <td>P:${symbolNum(monsterInfo.piercing)}${padStr(monsterInfo.piercing)}</td>
-      <td>${monsterInfo.trainer.substring(0, 11)}</td>
-    </tr>`;
+      <td>P:${symbolNum(monsterInfo.piercing)}${padStr(monsterInfo.piercing)}</td>`;
+    }
+    const cuttedTrainerName = monsterInfo.trainer.substring(0, 11);
+    tableHtml += `<td>${cuttedTrainerName === '' ? 'System' : cuttedTrainerName}</td>`;
+    tableHtml += '</tr>';
+
+    tableEl.appendChild(document.createElement('tbody')).innerHTML = tableHtml;
   }
 
   return tableContainerEl;

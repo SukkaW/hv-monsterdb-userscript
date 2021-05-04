@@ -77,5 +77,6 @@ export interface ISettings {
   debug: boolean,
   scanExpireDays: number,
   scanHighlightColor: string | boolean,
-  showMonsterInfoBox: boolean
+  showMonsterInfoBox: boolean,
+  compactMonsterInfoBox: boolean
 }

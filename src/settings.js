@@ -23,10 +23,17 @@ const SETTINGS = {
   /**
    * Monster Info Box
    *
-   * Monster Database Script provides a draggable info box during battle. If you don't
+   * Monster Database Script provides a draggable float box during battle. If you don't
    * like the ui, you can disable it here.
    */
-  showMonsterInfoBox: true
+  showMonsterInfoBox: true,
+  /**
+   * Compact Monster Info Box
+   *
+   * true - only show trainer, PL, monster class in the float box, mitigation data will be hidden
+   * false - show all mitigation data along with trainer, PL, monster class in the float box (default)
+   */
+  compactMonsterInfoBox: false
 };
 // ============= ^^^ SETTINGS ^^^ =============
 /* If you want to make some modifications, it is recommeneded to build your own script from
