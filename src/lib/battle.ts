@@ -76,7 +76,7 @@ function tasksRunAtStartOfPerRound(): void {
   logger.debug('Monsters in the round', MONSTERS);
 
   // This function is related with API, so it can't be wrapped in requestAnimationFrame.
-  showMonsterInfoAndHighlightExpiredMonster();
+  showMonsterInfoAndHighlightMonster();
 }
 
 function tasksRunDuringTheBattle(): void {
@@ -116,29 +116,38 @@ function tasksRunDuringTheBattle(): void {
     }
   }
 
-  showMonsterInfoAndHighlightExpiredMonster();
+  showMonsterInfoAndHighlightMonster();
 }
 
-function showMonsterInfoAndHighlightExpiredMonster(): void {
-  // A queue of function to be called, to avoid race condition
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  const requestAnimationFrameCallbackQueue: Function[] = [];
-
-  const clearMonsterInfoContainer = () => {
-    const monsterInfoBoxEl = document.getElementById('monsterdb_container');
-    if (monsterInfoBoxEl) {
-      monsterInfoBoxEl.innerHTML = '';
-    }
-  };
-  const appendMonsterInfo = (info: HVMonsterDatabase.MonsterInfo | null | undefined) => () => {
-    document.getElementById('monsterdb_container')?.appendChild(makeMonsterInfoTable(info));
-  };
-  const highlightExpireMonster = (monsterElement: HTMLElement | null, color: string) => () => {
-    const monsterBtm2El = monsterElement?.querySelector('div.btm2');
+const clearMonsterInfoContainer = () => {
+  const monsterInfoBoxEl = document.getElementById('monsterdb_container');
+  if (monsterInfoBoxEl) {
+    monsterInfoBoxEl.innerHTML = '';
+  }
+};
+const appendMonsterInfo = (info: HVMonsterDatabase.MonsterInfo | null | undefined) => () => {
+  document.getElementById('monsterdb_container')?.appendChild(makeMonsterInfoTable(info));
+};
+const highlightExpireMonster = (monsterElement: HTMLElement | null, color: string) => () => {
+  const monsterBtm2El = monsterElement?.querySelector('div.btm2');
+  if (monsterBtm2El) {
+    monsterBtm2El.style.backgroundColor = color;
+  }
+};
+const highlightMonster = (monsterStatus: MonsterStatus) => () => {
+  const color = monsterStatus.highlightColor;
+  if (color) {
+    const monsterBtm2El = monsterStatus.element?.querySelector('div.btm2');
     if (monsterBtm2El) {
       monsterBtm2El.style.backgroundColor = color;
     }
-  };
+  }
+};
+
+function showMonsterInfoAndHighlightMonster(): void {
+  // A queue of function to be called, to avoid race condition
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  const requestAnimationFrameCallbackQueue: Function[] = [];
 
   MONSTERS_NEED_SCAN.clear();
 
@@ -153,6 +162,11 @@ function showMonsterInfoAndHighlightExpiredMonster(): void {
       requestAnimationFrameCallbackQueue.push(appendMonsterInfo(monsterStatus.info));
     }
 
+    // Highlight a monster based on SETTINGS.highlightMonster
+    if (SETTINGS.highlightMonster && Object.keys(SETTINGS.highlightMonster).length > 0) {
+      requestAnimationFrameCallbackQueue.push(highlightMonster(monsterStatus));
+    }
+
     // Find monster needs to be scanned
     if (monsterStatus.isNeedScan && monsterStatus.checkScanResultValidity()) {
       MONSTERS_NEED_SCAN.add({
@@ -160,7 +174,6 @@ function showMonsterInfoAndHighlightExpiredMonster(): void {
         mkey: monsterStatus.mkey,
         mid: monsterStatus.mid
       });
-
       // Highlight a monster hasn't been scanned for a while
       if (SETTINGS.scanHighlightColor !== false) {
         const highlightColor = SETTINGS.scanHighlightColor === true ? 'coral' : SETTINGS.scanHighlightColor;

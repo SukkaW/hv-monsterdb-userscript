@@ -84,4 +84,27 @@ export class MonsterStatus {
 
     return true;
   }
+
+  get highlightColor(): string | false {
+    if (typeof SETTINGS.highlightMonster === 'object' && this.info) {
+      for (const [color, matcher] of Object.entries(SETTINGS.highlightMonster)) {
+        if (matcher instanceof RegExp) {
+          if (matcher.test(JSON.stringify(this.info))) {
+            return color;
+          }
+        } else if (typeof matcher === 'function') {
+          if (matcher(this.info)) {
+            return color;
+          }
+        } else if (typeof matcher === 'string') {
+          const regexp = new RegExp(matcher);
+          if (regexp.test(JSON.stringify(this.info))) {
+            return color;
+          }
+        }
+      }
+    }
+
+    return false;
+  }
 }

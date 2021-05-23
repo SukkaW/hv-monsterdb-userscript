@@ -71,6 +71,8 @@ export namespace HVMonsterDatabase {
      */
     monsterScansSubmitQueue?: MonsterInfo[]
   }
+
+  export type MonsterMatcher = (monsterInfo: MonsterInfo) => boolean | RegExp;
 }
 
 export interface ISettings {
@@ -78,5 +80,8 @@ export interface ISettings {
   scanExpireDays: number,
   scanHighlightColor: string | boolean,
   showMonsterInfoBox: boolean,
-  compactMonsterInfoBox: boolean
+  compactMonsterInfoBox: boolean,
+  highlightMonster: {
+    [key: string]: HVMonsterDatabase.MonsterMatcher
+  } | false
 }
