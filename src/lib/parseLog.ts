@@ -16,7 +16,7 @@ export function parseMonsterNameAndId(singleLogHtml: string): {
       const monsterId = Number(matches[1]);
       const monsterName = matches[2];
 
-      if (!isNaN(monsterId)) {
+      if (!Number.isNaN(monsterId)) {
         return { monsterId, monsterName };
       }
     }
@@ -49,7 +49,7 @@ export function parseScanResult(singleLogHtml: string): HVMonsterDatabase.Monste
       const slashing = Number(matches[21]) * isPositiveOrNegative(matches[20]);
       const piercing = Number(matches[23]) * isPositiveOrNegative(matches[22]);
 
-      if (![plvl, fire, cold, elec, wind, holy, dark, crushing, slashing, piercing].some(isNaN) && monsterId) {
+      if (![plvl, fire, cold, elec, wind, holy, dark, crushing, slashing, piercing].some(Number.isNaN) && monsterId) {
         return {
           monsterName, monsterId,
           monsterClass: matches[2] as HVMonsterDatabase.MonsterClass,
