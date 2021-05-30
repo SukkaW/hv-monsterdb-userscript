@@ -7,7 +7,7 @@
     "GM.setValue",
     "GM.deleteValue"
   ],
-  "run-at": "document-end",
+  "run-at": "document-idle",
   "compatible": [
     "Chrome/Chromium + Tampermonkey",
     "Firefox + Greasemonkey"

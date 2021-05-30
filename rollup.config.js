@@ -21,8 +21,7 @@ const userScriptMetaBlockConfig = {
     exclude: [
       'http*://hentaiverse.org/pages/showequip.php?*',
       '*hentaiverse.org/equip/*'
-    ],
-    'run-at': 'document-end'
+    ]
   }
 };
 
