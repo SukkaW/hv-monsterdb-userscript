@@ -5,10 +5,7 @@ const monsterInfoBoxStyle = `
 #monsterdb_info {
   position: absolute;
   z-index: 3;
-  border: 2px solid #5c0d11;
-  background-color: #eeece1;
   width: ${SETTINGS.compactMonsterInfoBox ? '75px' : '175px'};
-  height: 599px;
   opacity: 1;
 }
 
@@ -24,11 +21,20 @@ const monsterInfoBoxStyle = `
   background-color: #e5e2d5;
   line-height: 20px;
   font-weight: 600;
-  border-bottom: 2px solid #5c0d11;
+  border: 2px solid #5c0d11;
+  margin-bottom: -2px;
+  user-select: none;
+  visibility: hidden;
+}
+
+#monsterdb_info:hover .monsterdb_header {
+  visibility: visible;
 }
 
 .monsterdb_table_container {
-  height: 57.7px;
+  height: 56px;
+  background-color: #eeece1;
+  margin: 2px auto;
   font-weight: bold;
   font-family: Consolas,Monaco,SFMono-Regular,Andale Mono,Liberation Mono,Ubuntu Mono,Menlo,monospace;
 }
@@ -43,12 +49,20 @@ const monsterInfoBoxStyle = `
   line-height: 1;
   font-size: 12px;
   letter-spacing: -1px;
+  border: 2px ridge #5C0D12;
   border-spacing: 0;
   border-collapse: collapse;
   width: 100%;
   height: 100%;
 }
 
+.monsterdb_table td:last-child {
+  width: 70px;
+  max-width: 70px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .monsterdb_table td { padding: 0 1px; border: 1px solid #5c0d11; }
 .monsterdb_table .fire { color: red }
 .monsterdb_table .cold { color: blue }
@@ -109,7 +123,7 @@ export function makeMonsterInfoTable(monsterInfo?: HVMonsterDatabase.MonsterInfo
       <td class="cold">c:${symbolNum(monsterInfo.cold)}${padStr(monsterInfo.cold)}</td>
       <td class="elec">e:${symbolNum(monsterInfo.elec)}${padStr(monsterInfo.elec)}</td>`;
     }
-    tableHtml += `<td>${monsterInfo.monsterClass?.toLocaleLowerCase()?.substring(0, 5)}(${monsterInfo.attack?.toLocaleLowerCase()?.substring(0, 4)})</td>`;
+    tableHtml += `<td>${monsterInfo.monsterClass?.substring(0, 6)}/${monsterInfo.attack?.substring(0, 5)}</td>`;
     tableHtml += '</tr><tr>';
     if (!SETTINGS.compactMonsterInfoBox) {
       tableHtml += `
@@ -125,7 +139,7 @@ export function makeMonsterInfoTable(monsterInfo?: HVMonsterDatabase.MonsterInfo
       <td>S:${symbolNum(monsterInfo.slashing)}${padStr(monsterInfo.slashing)}</td>
       <td>P:${symbolNum(monsterInfo.piercing)}${padStr(monsterInfo.piercing)}</td>`;
     }
-    const cuttedTrainerName = monsterInfo.trainer.substring(0, 11);
+    const cuttedTrainerName = monsterInfo.trainer;
     tableHtml += `<td>${cuttedTrainerName === '' ? 'System' : cuttedTrainerName}</td>`;
     tableHtml += '</tr>';
 
