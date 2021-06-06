@@ -1,85 +1,25 @@
 import { HVMonsterDatabase } from '../types';
 import { MONSTER_INFO_BOX_POSITION } from './store';
-
-const monsterInfoBoxStyle = `
-#monsterdb_info {
-  position: absolute;
-  z-index: 3;
-  border: 2px solid #5c0d11;
-  background-color: #eeece1;
-  width: ${SETTINGS.compactMonsterInfoBox ? '75px' : '175px'};
-  height: 599px;
-  opacity: 1;
-}
-
-#monsterdb_monsterInfo.drag {
-  opacity: 0.6;
-  border-style: dashed;
-}
-
-#monsterdb_info .monsterdb_header {
-  cursor: move;
-  height: 20px;
-  text-align: center;
-  background-color: #e5e2d5;
-  line-height: 20px;
-  font-weight: 600;
-  border-bottom: 2px solid #5c0d11;
-}
-
-.monsterdb_table_container {
-  height: 57.7px;
-  font-weight: bold;
-  font-family: Consolas,Monaco,SFMono-Regular,Andale Mono,Liberation Mono,Ubuntu Mono,Menlo,monospace;
-}
-
-.monsterdb_table_container .notify {
-  font-size: 20px;
-  color: red;
-  line-height: 56px;
-}
-
-.monsterdb_table {
-  line-height: 1;
-  font-size: 12px;
-  letter-spacing: -1px;
-  border-spacing: 0;
-  border-collapse: collapse;
-  width: 100%;
-  height: 100%;
-}
-
-.monsterdb_table td { padding: 0 1px; border: 1px solid #5c0d11; }
-.monsterdb_table .fire { color: red }
-.monsterdb_table .cold { color: blue }
-.monsterdb_table .elec { color: mediumpurple }
-.monsterdb_table .wind { color: limegreen }
-.monsterdb_table .holy { color: rosybrown }
-.monsterdb_table .dark { color: black }
-`;
+import styles from '../style/style.module.css';
 
 export function createMonsterInfoBox(): void {
   // Monsterbation tends to completely wipe out DOM when changing round
   // However we still have to make sure the info box won't be added again & again
   if (document.getElementById('monsterdb_info')) return;
 
-  // GM.addStyle method has been removed in GreaseMonkey 4.0 spec
-  // So let's make our own add style method.
-  if (!document.getElementById('monsterdb_style')) {
-    const styleEl = document.createElement('style');
-    styleEl.appendChild(document.createTextNode(monsterInfoBoxStyle));
-    styleEl.id = 'monsterdb_style';
-    document.head.appendChild(styleEl);
-  }
-
   const boxEl = document.createElement('div');
   boxEl.id = 'monsterdb_info';
+  boxEl.className = styles.monsterdb_info;
+
   // Use saved position information
   boxEl.style.left = `${MONSTER_INFO_BOX_POSITION.x}px`;
   boxEl.style.top = `${MONSTER_INFO_BOX_POSITION.y}px`;
 
   const headerEl = boxEl.appendChild(document.createElement('div'));
-  headerEl.className = 'monsterdb_header';
+  headerEl.classList.add(styles.header);
+  if (SETTINGS.compactMonsterInfoBox) {
+    headerEl.classList.add(styles.compact);
+  }
   headerEl.textContent = 'drag\'n\'drop';
 
   const containerEl = document.createElement('div');
@@ -95,27 +35,27 @@ export function makeMonsterInfoTable(monsterInfo?: HVMonsterDatabase.MonsterInfo
   // eslint-disable-next-line no-nested-ternary
   const symbolNum = (num: number) => (num === 0 ? ' ' : num > 0 ? '+' : '');
   const tableContainerEl = document.createElement('div');
-  tableContainerEl.className = 'monsterdb_table_container';
+  tableContainerEl.className = styles.table_container;
 
   if (monsterInfo) {
     const tableEl = tableContainerEl.appendChild(document.createElement('table'));
-    tableEl.className = 'monsterdb_table';
+    tableEl.className = styles.table; // 'monsterdb_table';
 
     let tableHtml = '';
     tableHtml += '<tr>';
     if (!SETTINGS.compactMonsterInfoBox) {
       tableHtml += `
-      <td class="fire">f:${symbolNum(monsterInfo.fire)}${padStr(monsterInfo.fire)}</td>
-      <td class="cold">c:${symbolNum(monsterInfo.cold)}${padStr(monsterInfo.cold)}</td>
-      <td class="elec">e:${symbolNum(monsterInfo.elec)}${padStr(monsterInfo.elec)}</td>`;
+      <td class="${styles.fire}">f:${symbolNum(monsterInfo.fire)}${padStr(monsterInfo.fire)}</td>
+      <td class="${styles.cold}">c:${symbolNum(monsterInfo.cold)}${padStr(monsterInfo.cold)}</td>
+      <td class="${styles.elec}">e:${symbolNum(monsterInfo.elec)}${padStr(monsterInfo.elec)}</td>`;
     }
     tableHtml += `<td>${monsterInfo.monsterClass?.toLocaleLowerCase()?.substring(0, 5)}(${monsterInfo.attack?.toLocaleLowerCase()?.substring(0, 4)})</td>`;
     tableHtml += '</tr><tr>';
     if (!SETTINGS.compactMonsterInfoBox) {
       tableHtml += `
-      <td class="wind">w:${symbolNum(monsterInfo.wind)}${padStr(monsterInfo.wind)}</td>
-      <td class="holy">h:${symbolNum(monsterInfo.holy)}${padStr(monsterInfo.holy)}</td>
-      <td class="dark">d:${symbolNum(monsterInfo.dark)}${padStr(monsterInfo.dark)}</td>`;
+      <td class="${styles.wind}">w:${symbolNum(monsterInfo.wind)}${padStr(monsterInfo.wind)}</td>
+      <td class="${styles.holy}">h:${symbolNum(monsterInfo.holy)}${padStr(monsterInfo.holy)}</td>
+      <td class="${styles.dark}">d:${symbolNum(monsterInfo.dark)}${padStr(monsterInfo.dark)}</td>`;
     }
     tableHtml += `<td>PL: ${monsterInfo.plvl}</td>`;
     tableHtml += '</tr><tr>';
@@ -170,7 +110,7 @@ function makeMonsterInfoBoxDraggable(boxEl: HTMLDivElement, headerEl: HTMLDivEle
       const onMouseMove = (evt: MouseEvent) => {
         if (MOVE_FLAG) {
           window.requestAnimationFrame(() => {
-            boxEl.classList.add('drag');
+            boxEl.classList.add(styles.drag);
             moveTo(evt.pageX, evt.pageY);
           });
         }
@@ -181,7 +121,7 @@ function makeMonsterInfoBoxDraggable(boxEl: HTMLDivElement, headerEl: HTMLDivEle
         document.removeEventListener('mousemove', onMouseMove);
         headerEl.removeEventListener('mouseup', onReleaseMouse);
         window.removeEventListener('blur', onReleaseMouse);
-        boxEl.classList.remove('drag');
+        boxEl.classList.remove(styles.drag);
       };
 
       document.addEventListener('mousemove', onMouseMove);

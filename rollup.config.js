@@ -2,6 +2,8 @@
 import typescript from '@rollup/plugin-typescript';
 import { babel } from '@rollup/plugin-babel';
 import commonjs from '@rollup/plugin-commonjs';
+import postcss from 'rollup-plugin-postcss';
+import cssnano from 'cssnano';
 import metablock from 'rollup-plugin-userscript-metablock';
 import pkgJson from './package.json';
 import MagicString from 'magic-string';
@@ -72,9 +74,15 @@ export default [{
       target: 'ES2020',
       tsconfig: './tsconfig.json'
     }),
+    postcss({
+      plugins: [
+        cssnano()
+      ]
+    }),
     rollupPluginSettingLiteral(),
     metablock(userScriptMetaBlockConfig)
   ],
+  external: ['typed-query-selector'],
   cache
 }, {
   input: 'src/index.ts',
@@ -89,6 +97,11 @@ export default [{
       target: 'ES5',
       downlevelIteration: true,
       tsconfig: './tsconfig.json'
+    }),
+    postcss({
+      plugins: [
+        cssnano()
+      ]
     }),
     commonjs(),
     babel({
@@ -114,5 +127,6 @@ export default [{
       }
     })
   ],
+  external: ['typed-query-selector'],
   cache
 }];

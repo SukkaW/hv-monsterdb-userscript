@@ -1,0 +1,80 @@
+.monsterdb_info {
+  position: absolute;
+  z-index: 3;
+  border: 2px solid #5c0d11;
+  background-color: #eeece1;
+
+  width: 175px;
+  height: 599px;
+  opacity: 1;
+}
+
+.monsterdb_info.compact {
+  width: 75px;
+}
+
+.drag {
+  opacity: 0.6;
+  border-style: dashed;
+}
+
+.header {
+  cursor: move;
+  height: 20px;
+  text-align: center;
+  background-color: #e5e2d5;
+  line-height: 20px;
+  font-weight: 600;
+  border-bottom: 2px solid #5c0d11;
+}
+
+.table_container {
+  height: 57.7px;
+  font-weight: bold;
+  font-family: Consolas, Monaco, SFMono-Regular, Andale Mono, Liberation Mono, Ubuntu Mono, Menlo, monospace;
+}
+
+.notify {
+  font-size: 20px;
+  color: red;
+  line-height: 56px;
+}
+
+.table {
+  line-height: 1;
+  font-size: 12px;
+  letter-spacing: -1px;
+  border-spacing: 0;
+  border-collapse: collapse;
+  width: 100%;
+  height: 100%;
+}
+
+.table td {
+  padding: 0 1px;
+  border: 1px solid #5c0d11;
+}
+
+.fire {
+  color: rgb(255, 104, 0)
+}
+
+.cold {
+  color: rgb(32, 145, 255)
+}
+
+.elec {
+  color: rgb(255, 204, 51)
+}
+
+.wind {
+  color: rgb(26, 188, 156)
+}
+
+.holy {
+  color: rgb(250, 249, 143)
+}
+
+.dark {
+  color: rgb(155, 89, 182)
+}

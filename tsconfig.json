@@ -8,6 +8,7 @@
     "strict": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
+    "plugins": [{ "name": "typescript-plugin-css-modules" }]
   },
   "include": ["src"],
   "exclude": ["dist", "test"]

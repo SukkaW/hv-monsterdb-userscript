@@ -36,15 +36,19 @@
     "@typescript-eslint/eslint-plugin": "^4.18.0",
     "@typescript-eslint/parser": "^4.18.0",
     "core-js": "^3.10.1",
+    "cssnano": "^4.1.11",
     "eslint": "^7.22.0",
     "eslint-config-sukka": "^1.1.2",
     "eslint-plugin-node": "^11.1.0",
     "magic-string": "^0.25.7",
     "rollup": "^2.41.4",
+    "rollup-plugin-embed-css": "^1.0.21",
+    "rollup-plugin-postcss": "^4.0.0",
     "rollup-plugin-userscript-metablock": "^0.2.7",
     "typed-query-selector": "^2.4.1",
     "typedoc": "^0.20.34",
-    "typescript": "^4.2.3"
+    "typescript": "^4.2.3",
+    "typescript-plugin-css-modules": "^3.4.0"
   },
   "engines": {
     "node": ">= 12.0.0"
