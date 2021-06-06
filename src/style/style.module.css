@@ -56,25 +56,25 @@
 }
 
 .fire {
-  color: rgb(255, 104, 0)
+  color: #ce3600
 }
 
 .cold {
-  color: rgb(32, 145, 255)
+  color: rgb(27, 120, 212)
 }
 
 .elec {
-  color: rgb(255, 204, 51)
+  color: rgb(190, 144, 15)
 }
 
 .wind {
-  color: rgb(26, 188, 156)
+  color: rgb(22, 160, 132)
 }
 
 .holy {
-  color: rgb(250, 249, 143)
+  color: rgb(161, 159, 2)
 }
 
 .dark {
-  color: rgb(155, 89, 182)
+  color: rgb(129, 67, 153)
 }
