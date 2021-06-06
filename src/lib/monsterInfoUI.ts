@@ -65,7 +65,7 @@ export function makeMonsterInfoTable(monsterInfo?: HVMonsterDatabase.MonsterInfo
       <td>S:${symbolNum(monsterInfo.slashing)}${padStr(monsterInfo.slashing)}</td>
       <td>P:${symbolNum(monsterInfo.piercing)}${padStr(monsterInfo.piercing)}</td>`;
     }
-    const cuttedTrainerName = monsterInfo.trainer.substring(0, 11);
+    const cuttedTrainerName = monsterInfo.trainer;
     tableHtml += `<td>${cuttedTrainerName === '' ? 'System' : cuttedTrainerName}</td>`;
     tableHtml += '</tr>';
 

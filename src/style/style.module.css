@@ -1,11 +1,11 @@
+/*
+ * Some modification by @indefined
+ */
+
 .monsterdb_info {
   position: absolute;
   z-index: 3;
-  border: 2px solid #5c0d11;
-  background-color: #eeece1;
-
   width: 175px;
-  height: 599px;
   opacity: 1;
 }
 
@@ -15,6 +15,10 @@
 
 .drag {
   opacity: 0.6;
+}
+
+.drag .header,
+.drag .table {
   border-style: dashed;
 }
 
@@ -25,11 +29,20 @@
   background-color: #e5e2d5;
   line-height: 20px;
   font-weight: 600;
-  border-bottom: 2px solid #5c0d11;
+  border: 2px solid #5c0d11;
+  margin-bottom: -2px;
+  user-select: none;
+  visibility: hidden;
+}
+
+.monsterdb_info:hover .header {
+  visibility: visible;
 }
 
 .table_container {
-  height: 57.7px;
+  height: 56px;
+  background-color: #eeece1;
+  margin: 2px auto;
   font-weight: bold;
   font-family: Consolas, Monaco, SFMono-Regular, Andale Mono, Liberation Mono, Ubuntu Mono, Menlo, monospace;
 }
@@ -42,6 +55,7 @@
 
 .table {
   line-height: 1;
+  border: 2px ridge #5C0D12;
   font-size: 12px;
   letter-spacing: -1px;
   border-spacing: 0;
@@ -53,6 +67,14 @@
 .table td {
   padding: 0 1px;
   border: 1px solid #5c0d11;
+}
+
+.table td:last-child {
+  width: 70px;
+  max-width: 70px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .fire {
