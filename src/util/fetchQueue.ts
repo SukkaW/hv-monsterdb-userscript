@@ -1,13 +1,14 @@
-/** Options for the fetch queue and all fetch requests. */
-export interface IFetchQueueOptions {
-  /** Max live connection count of the queue. Default to 4. */
+interface FetchQueueOption {
   maxConnections?: number;
+  interval?: number;
 }
 
-/** Promise that can cancel the request. */
-interface IFetchQueuePromise<T = any> extends Promise<T> {
-  /** Cancel the request and remove it from the queue. */
-  cancel(): void;
+interface FetchQueueItem {
+  readonly url: string;
+  readonly init?: RequestInit;
+  readonly resolve: (value: Response) => void;
+  readonly reject: (reason?: any) => void;
+  state: ItemState;
 }
 
 enum ItemState {
@@ -18,20 +19,31 @@ enum ItemState {
   Canceled
 }
 
-interface IQueueItem {
-  readonly url: string;
-  readonly init?: RequestInit;
-  readonly resolve: (value: Response) => void;
-  readonly reject: (reason?: any) => void;
-  state: ItemState;
+/** Promise that can cancel the request. */
+interface FetchQueuePromise<T = any> extends Promise<T> {
+  /** Cancel the request and remove it from the queue. */
+  cancel(): void;
 }
 
-/**
- * Request queue base on fetch() API.
- */
 export class FetchQueue {
-  /** Fetch queue options. */
-  public readonly options: IFetchQueueOptions;
+  private readonly options: FetchQueueOption;
+  private pendingItems: FetchQueueItem[] = [];
+  private activeItems: FetchQueueItem[] = [];
+  private isPaused = false;
+  private timer: ReturnType<typeof setTimeout> | null;
+  private lastCalled: number;
+  private isFirstRequest = true;
+
+  constructor(options: FetchQueueOption = { maxConnections: 4, interval: 300 }) {
+    this.options = {
+      maxConnections: 4,
+      interval: 300,
+      ...options
+    };
+
+    this.lastCalled = Date.now();
+    this.timer = null;
+  }
 
   /** Count of requests pending in the queue. */
   public get pendingCount(): number {
@@ -43,34 +55,15 @@ export class FetchQueue {
     return this.activeItems.length;
   }
 
-  private pendingItems: IQueueItem[] = [];
-  private activeItems: IQueueItem[] = [];
-  private isPaused = false;
-
-  /**
-   * Create a fetch queue.
-   * @param options Queue options.
-   */
-  public constructor(options?: IFetchQueueOptions) {
-    this.options = {
-      maxConnections: 4,
-      ...options
-    };
-  }
-
   /**
    * Add a request to the end of the queue.
-   *
-   * @param url Request url
-   * @param init Request init for fetch() API
-   * @returns {IFetchQueuePromise} Request promise that can also cancel the request.
    */
-  public add(url: string, init?: RequestInit): IFetchQueuePromise<Response> {
-    let item: IQueueItem;
+  public add(url: string, init?: RequestInit): FetchQueuePromise<Response> {
+    let item: FetchQueueItem;
     const promise = new Promise((resolve, reject) => {
       item = { url, init, resolve, reject, state: ItemState.Pending };
       this.pendingItems.push(item);
-    }) as IFetchQueuePromise;
+    }) as FetchQueuePromise;
     promise.cancel = () => this.cancel(item);
 
     this.checkNext();
@@ -89,12 +82,7 @@ export class FetchQueue {
     this.checkNext();
   }
 
-  /** Override max connections */
-  public setMaxConnections(connections: number): void {
-    this.options.maxConnections = connections;
-  }
-
-  private cancel(item: IQueueItem): void {
+  private cancel(item: FetchQueueItem): void {
     switch (item.state) {
       case ItemState.Pending:
         this.pendingItems = this.pendingItems.filter((i) => i !== item);
@@ -110,33 +98,59 @@ export class FetchQueue {
     item.reject('Canceled');
   }
 
+  private handleResult(item: FetchQueueItem, state: ItemState.Succeeded, result: Response): void
+  private handleResult(item: FetchQueueItem, state: ItemState.Failed, result: Error): void
+  private handleResult(item: FetchQueueItem, state: ItemState.Succeeded | ItemState.Failed, result: Response | Error): void {
+    this.activeItems = this.activeItems.filter((i) => i !== item);
+    item.state = state;
+
+    if (state === ItemState.Succeeded) {
+      // Two years have passed, and the sh*t TypeScript still haven't added support for overload narrowing
+      // See https://github.com/Microsoft/TypeScript/issues/22609
+      if (result instanceof Response) {
+        item.resolve(result);
+      }
+    } else {
+      item.reject(result);
+    }
+  }
+
   private checkNext() {
-    while (!this.isPaused && this.pendingCount > 0 && this.activeCount < this.options.maxConnections!) {
+    const threshold = this.lastCalled + (this.options?.interval || 300);
+    const now = Date.now();
+
+    // Adjust timer if it is called too early
+    if (now < threshold && !this.isFirstRequest) {
+      if (this.timer) {
+        clearTimeout(this.timer);
+      }
+      this.timer = setTimeout(() => {
+        this.checkNext();
+      }, threshold - now);
+      return;
+    }
+
+    this.isFirstRequest = false;
+
+    if (this.isPaused) {
+      // Paused. Wait until resume. Resume will call checkNext again.
+      return;
+    }
+    if (this.pendingCount > 0 && this.activeCount < (this.options?.maxConnections ?? 4)) {
       const item = this.pendingItems.shift()!;
       this.activeItems.push(item);
       item.state = ItemState.Active;
 
+      this.lastCalled = now;
       const request = new Request(item.url, item.init);
-
       fetch(request).then(
         (resp) => this.handleResult(item, ItemState.Succeeded, resp),
         (reason) => this.handleResult(item, ItemState.Failed, reason)
-      );
+      ).then(() => {
+        if (this.pendingCount > 0) {
+          this.checkNext();
+        }
+      });
     }
-  }
-
-  private handleResult(item: IQueueItem, state: ItemState, result: any) {
-    this.activeItems = this.activeItems.filter((i) => i !== item);
-
-    if (item.state === ItemState.Active) {
-      item.state = state;
-      if (state === ItemState.Succeeded) {
-        item.resolve(result);
-      } else {
-        item.reject(result);
-      }
-    }
-
-    this.checkNext();
   }
 }
