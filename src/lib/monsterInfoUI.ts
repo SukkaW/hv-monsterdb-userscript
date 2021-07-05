@@ -18,7 +18,7 @@ export function createMonsterInfoBox(): void {
   const headerEl = boxEl.appendChild(document.createElement('div'));
   headerEl.classList.add(styles.header);
   if (SETTINGS.compactMonsterInfoBox) {
-    headerEl.classList.add(styles.compact);
+    boxEl.classList.add(styles.compact);
   }
   headerEl.textContent = 'drag\'n\'drop';
 
