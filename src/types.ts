@@ -57,6 +57,11 @@ export namespace HVMonsterDatabase {
     databaseV2?: LocalDatabaseVersion2
     databaseIsekaiV2?: LocalDatabaseVersion2
 
+    /** Isekai Level used to determine if isekai has been reset */
+    isekaiLevel?: number
+    /** Timestamp of last recorded isekai reset date */
+    lastIsekaiReset?: number
+
     /** MonsterInfoBox position */
     monsterInfoBoxPosition?: { x: number, y: number }
 

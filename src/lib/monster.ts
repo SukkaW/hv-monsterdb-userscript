@@ -1,5 +1,6 @@
 import { HVMonsterDatabase } from '../types';
 import { isIsekai } from '../util/common';
+import { getHowManyDaysSinceLastIsekaiReset } from './isekaiReset';
 import { convertEncodedMonsterInfoToMonsterInfo, EncodedMonsterDatabase } from './monsterDataEncode';
 import { LOCAL_MONSTER_DATABASE, MONSTER_NAME_ID_MAP } from './store';
 
@@ -24,7 +25,11 @@ export class MonsterStatus {
 
     // To prevent multiple users scan the same monster over and over again, some randomness has been added.
     // Generate it once per monster
-    this._randomness = Math.floor(Math.random() * Math.floor(SETTINGS.scanExpireDays / 5)) + 1;
+    if (isIsekai()) {
+      this._randomness = Math.floor(Math.random() * Math.floor(SETTINGS.scanExpireDays / 3));
+    } else {
+      this._randomness = Math.floor(Math.random() * Math.floor(SETTINGS.scanExpireDays / 5)) + 1;
+    }
   }
 
   get element(): HTMLElement | null {
@@ -40,7 +45,7 @@ export class MonsterStatus {
     }
   }
 
-  get lastUpdate(): number | undefined {
+  get lastUpdate(): number | null {
     if (LOCAL_MONSTER_DATABASE && this.mid) {
       const encodedMonsterInfo = LOCAL_MONSTER_DATABASE[this.mid];
 
@@ -48,6 +53,8 @@ export class MonsterStatus {
         return encodedMonsterInfo[EncodedMonsterDatabase.EMonsterInfo.lastUpdate];
       }
     }
+
+    return null;
   }
 
   get isDead(): boolean {
@@ -70,13 +77,26 @@ export class MonsterStatus {
     // When lastUpdate is undefined, it means it is not in local database.
     // That also means it requires scan.
     if (lastUpdate) {
+      // How many days since lastUpdate to now.
+      const passedDays = Math.round((NOW - lastUpdate) / (24 * 60 * 60 * 1000));
+
       if (isIsekai()) {
+        const howManyDaysSinceLastIsekaiReset = getHowManyDaysSinceLastIsekaiReset();
+        if (
+          howManyDaysSinceLastIsekaiReset
+          // There is an Isekai Reset between last scan and now.
+          && passedDays > howManyDaysSinceLastIsekaiReset
+          // Add some randomness to prevent everyone scan monsters at the day one of the Isekai Reset
+          && howManyDaysSinceLastIsekaiReset > this._randomness
+        ) {
+          return true;
+        }
+
         // In isekai monsters won't get update. If lastUpdate is not undefined,
         // it means the monster is already in the database, no need to scan it again
         return false;
       }
 
-      const passedDays = Math.round((NOW - lastUpdate) / (24 * 60 * 60 * 1000));
       if (passedDays < (SETTINGS.scanExpireDays + this._randomness)) {
         return false;
       }
