@@ -71,7 +71,14 @@ const SETTINGS = {
     //   if (monsterInfo.attack === 'Piercing' || monsterInfo.attack === 'Crushing') return true;
     //   return false
     // }
-  }
+  },
+  /**
+   * Dark Mode
+   *
+   * Made by @raraha (https://forums.e-hentai.org/index.php?showuser=4071895)
+   * Enable Dark theme for the Monster Info Box
+   */
+  darkMode: false
 };
 // ============= ^^^ SETTINGS ^^^ =============
 /*

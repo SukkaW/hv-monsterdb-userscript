@@ -72,7 +72,7 @@ export namespace HVMonsterDatabase {
     monsterScansSubmitQueue?: MonsterInfo[]
   }
 
-  export type MonsterMatcher = (monsterInfo: MonsterInfo) => boolean | RegExp;
+  export type MonsterMatcher = ((monsterInfo: MonsterInfo) => boolean) | RegExp;
 }
 
 export interface ISettings {
@@ -83,5 +83,6 @@ export interface ISettings {
   compactMonsterInfoBox: boolean,
   highlightMonster: {
     [key: string]: HVMonsterDatabase.MonsterMatcher
-  } | false
+  } | false,
+  darkMode: boolean
 }

@@ -9,7 +9,11 @@ export function createMonsterInfoBox(): void {
 
   const boxEl = document.createElement('div');
   boxEl.id = 'monsterdb_info';
-  boxEl.className = styles.monsterdb_info;
+  boxEl.classList.add(styles.monsterdb_info);
+
+  if (SETTINGS.darkMode) {
+    boxEl.classList.add(styles.monsterdb_dark);
+  }
 
   // Use saved position information
   boxEl.style.left = `${MONSTER_INFO_BOX_POSITION.x}px`;
