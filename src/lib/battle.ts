@@ -146,8 +146,7 @@ const highlightMonster = (monsterStatus: MonsterStatus) => () => {
 
 function showMonsterInfoAndHighlightMonster(): void {
   // A queue of function to be called, to avoid race condition
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  const requestAnimationFrameCallbackQueue: Function[] = [];
+  const requestAnimationFrameCallbackQueue: FrameRequestCallback[] = [];
 
   MONSTERS_NEED_SCAN.clear();
 
@@ -183,9 +182,9 @@ function showMonsterInfoAndHighlightMonster(): void {
   }
 
   // Batch highlightExpireMonster to avoid race condition
-  window.requestAnimationFrame(() => {
+  window.requestAnimationFrame((t) => {
     for (const func of requestAnimationFrameCallbackQueue) {
-      func();
+      func(t);
     }
   });
 }
