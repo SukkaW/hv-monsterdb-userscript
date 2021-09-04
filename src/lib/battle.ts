@@ -104,10 +104,9 @@ function tasksRunDuringTheBattle(): void {
           logger.info(`Scan results for ${monsterName} is now queued to submit`);
           submitScanResults(scanResult);
 
-          const simplifiedScanResult = convertMonsterInfoToEncodedMonsterInfo(scanResult);
           // Update local database first, it will be used to update UI
           if (monsterStatus.mid) {
-            LOCAL_MONSTER_DATABASE[monsterStatus.mid] = simplifiedScanResult;
+            LOCAL_MONSTER_DATABASE[monsterStatus.mid] = convertMonsterInfoToEncodedMonsterInfo(scanResult);
           }
         } else {
           logger.warn(`${monsterName} is not legible for scan, ignoring the scan result!`);
