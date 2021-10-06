@@ -1,8 +1,9 @@
 declare global {
   interface Window {
-    mozRequestAnimationFrame: (callback: FrameRequestCallback) => number
-    webkitRequestAnimationFrame: (callback: FrameRequestCallback) => number
-    msRequestAnimationFrame: (callback: FrameRequestCallback) => number
+    mozRequestAnimationFrame?: typeof window.requestAnimationFrame
+    msRequestAnimationFrame?: typeof window.requestAnimationFrame
+    mozCancelAnimationFrame?: typeof window.requestAnimationFrame
+    msCancelAnimationFrame?: typeof window.requestAnimationFrame
   }
 }
 
@@ -10,6 +11,7 @@ export function polyfill(): void {
   // globalThis is the "safeWindow" (no "un" here!)
 
   globalThis.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+  globalThis.cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame || window.webkitCancelAnimationFrame || window.msCancelAnimationFrame;
 
   globalThis.requestIdleCallback = window.requestIdleCallback || (cb => {
     const start = Date.now();
