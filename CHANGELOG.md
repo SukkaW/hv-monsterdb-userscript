@@ -1,3 +1,14 @@
+## 1.2.0
+
+- Change userscript `run-at` property to `document-idle` in order to fix some race condition caused by TamperMonkey & ViolentMonkey
+- New feature `darkMode` which will use a dark theme for the float window.
+- Some ui improvements made by @indefined.
+- Fix the width of the float window when `compactMonsterInfoBox` is enabled.
+- The script is now able to detect the Isekai has been reset or not. And monsters in the Isekai will expire only once per season.
+- Some performance improvements:
+  - Use virtual dom to minimize the dom operations
+  - Fix some potential or rare memory leaks by preventing unnecessary object allocation
+
 ## 1.1.0
 
 - New feature `highlightMonster` which will highlight monsters where the name, id, class, attack matches

@@ -11,6 +11,7 @@ const SETTINGS = {
    * Scan Expire Date
    *
    * Monsters that haven't been scanned in this number of days will be considered expired.
+   * In the Isekai, monsters will only expire once per season.
    */
   scanExpireDays: 31,
   /**
