@@ -1,11 +1,13 @@
 import { MonsterStatus } from './monster';
 import { parseMonsterNameAndId, parseScanResult } from './parseLog';
 import { LOCAL_MONSTER_DATABASE, MONSTER_NAME_ID_MAP } from './store';
-import { createMonsterInfoBox, makeMonsterInfoTable } from './monsterInfoUI';
+import { createMonsterInfoBox, monsterInfoVirtualNodeFactory } from './monsterInfoUI';
 import { convertMonsterInfoToEncodedMonsterInfo } from './monsterDataEncode';
 import { logger } from '../util/logger';
 import { submitScanResults } from './submitScan';
-import { HVMonsterDatabase } from '../types';
+import { createElement, patch } from 'million';
+
+let monsterInfoVElement: ReturnType<typeof createElement> | undefined;
 
 import 'typed-query-selector';
 
@@ -118,15 +120,6 @@ function tasksRunDuringTheBattle(): void {
   showMonsterInfoAndHighlightMonster();
 }
 
-const clearMonsterInfoContainer = () => {
-  const monsterInfoBoxEl = document.getElementById('monsterdb_container');
-  if (monsterInfoBoxEl) {
-    monsterInfoBoxEl.innerHTML = '';
-  }
-};
-const appendMonsterInfo = (info: HVMonsterDatabase.MonsterInfo | null | undefined) => () => {
-  document.getElementById('monsterdb_container')?.appendChild(makeMonsterInfoTable(info));
-};
 const highlightExpireMonster = (monsterElement: HTMLElement | null, color: string) => () => {
   const monsterBtm2El = monsterElement?.querySelector('div.btm2');
   if (monsterBtm2El) {
@@ -143,25 +136,40 @@ const highlightMonster = (monsterStatus: MonsterStatus) => () => {
   }
 };
 
+let requestAnimationFrameId: ReturnType<typeof globalThis.requestAnimationFrame> | undefined;
+const isHighlightMonsterEnabled = SETTINGS.highlightMonster && Object.keys(SETTINGS.highlightMonster).length > 0;
+const highlightScanColor = SETTINGS.scanHighlightColor === true ? 'coral' : SETTINGS.scanHighlightColor;
+
 function showMonsterInfoAndHighlightMonster(): void {
   // A queue of function to be called, to avoid race condition
   const requestAnimationFrameCallbackQueue: FrameRequestCallback[] = [];
 
   MONSTERS_NEED_SCAN.clear();
 
-  if (SETTINGS.showMonsterInfoBox && !document.getElementById('monsterdb_info')) {
-    requestAnimationFrameCallbackQueue.push(createMonsterInfoBox);
+  if (SETTINGS.showMonsterInfoBox) {
+    const monsterStatus = [...MONSTERS.values()];
+
+    if (!document.getElementById('monsterdb_info')) {
+      requestAnimationFrameCallbackQueue.push(() => {
+        createMonsterInfoBox();
+        monsterInfoVElement = createElement(
+          monsterInfoVirtualNodeFactory(monsterStatus)
+        );
+        document.getElementById('monsterdb_container')?.appendChild(monsterInfoVElement);
+      });
+    } else {
+      requestAnimationFrameCallbackQueue.push(() => {
+        const container = document.getElementById('monsterdb_container');
+        if (container && monsterInfoVElement) {
+          patch(monsterInfoVElement, monsterInfoVirtualNodeFactory(monsterStatus));
+        }
+      });
+    }
   }
-  requestAnimationFrameCallbackQueue.push(clearMonsterInfoContainer);
 
   for (const [monsterName, monsterStatus] of MONSTERS) {
-    // #geiInfo method always provide latest data (including scanned)
-    if (SETTINGS.showMonsterInfoBox) {
-      requestAnimationFrameCallbackQueue.push(appendMonsterInfo(monsterStatus.info));
-    }
-
     // Highlight a monster based on SETTINGS.highlightMonster
-    if (SETTINGS.highlightMonster && Object.keys(SETTINGS.highlightMonster).length > 0) {
+    if (isHighlightMonsterEnabled) {
       requestAnimationFrameCallbackQueue.push(highlightMonster(monsterStatus));
     }
 
@@ -173,17 +181,22 @@ function showMonsterInfoAndHighlightMonster(): void {
         mid: monsterStatus.mid
       });
       // Highlight a monster hasn't been scanned for a while
-      if (SETTINGS.scanHighlightColor !== false) {
-        const highlightColor = SETTINGS.scanHighlightColor === true ? 'coral' : SETTINGS.scanHighlightColor;
-        requestAnimationFrameCallbackQueue.push(highlightExpireMonster(monsterStatus.element, highlightColor));
+      if (highlightScanColor !== false) {
+        requestAnimationFrameCallbackQueue.push(highlightExpireMonster(monsterStatus.element, highlightScanColor));
       }
     }
   }
 
-  // Batch highlightExpireMonster to avoid race condition
-  window.requestAnimationFrame((t) => {
+  // Avoid stacking FrameRequestCallback causing memory leaks
+  if (requestAnimationFrameId && typeof window.cancelAnimationFrame === 'function') {
+    window.cancelAnimationFrame(requestAnimationFrameId);
+  }
+  requestAnimationFrameId = window.requestAnimationFrame((t) => {
+    // Batch FrameRequestCallback to avoid race condition
     for (const func of requestAnimationFrameCallbackQueue) {
       func(t);
     }
+
+    requestAnimationFrameId = undefined;
   });
 }

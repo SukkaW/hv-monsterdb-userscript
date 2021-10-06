@@ -30,10 +30,9 @@ polyfill();
     document.addEventListener('HVReload', inBattle);
 
     if (hasTextLog) {
-      // In Battle
       /**
-       * We will listen 'DOMContentLoaded' soon. If the browser inject the script right before
-       * DOMContentLoaded event, we won't call inBattle(), and let event handler does its job.
+       * We have already listened 'DOMContentLoaded' soon. If the browser inject the script right before
+       * DOMContentLoaded event, we will call inBattle() again, and let race condition mitigation does its job.
        */
       inBattle();
     }

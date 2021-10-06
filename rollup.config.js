@@ -2,6 +2,7 @@
 import typescript from '@rollup/plugin-typescript';
 import { babel } from '@rollup/plugin-babel';
 import commonjs from '@rollup/plugin-commonjs';
+import { nodeResolve } from '@rollup/plugin-node-resolve';
 import postcss from 'rollup-plugin-postcss';
 import cssnano from 'cssnano';
 import metablock from 'rollup-plugin-userscript-metablock';
@@ -70,6 +71,7 @@ export default [{
     sourcemap: false
   }],
   plugins: [
+    nodeResolve(),
     typescript({
       target: 'ES2020',
       tsconfig: './tsconfig.json'
@@ -93,6 +95,7 @@ export default [{
     sourcemap: false
   },
   plugins: [
+    nodeResolve(),
     typescript({
       target: 'ES5',
       downlevelIteration: true,
