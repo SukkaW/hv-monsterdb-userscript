@@ -22,7 +22,10 @@ export function getMonsterDatabaseCompatibleDate(timestamp?: number): string {
   const padNumber = (num: number) => num.toString().padStart(2, '0');
   const result = `${year}-${padNumber(month)}-${padNumber(day)}`;
 
-  MonsterDatabaseCompatibleDateCache.set(timestamp, result);
+  if (timestamp) {
+    MonsterDatabaseCompatibleDateCache.set(timestamp, result);
+  }
+
   return result;
 }
 
