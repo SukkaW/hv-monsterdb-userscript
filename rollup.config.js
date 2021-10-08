@@ -123,9 +123,6 @@ export default [{
           'GM_setValue', // GMv3 Legacy API support
           'GM.deleteValue',
           'GM_deleteValue' // GMv3 Legacy API support
-        ],
-        require: [
-          'https://cdn.jsdelivr.net/npm/gm4-polyfill@1.0.1/gm4-polyfill.es5.min.js'
         ]
       }
     })
