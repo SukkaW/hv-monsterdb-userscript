@@ -115,6 +115,7 @@ export default [{
     metablock({
       ...userScriptMetaBlockConfig,
       override: {
+        ...userScriptMetaBlockConfig.override,
         grant: [
           'unsafeWindow',
           'GM.getValue',
