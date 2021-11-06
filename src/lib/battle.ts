@@ -39,15 +39,15 @@ export async function inBattle(): Promise<void> {
 
   const logEl = document.getElementById('textlog');
   if (logEl && logEl.firstChild) {
-    tasksRunAtStartOfPerRound();
+    await tasksRunAtStartOfPerRound();
     const mo = new MutationObserver(tasksRunDuringTheBattle);
     mo.observe(logEl.firstChild, { childList: true });
   }
 }
 
 /** Tasks like "get monster id and monster name" only have to run at the start of per round */
-function tasksRunAtStartOfPerRound(): void {
-  document.querySelectorAll('#textlog > tbody > tr').forEach(logEl => {
+async function tasksRunAtStartOfPerRound(): Promise<void> {
+  await Promise.all([...document.querySelectorAll('#textlog > tbody > tr')].map(async logEl => {
     const logHtml = logEl.innerHTML;
 
     // Get Monster Name & ID
@@ -55,25 +55,28 @@ function tasksRunAtStartOfPerRound(): void {
       const monsterNameAndId = parseMonsterNameAndId(logHtml);
       if (monsterNameAndId) {
         logger.debug('Monster Name & ID', monsterNameAndId.monsterId, monsterNameAndId.monsterName);
-        MONSTER_NAME_ID_MAP.set(monsterNameAndId.monsterName, monsterNameAndId.monsterId);
+        return MONSTER_NAME_ID_MAP.set(monsterNameAndId.monsterName, monsterNameAndId.monsterId);
       }
     }
-  });
+  }));
 
   MONSTERS.clear();
   // I am not sure the order that monster showed up in battle log
   // is consistent with actually in #battle_right. It is unstable
   // and unreliable method. So I will manually get monster info
   // directly from DOM.
-  for (const el of document.getElementsByClassName('btm1')) {
+  (await Promise.all([...document.getElementsByClassName('btm1')].map(async el => {
     const mkey = el.getAttribute('id');
     const name = el.getElementsByClassName('btm3')[0].textContent?.trim();
-
     if (mkey && name) {
-      const monster = new MonsterStatus(name, mkey);
-      MONSTERS.set(name, monster);
+      const mid = await MONSTER_NAME_ID_MAP.get(name);
+      return new MonsterStatus(name, mkey, mid ?? null);
     }
-  }
+  }))).forEach(monster => {
+    if (monster?.name) {
+      MONSTERS.set(monster?.name, monster);
+    }
+  });
 
   logger.debug('Monsters in the round', MONSTERS);
 
@@ -81,7 +84,7 @@ function tasksRunAtStartOfPerRound(): void {
   showMonsterInfoAndHighlightMonster();
 }
 
-function tasksRunDuringTheBattle(): void {
+async function tasksRunDuringTheBattle(): Promise<void> {
   // Handle batleLog
   const logEls = document.querySelectorAll('#textlog > tbody > tr');
   for (const logEl of logEls) {
@@ -92,7 +95,8 @@ function tasksRunDuringTheBattle(): void {
 
     // This turn scan a monster
     if (logHtml.includes('Scanning')) {
-      const scanResult = parseScanResult(logHtml);
+      // eslint-disable-next-line no-await-in-loop
+      const scanResult = await parseScanResult(logHtml);
       if (scanResult) {
         const { monsterName } = scanResult;
 

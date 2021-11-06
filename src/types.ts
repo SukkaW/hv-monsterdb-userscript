@@ -65,16 +65,10 @@ export namespace HVMonsterDatabase {
     /** MonsterInfoBox position */
     monsterInfoBoxPosition?: { x: number, y: number }
 
-    /**
-     * @description Monster ID Map. Monster ID are shared in both persistent and isekai
-     */
+    /** @deprecated - Monster ID Map. Monster ID are shared in both persistent and isekai */
     monsterIdMap?: {
       [key: string]: number
     }
-    /**
-     * @description Queue scan results and only submit them out of battle
-     */
-    monsterScansSubmitQueue?: MonsterInfo[]
   }
 
   export type MonsterMatcher = ((monsterInfo: MonsterInfo) => boolean) | RegExp;

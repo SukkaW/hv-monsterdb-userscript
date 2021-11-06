@@ -36,8 +36,8 @@ export function inBattle(): void {
  * // 32
  * ```
  */
-export function getMonsterIdByName(name: string): number | null {
-  const monsterId = MONSTER_NAME_ID_MAP.get(name);
+export async function getMonsterIdByName(name: string): Promise<number | null> {
+  const monsterId = await MONSTER_NAME_ID_MAP.get(name);
 
   return monsterId || null;
 }
@@ -80,8 +80,8 @@ export function getCurrentMonstersInformation(): {
  * // { ... }
  * ```
  */
-export function getMonsterInfoByName(name: string): HVMonsterDatabase.MonsterInfo | null {
-  const monsterId = MONSTER_NAME_ID_MAP.get(name);
+export async function getMonsterInfoByName(name: string): Promise<HVMonsterDatabase.MonsterInfo | null> {
+  const monsterId = await MONSTER_NAME_ID_MAP.get(name);
 
   if (monsterId) {
     const encodedMonsterInfo = LOCAL_MONSTER_DATABASE[monsterId];

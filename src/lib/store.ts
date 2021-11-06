@@ -1,12 +1,44 @@
 import { HVMonsterDatabase } from '../types';
 import { isIsekai } from '../util/common';
 import { getStoredValue, setStoredValue } from '../util/store';
+import { IDBKV } from './idbkv';
+
+const DBNAME = 'hv-monster-database-script';
 
 /** Monster Name => Monster Id */
-export let MONSTER_NAME_ID_MAP: Map<string, number> = new Map();
 export let LOCAL_MONSTER_DATABASE: HVMonsterDatabase.LocalDatabaseVersion2 = {};
 /** The position of monster info box */
 export let MONSTER_INFO_BOX_POSITION = { x: 10, y: 10 };
+
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export class MONSTER_NAME_ID_MAP {
+  private static cache: Map<string, number> = new Map();
+  private static store = new IDBKV<{ [key: string]: number }>(DBNAME, 'MONSTER_NAME_ID_MAP');
+
+  static async has(monsterName: string): Promise<boolean> {
+    if (MONSTER_NAME_ID_MAP.cache.has(monsterName)) return true;
+
+    const monsterId = await MONSTER_NAME_ID_MAP.store.get(monsterName);
+    if (monsterId) {
+      MONSTER_NAME_ID_MAP.cache.set(monsterName, monsterId);
+      return true;
+    }
+    return false;
+  }
+
+  static async get(monsterName: string): Promise<number | undefined> {
+    if (MONSTER_NAME_ID_MAP.cache.has(monsterName)) return MONSTER_NAME_ID_MAP.cache.get(monsterName);
+    const monsterId = await MONSTER_NAME_ID_MAP.store.get(monsterName);
+    if (monsterId) {
+      MONSTER_NAME_ID_MAP.cache.set(monsterName, monsterId);
+    }
+    return monsterId;
+  }
+
+  static set(monsterName: string, monsterId: number): Promise<void> {
+    return MONSTER_NAME_ID_MAP.store.set(monsterName, monsterId);
+  }
+}
 
 /**
  * According to MDN:
@@ -19,18 +51,10 @@ export let MONSTER_INFO_BOX_POSITION = { x: 10, y: 10 };
  */
 
 export async function storeTmpValue(): Promise<void> {
-  setStoredValue('monsterIdMap', Object.fromEntries(MONSTER_NAME_ID_MAP));
-  setStoredValue('monsterInfoBoxPosition', MONSTER_INFO_BOX_POSITION);
-
-  if (isIsekai()) {
-    setStoredValue('databaseIsekaiV2', LOCAL_MONSTER_DATABASE);
-  } else {
-    setStoredValue('databaseV2', LOCAL_MONSTER_DATABASE);
-  }
+  return isIsekai() ? setStoredValue('databaseIsekaiV2', LOCAL_MONSTER_DATABASE) : setStoredValue('databaseV2', LOCAL_MONSTER_DATABASE);
 }
 
 export async function retrieveTmpValue(): Promise<void> {
-  MONSTER_NAME_ID_MAP = new Map(Object.entries(await getStoredValue('monsterIdMap') || {}));
   MONSTER_INFO_BOX_POSITION = await getStoredValue('monsterInfoBoxPosition') || { x: 10, y: 10 };
 
   if (isIsekai()) {

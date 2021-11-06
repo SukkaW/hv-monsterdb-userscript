@@ -25,14 +25,14 @@ export function parseMonsterNameAndId(singleLogHtml: string): {
 
 const isPositiveOrNegative = (modifier: string): number => (modifier === '+' ? 1 : -1);
 
-export function parseScanResult(singleLogHtml: string): HVMonsterDatabase.MonsterInfo | void {
+export async function parseScanResult(singleLogHtml: string): Promise<void | HVMonsterDatabase.MonsterInfo> {
   if (singleLogHtml.includes('Scanning')) {
 
     const matches = singleLogHtml.match(rMatchScan);
 
     if (matches) {
       const monsterName = matches[1];
-      const monsterId = MONSTER_NAME_ID_MAP.get(monsterName);
+      const monsterId = await MONSTER_NAME_ID_MAP.get(monsterName);
       const lastUpdate = getMonsterDatabaseCompatibleDate();
 
       // System Monster has no Power Level results in undefined

@@ -34,7 +34,7 @@ export namespace EncodedMonsterDatabase {
     Void
   }
 
-  export enum EMonsterInfo {
+  export const enum EMonsterInfo {
     monsterName,
     monsterId,
     monsterClass,

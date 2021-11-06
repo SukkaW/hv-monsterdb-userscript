@@ -2,7 +2,7 @@ import { HVMonsterDatabase } from '../types';
 import { isIsekai } from '../util/common';
 import { getHowManyDaysSinceLastIsekaiReset } from './isekaiReset';
 import { convertEncodedMonsterInfoToMonsterInfo, EncodedMonsterDatabase } from './monsterDataEncode';
-import { LOCAL_MONSTER_DATABASE, MONSTER_NAME_ID_MAP } from './store';
+import { LOCAL_MONSTER_DATABASE } from './store';
 
 const EFFECTS_AFFECTING_SCAN_REAULT = ['nbardead.png', 'imperil.png', 'firedot.png', 'coldslow.png', 'coldslow.png', 'windmiss.png', 'holybreach.png', 'darknerf.png'];
 
@@ -18,10 +18,12 @@ export class MonsterStatus {
   /** randomness */
   private _randomness: number;
 
-  constructor(name: string, mkey: string) {
+  constructor(name: string, mkey: string, mid: number | null) {
     this.name = name;
     this.mkey = mkey;
-    this.mid = MONSTER_NAME_ID_MAP.get(name);
+    if (mid) {
+      this.mid = mid;
+    }
 
     // To prevent multiple users scan the same monster over and over again, some randomness has been added.
     // Generate it once per monster
@@ -74,8 +76,6 @@ export class MonsterStatus {
     if (this.isDead) return false;
 
     const { lastUpdate } = this;
-    // When lastUpdate is undefined, it means it is not in local database.
-    // That also means it requires scan.
     if (lastUpdate) {
       // How many days since lastUpdate to now.
       const passedDays = Math.round((NOW - lastUpdate) / (24 * 60 * 60 * 1000));
@@ -101,7 +101,8 @@ export class MonsterStatus {
         return false;
       }
     }
-
+    // When lastUpdate is undefined / null, it means it is not in local database.
+    // That also means it requires scan.
     return true;
   }
 
