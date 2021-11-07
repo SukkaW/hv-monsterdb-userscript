@@ -37,7 +37,7 @@ export async function parseScanResult(singleLogHtml: string): Promise<void | HVM
 
       // System Monster has no Power Level results in undefined
       // Treat it as PL 0 instead
-      const plvl = Number(matches[3] || 0);
+      const plvl = Number(matches[3] ?? 0);
 
       const fire = Number(matches[7]) * isPositiveOrNegative(matches[6]);
       const cold = Number(matches[9]) * isPositiveOrNegative(matches[8]);
