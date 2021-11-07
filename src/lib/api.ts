@@ -4,7 +4,7 @@ import { logger } from '../util/logger';
 import { MONSTERS, MONSTERS_NEED_SCAN, inBattle as inBattleFunc } from './battle';
 import { updateLocalDatabase } from './localDataBase';
 import { convertEncodedMonsterInfoToMonsterInfo } from './monsterDataEncode';
-import { LOCAL_MONSTER_DATABASE, MONSTER_NAME_ID_MAP } from './store';
+import { MONSTER_NAME_ID_MAP, LOCAL_MONSTER_DATABASE } from './store';
 
 /**
  * Although Monster Database script have tried best to be compatible with Monsterbation's ajaxRound feature, in order to workaround TamperMonkey on Firefox cross userscript sandbox event handler issue (one userscript can't recevied a document Event event from another one), a fallback API is provided.
@@ -84,7 +84,7 @@ export async function getMonsterInfoByName(name: string): Promise<HVMonsterDatab
   const monsterId = await MONSTER_NAME_ID_MAP.get(name);
 
   if (monsterId) {
-    const encodedMonsterInfo = LOCAL_MONSTER_DATABASE[monsterId];
+    const encodedMonsterInfo = await LOCAL_MONSTER_DATABASE.get(monsterId);
     if (encodedMonsterInfo) {
       return convertEncodedMonsterInfoToMonsterInfo(monsterId, encodedMonsterInfo);
     }
@@ -130,17 +130,13 @@ export function forceUpdateLocalDatabase(): Promise<void> {
 }
 
 /**
- * DEBUG Method, dump raw local data base (only avaliable when "debug" setting is enabled)
+ * @deprecated DEBUG Method, dump raw local data base (only avaliable when "debug" setting is enabled)
  *
  * ```js
  * window.HVMonsterDB.dumpRawLocalDataBase();
  * ```
  */
-export function dumpRawLocalDataBase(): HVMonsterDatabase.LocalDatabaseVersion2 {
-  if (!SETTINGS.debug) {
-    logger.error('"dumpRawLocalDataBase" method is only avaliable when "debug" setting is enabled!');
-    throw new Error('"dumpRawLocalDataBase" method is only avaliable when "debug" setting is enabled!');
-  } else {
-    return LOCAL_MONSTER_DATABASE;
-  }
+export function dumpRawLocalDataBase(): never {
+  logger.error('"dumpRawLocalDataBase" method is deprecated, please view the raw local database direcly in the DevTools -> IndexedDB!');
+  throw new Error('"dumpRawLocalDataBase" method is deprecated!');
 }

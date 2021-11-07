@@ -2,8 +2,8 @@ import { HVMonsterDatabase } from '../types';
 import { getUTCDate, isIsekai, showPopup } from '../util/common';
 import { logger } from '../util/logger';
 import { getStoredValue, removeStoredValue, setStoredValue } from '../util/store';
-import { convertMonsterInfoToEncodedMonsterInfo } from './monsterDataEncode';
-import { setLocalDatabaseTmpValue, MONSTER_NAME_ID_MAP } from './store';
+import { convertMonsterInfoToEncodedMonsterInfo, EncodedMonsterDatabase } from './monsterDataEncode';
+import { MONSTER_NAME_ID_MAP, LOCAL_MONSTER_DATABASE_PERSISTENT, LOCAL_MONSTER_DATABASE_ISEKAI } from './store';
 
 interface ApiResponse {
   monsters: (HVMonsterDatabase.MonsterInfo & {
@@ -47,25 +47,20 @@ export async function updateLocalDatabase(force = false): Promise<void> {
       window.requestIdleCallback(async () => {
         logger.info('Processing Monster Database...');
 
-        const db = Object.fromEntries(data.monsters.map(monster => {
+        const db = data.monsters.map(monster => {
           MONSTER_NAME_ID_MAP.set(monster.monsterName, monster.monsterId);
 
           const EncodedMonsterInfo = convertMonsterInfoToEncodedMonsterInfo(monster);
-          return [monster.monsterId, EncodedMonsterInfo];
-        }));
+          return [monster.monsterId, EncodedMonsterInfo] as [number, EncodedMonsterDatabase.MonsterInfo];
+        });
 
         logger.info(`${data.monsters.length} monsters' information processed.`);
 
-        // This fix an edge case: When try to update database during battle,
-        // it is possible that storage will be overwritten by in-memory data
-        // By foring update in-memory data the edge case can be bypassed.
-        setLocalDatabaseTmpValue(db);
-
         if (isIsekai()) {
-          await setStoredValue('databaseIsekaiV2', db);
+          LOCAL_MONSTER_DATABASE_ISEKAI.setMany(db);
           await setStoredValue('lastUpdateIsekaiV2', getUTCDate());
         } else {
-          await setStoredValue('databaseV2', db);
+          LOCAL_MONSTER_DATABASE_PERSISTENT.setMany(db);
           await setStoredValue('lastUpdateV2', getUTCDate());
         }
       }, { timeout: 10000 });
@@ -83,18 +78,30 @@ export async function updateLocalDatabase(force = false): Promise<void> {
 }
 
 async function databaseMigration() {
-  // Remove old version 1 database
-  await Promise.all([
+  // Migrate all old userscript storage to IndexedDB
+  const [monsterIdMap, databaseV2, databaseIsekaiV2] = await Promise.all([getStoredValue('monsterIdMap'), getStoredValue('databaseV2'), getStoredValue('databaseIsekaiV2')]);
+  if (monsterIdMap) {
+    logger.debug('Migrating old monsterIdMap to IndexedDB');
+    await MONSTER_NAME_ID_MAP.setMany(Object.entries(monsterIdMap));
+  }
+  if (databaseV2) {
+    logger.debug('Migrating old databaseV2 to IndexedDB');
+    await LOCAL_MONSTER_DATABASE_PERSISTENT.setMany(Object.entries(databaseV2).map(([k, v]) => [Number(k), v]));
+  }
+  if (databaseIsekaiV2) {
+    logger.debug('Migrating old databaseIsekaiV2 to IndexedDB');
+    await LOCAL_MONSTER_DATABASE_ISEKAI.setMany(Object.entries(databaseIsekaiV2).map(([k, v]) => [Number(k), v]));
+  }
+
+  return Promise.all([
+    // Remove version 2 from the userscript storage
+    removeStoredValue('monsterIdMap'),
+    removeStoredValue('databaseV2'),
+    removeStoredValue('databaseIsekaiV2'),
+    // Remove old version 1 database
     removeStoredValue('database'),
     removeStoredValue('databaseIsekai'),
     removeStoredValue('lastUpdate'),
     removeStoredValue('lastUpdateIsekai')
   ]);
-
-  const monsterIdMap = await getStoredValue('monsterIdMap');
-  if (monsterIdMap) {
-    logger.debug('Migrating old monsterIdMap to IndexedDB');
-    await Promise.all(Object.entries(monsterIdMap).map(([name, id]) => MONSTER_NAME_ID_MAP.set(name, id)));
-  }
-  return removeStoredValue('monsterIdMap');
 }

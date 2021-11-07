@@ -35,16 +35,26 @@ const fuckThisShitfari14IndexedDBStupidBug = () => {
 export class IDBKV<T> {
   private store: UseStore;
 
-  static createStore(dbName: string, storeName: string): UseStore {
-    return (txMode, callback) => fuckThisShitfari14IndexedDBStupidBug().then(() => {
-      const request = indexedDB.open(dbName);
-      request.onupgradeneeded = () => request.result.createObjectStore(storeName);
+  static createObjectStore(dbName: string, storeNames: string[], dbVersion?: number): Promise<IDBDatabase> {
+    return fuckThisShitfari14IndexedDBStupidBug().then(() => {
+      const request = indexedDB.open(dbName, dbVersion);
+      request.onupgradeneeded = () => storeNames.forEach(storeName => request.result.createObjectStore(storeName));
       return promisifyRequest(request);
-    }).then((db) => callback(db.transaction(storeName, txMode).objectStore(storeName)));
+    });
   }
 
-  constructor(dbName: string, storeName: string) {
-    this.store = IDBKV.createStore(dbName, storeName);
+  static createStore(dbName: string, storeName: string, dbVersion?: number): UseStore {
+    return (txMode, callback) => fuckThisShitfari14IndexedDBStupidBug().then(() => {
+      const request = indexedDB.open(dbName, dbVersion);
+      request.onupgradeneeded = () => request.result.createObjectStore(storeName);
+      return promisifyRequest(request);
+    }).then((db) => {
+      return callback(db.transaction(storeName, txMode).objectStore(storeName));
+    });
+  }
+
+  constructor(dbName: string, storeName: string, dbVersion?: number) {
+    this.store = IDBKV.createStore(dbName, storeName, dbVersion);
   }
 
   get<K extends IDBValidKey & keyof T>(key: K): Promise<T[K] | undefined> {

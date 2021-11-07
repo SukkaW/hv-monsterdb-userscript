@@ -18,6 +18,9 @@ export class MonsterStatus {
   /** randomness */
   private _randomness: number;
 
+  public info?: HVMonsterDatabase.MonsterInfo;
+  public lastUpdate?: number;
+
   constructor(name: string, mkey: string, mid: number | null) {
     this.name = name;
     this.mkey = mkey;
@@ -34,29 +37,23 @@ export class MonsterStatus {
     }
   }
 
+  async init(): Promise<void> {
+    if (this.mid) {
+      const encodedMonsterInfo = await LOCAL_MONSTER_DATABASE.get(this.mid);
+      if (encodedMonsterInfo) {
+        this.info = convertEncodedMonsterInfoToMonsterInfo(this.mid, encodedMonsterInfo);
+        this.lastUpdate = encodedMonsterInfo[EncodedMonsterDatabase.EMonsterInfo.lastUpdate];
+      }
+    }
+  }
+
+  updateInfoFromScan(scanResult: HVMonsterDatabase.MonsterInfo): void {
+    this.info = scanResult;
+    this.lastUpdate = Date.now();
+  }
+
   get element(): HTMLElement | null {
     return document.getElementById(this.mkey);
-  }
-
-  get info(): HVMonsterDatabase.MonsterInfo | undefined {
-    if (LOCAL_MONSTER_DATABASE && this.mid) {
-      const monsterInfo = LOCAL_MONSTER_DATABASE[this.mid];
-      if (monsterInfo) {
-        return convertEncodedMonsterInfoToMonsterInfo(this.mid, monsterInfo);
-      }
-    }
-  }
-
-  get lastUpdate(): number | null {
-    if (LOCAL_MONSTER_DATABASE && this.mid) {
-      const encodedMonsterInfo = LOCAL_MONSTER_DATABASE[this.mid];
-
-      if (encodedMonsterInfo) {
-        return encodedMonsterInfo[EncodedMonsterDatabase.EMonsterInfo.lastUpdate];
-      }
-    }
-
-    return null;
   }
 
   get isDead(): boolean {

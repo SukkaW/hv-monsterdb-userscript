@@ -1,3 +1,4 @@
+import { EncodedMonsterDatabase } from './monsterDataEncode';
 import { HVMonsterDatabase } from '../types';
 import { isIsekai } from '../util/common';
 import { getStoredValue, setStoredValue } from '../util/store';
@@ -5,8 +6,6 @@ import { IDBKV } from './idbkv';
 
 const DBNAME = 'hv-monster-database-script';
 
-/** Monster Name => Monster Id */
-export let LOCAL_MONSTER_DATABASE: HVMonsterDatabase.LocalDatabaseVersion2 = {};
 /** The position of monster info box */
 export let MONSTER_INFO_BOX_POSITION = { x: 10, y: 10 };
 
@@ -38,7 +37,53 @@ export class MONSTER_NAME_ID_MAP {
   static set(monsterName: string, monsterId: number): Promise<void> {
     return MONSTER_NAME_ID_MAP.store.set(monsterName, monsterId);
   }
+
+  static setMany(entries: [string, number][]): Promise<void> {
+    return MONSTER_NAME_ID_MAP.store.setMany(entries);
+  }
 }
+
+class LocalMonsterDatabase {
+  private cache: Map<number, EncodedMonsterDatabase.MonsterInfo> = new Map();
+  private store: IDBKV<HVMonsterDatabase.LocalDatabaseVersion2>;
+
+  constructor(storeName: string) {
+    this.store = new IDBKV<HVMonsterDatabase.LocalDatabaseVersion2>(DBNAME, storeName);
+  }
+
+  async has(monsterId: number): Promise<boolean> {
+    if (this.cache.has(monsterId)) return true;
+
+    const encodedMonsterInfo = await this.store.get(monsterId);
+    if (encodedMonsterInfo) {
+      this.cache.set(monsterId, encodedMonsterInfo);
+      return true;
+    }
+    return false;
+  }
+
+  async get(monsterId: number): Promise<EncodedMonsterDatabase.MonsterInfo | undefined> {
+    if (this.cache.has(monsterId)) return this.cache.get(monsterId);
+
+    const encodedMonsterInfo = await this.store.get(monsterId);
+    if (encodedMonsterInfo) {
+      this.cache.set(monsterId, encodedMonsterInfo);
+      return encodedMonsterInfo;
+    }
+  }
+
+  set(monsterId: number, monsterInfo: EncodedMonsterDatabase.MonsterInfo): Promise<void> {
+    return this.store.set(monsterId, monsterInfo);
+  }
+
+  setMany(entries: [number, EncodedMonsterDatabase.MonsterInfo][]): Promise<void> {
+    return this.store.setMany(entries);
+  }
+}
+
+export const LOCAL_MONSTER_DATABASE_PERSISTENT = new LocalMonsterDatabase('databaseV2');
+export const LOCAL_MONSTER_DATABASE_ISEKAI = new LocalMonsterDatabase('databaseIsekaiV2');
+export const LOCAL_MONSTER_DATABASE = isIsekai() ? LOCAL_MONSTER_DATABASE_ISEKAI : LOCAL_MONSTER_DATABASE_PERSISTENT;
 
 /**
  * According to MDN:
@@ -50,20 +95,12 @@ export class MONSTER_NAME_ID_MAP {
  * so it is required to convert Map to Object literal before storing, and convert it back after retrieving.
  */
 
-export async function storeTmpValue(): Promise<void> {
-  return isIsekai() ? setStoredValue('databaseIsekaiV2', LOCAL_MONSTER_DATABASE) : setStoredValue('databaseV2', LOCAL_MONSTER_DATABASE);
+export function storeTmpValue(): Promise<void> {
+  return setStoredValue('monsterInfoBoxPosition', MONSTER_INFO_BOX_POSITION);
 }
 
 export async function retrieveTmpValue(): Promise<void> {
+  await IDBKV.createObjectStore(DBNAME, ['MONSTER_NAME_ID_MAP', 'databaseV2', 'databaseIsekaiV2']);
+
   MONSTER_INFO_BOX_POSITION = await getStoredValue('monsterInfoBoxPosition') || { x: 10, y: 10 };
-
-  if (isIsekai()) {
-    LOCAL_MONSTER_DATABASE = await getStoredValue('databaseIsekaiV2') || {};
-  } else {
-    LOCAL_MONSTER_DATABASE = await getStoredValue('databaseV2') || {};
-  }
-}
-
-export function setLocalDatabaseTmpValue(db: HVMonsterDatabase.LocalDatabaseVersion2): void {
-  LOCAL_MONSTER_DATABASE = db;
 }

@@ -1,6 +1,6 @@
 import { MonsterStatus } from './monster';
 import { parseMonsterNameAndId, parseScanResult } from './parseLog';
-import { LOCAL_MONSTER_DATABASE, MONSTER_NAME_ID_MAP } from './store';
+import { MONSTER_NAME_ID_MAP, LOCAL_MONSTER_DATABASE } from './store';
 import { createMonsterInfoBox, monsterInfoVirtualNodeFactory } from './monsterInfoUI';
 import { convertMonsterInfoToEncodedMonsterInfo } from './monsterDataEncode';
 import { logger } from '../util/logger';
@@ -70,7 +70,9 @@ async function tasksRunAtStartOfPerRound(): Promise<void> {
     const name = el.getElementsByClassName('btm3')[0].textContent?.trim();
     if (mkey && name) {
       const mid = await MONSTER_NAME_ID_MAP.get(name);
-      return new MonsterStatus(name, mkey, mid ?? null);
+      const monster = new MonsterStatus(name, mkey, mid ?? null);
+      await monster.init();
+      return monster;
     }
   }))).forEach(monster => {
     if (monster?.name) {
@@ -112,7 +114,8 @@ async function tasksRunDuringTheBattle(): Promise<void> {
 
           // Update local database first, it will be used to update UI
           if (monsterStatus.mid) {
-            LOCAL_MONSTER_DATABASE[monsterStatus.mid] = convertMonsterInfoToEncodedMonsterInfo(scanResult);
+            LOCAL_MONSTER_DATABASE.set(monsterStatus.mid, convertMonsterInfoToEncodedMonsterInfo(scanResult));
+            monsterStatus.updateInfoFromScan(scanResult);
           }
         } else {
           logger.warn(`${monsterName} is not legible for scan, ignoring the scan result!`);
