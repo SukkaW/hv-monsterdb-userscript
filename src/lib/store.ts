@@ -2,7 +2,7 @@ import { EncodedMonsterDatabase } from './monsterDataEncode';
 import { HVMonsterDatabase } from '../types';
 import { isIsekai } from '../util/common';
 import { getStoredValue, setStoredValue } from '../util/store';
-import { IDBKV } from './idbkv';
+import { IDBKV } from '../util/idbkv';
 
 const DBNAME = 'hv-monster-database-script';
 
@@ -32,6 +32,10 @@ export class MONSTER_NAME_ID_MAP {
       MONSTER_NAME_ID_MAP.cache.set(monsterName, monsterId);
     }
     return monsterId;
+  }
+
+  static getMany(monsterNames: string[]): Promise<(number | undefined)[]> {
+    return MONSTER_NAME_ID_MAP.store.getMany(monsterNames);
   }
 
   static set(monsterName: string, monsterId: number): Promise<void> {

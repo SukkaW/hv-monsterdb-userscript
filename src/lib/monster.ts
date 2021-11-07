@@ -2,7 +2,7 @@ import { HVMonsterDatabase } from '../types';
 import { isIsekai } from '../util/common';
 import { getHowManyDaysSinceLastIsekaiReset } from './isekaiReset';
 import { convertEncodedMonsterInfoToMonsterInfo, EncodedMonsterDatabase } from './monsterDataEncode';
-import { LOCAL_MONSTER_DATABASE } from './store';
+import { LOCAL_MONSTER_DATABASE, MONSTER_NAME_ID_MAP } from './store';
 
 const EFFECTS_AFFECTING_SCAN_REAULT = ['nbardead.png', 'imperil.png', 'firedot.png', 'coldslow.png', 'coldslow.png', 'windmiss.png', 'holybreach.png', 'darknerf.png'];
 
@@ -38,6 +38,9 @@ export class MonsterStatus {
   }
 
   async init(): Promise<void> {
+    if (!this.mid) {
+      this.mid = await MONSTER_NAME_ID_MAP.get(this.name);
+    }
     if (this.mid) {
       const encodedMonsterInfo = await LOCAL_MONSTER_DATABASE.get(this.mid);
       if (encodedMonsterInfo) {

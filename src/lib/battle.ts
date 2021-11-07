@@ -65,18 +65,20 @@ async function tasksRunAtStartOfPerRound(): Promise<void> {
   // is consistent with actually in #battle_right. It is unstable
   // and unreliable method. So I will manually get monster info
   // directly from DOM.
-  (await Promise.all([...document.getElementsByClassName('btm1')].map(async el => {
-    const mkey = el.getAttribute('id');
-    const name = el.getElementsByClassName('btm3')[0].textContent?.trim();
-    if (mkey && name) {
-      const mid = await MONSTER_NAME_ID_MAP.get(name);
-      const monster = new MonsterStatus(name, mkey, mid ?? null);
-      await monster.init();
-      return monster;
-    }
-  }))).forEach(monster => {
+  (await Promise.all(
+    [...document.getElementsByClassName('btm1')].map(async el => {
+      const mkey = el.getAttribute('id');
+      const name = el.getElementsByClassName('btm3')[0].textContent?.trim();
+
+      if (mkey && name) {
+        const monster = new MonsterStatus(name, mkey, null);
+        await monster.init();
+        return monster;
+      }
+    })
+  )).forEach(monster => {
     if (monster?.name) {
-      MONSTERS.set(monster?.name, monster);
+      MONSTERS.set(monster.name, monster);
     }
   });
 
