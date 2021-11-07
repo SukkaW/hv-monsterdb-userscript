@@ -2,7 +2,7 @@ import { inBattle } from './lib/battle';
 import { isIsekaiHaveBeenResetSinceLastVisit, readHowManyDaysSinceLastIsekaiReset } from './lib/isekaiReset';
 import { updateLocalDatabase } from './lib/localDataBase';
 import { retrieveTmpValue, storeTmpValue } from './lib/store';
-import { isFightingInBattle } from './util/common';
+import { isFightingInBattle, isIsekai } from './util/common';
 import { logger } from './util/logger';
 import { polyfill } from './util/polyfill';
 
@@ -40,7 +40,9 @@ polyfill();
     // Out of Battle
 
     // Just check if Isekai has been reset
-    await isIsekaiHaveBeenResetSinceLastVisit();
+    if (isIsekai()) {
+      await isIsekaiHaveBeenResetSinceLastVisit();
+    }
 
     // Trigger database update when out of battle.
     // "updateLocalDatabase" method will only update local database once a day.
