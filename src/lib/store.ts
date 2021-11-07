@@ -2,7 +2,7 @@ import { EncodedMonsterDatabase } from './monsterDataEncode';
 import { HVMonsterDatabase } from '../types';
 import { isIsekai } from '../util/common';
 import { getStoredValue, setStoredValue } from '../util/store';
-import { IDBKV } from '../util/idbkv';
+import { IDBKV, promisifyRequest } from '../util/idbkv';
 
 const DBNAME = 'hv-monster-database-script';
 
@@ -39,11 +39,45 @@ export class MONSTER_NAME_ID_MAP {
   }
 
   static set(monsterName: string, monsterId: number): Promise<void> {
+    this.cache.set(monsterName, monsterId);
     return MONSTER_NAME_ID_MAP.store.set(monsterName, monsterId);
   }
 
   static setMany(entries: [string, number][]): Promise<void> {
+    this.cache.clear();
     return MONSTER_NAME_ID_MAP.store.setMany(entries);
+  }
+
+  static async update(monsterName: string, newMonsterId: number): Promise<void> {
+    this.cache.delete(monsterName);
+    return MONSTER_NAME_ID_MAP.store.performDatabaseOperation(
+      'readwrite',
+      (store) => new Promise((resolve, reject) => {
+        store.get(monsterName).onsuccess = function () {
+          try {
+            const oldMonsterId = this.result;
+            if (oldMonsterId !== newMonsterId) store.put(newMonsterId, monsterName);
+            resolve(promisifyRequest(store.transaction));
+          } catch (err) {
+            reject(err);
+          }
+        };
+      })
+    );
+  }
+
+  static async updateMany(entries: [string, number][]): Promise<void> {
+    this.cache.clear();
+    return MONSTER_NAME_ID_MAP.store.performDatabaseOperation('readwrite', (store) => {
+      entries.forEach(([monsterName, monsterId]) => {
+        store.get(monsterName).onsuccess = function () {
+          if (this.result !== monsterId) {
+            store.put(monsterId, monsterName);
+          }
+        };
+      });
+      return promisifyRequest(store.transaction);
+    });
   }
 }
 
@@ -77,11 +111,27 @@ class LocalMonsterDatabase {
   }
 
   set(monsterId: number, monsterInfo: EncodedMonsterDatabase.MonsterInfo): Promise<void> {
+    this.cache.set(monsterId, monsterInfo);
     return this.store.set(monsterId, monsterInfo);
   }
 
   setMany(entries: [number, EncodedMonsterDatabase.MonsterInfo][]): Promise<void> {
+    this.cache.clear();
     return this.store.setMany(entries);
+  }
+
+  updateMany(entries: [number, EncodedMonsterDatabase.MonsterInfo][]): Promise<void> {
+    this.cache.clear();
+    return this.store.performDatabaseOperation('readwrite', (store) => {
+      entries.forEach(([monsterId, monsterInfo]) => {
+        store.get(monsterId).onsuccess = function () {
+          if ((this.result as EncodedMonsterDatabase.MonsterInfo)?.[EncodedMonsterDatabase.EMonsterInfo.lastUpdate] !== monsterInfo[EncodedMonsterDatabase.EMonsterInfo.lastUpdate]) {
+            store.put(monsterInfo, monsterId);
+          }
+        };
+      });
+      return promisifyRequest(store.transaction);
+    });
   }
 }
 

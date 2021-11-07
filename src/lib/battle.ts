@@ -55,7 +55,7 @@ async function tasksRunAtStartOfPerRound(): Promise<void> {
       const monsterNameAndId = parseMonsterNameAndId(logHtml);
       if (monsterNameAndId) {
         logger.debug('Monster Name & ID', monsterNameAndId.monsterId, monsterNameAndId.monsterName);
-        return MONSTER_NAME_ID_MAP.set(monsterNameAndId.monsterName, monsterNameAndId.monsterId);
+        return MONSTER_NAME_ID_MAP.update(monsterNameAndId.monsterName, monsterNameAndId.monsterId);
       }
     }
   }));

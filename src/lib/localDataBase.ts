@@ -46,10 +46,9 @@ export async function updateLocalDatabase(force = false): Promise<void> {
       // Use window.requestIdleCallback again since conevrt database is a CPU intensive task.
       window.requestIdleCallback(async () => {
         logger.info('Processing Monster Database...');
+        MONSTER_NAME_ID_MAP.updateMany(data.monsters.map(monster => [monster.monsterName, monster.monsterId]));
 
         const db = data.monsters.map(monster => {
-          MONSTER_NAME_ID_MAP.set(monster.monsterName, monster.monsterId);
-
           const EncodedMonsterInfo = convertMonsterInfoToEncodedMonsterInfo(monster);
           return [monster.monsterId, EncodedMonsterInfo] as [number, EncodedMonsterDatabase.MonsterInfo];
         });
@@ -57,10 +56,10 @@ export async function updateLocalDatabase(force = false): Promise<void> {
         logger.info(`${data.monsters.length} monsters' information processed.`);
 
         if (isIsekai()) {
-          LOCAL_MONSTER_DATABASE_ISEKAI.setMany(db);
+          LOCAL_MONSTER_DATABASE_ISEKAI.updateMany(db);
           await setStoredValue('lastUpdateIsekaiV2', getUTCDate());
         } else {
-          LOCAL_MONSTER_DATABASE_PERSISTENT.setMany(db);
+          LOCAL_MONSTER_DATABASE_PERSISTENT.updateMany(db);
           await setStoredValue('lastUpdateV2', getUTCDate());
         }
       }, { timeout: 10000 });
@@ -82,15 +81,15 @@ async function databaseMigration() {
   const [monsterIdMap, databaseV2, databaseIsekaiV2] = await Promise.all([getStoredValue('monsterIdMap'), getStoredValue('databaseV2'), getStoredValue('databaseIsekaiV2')]);
   if (monsterIdMap) {
     logger.debug('Migrating old monsterIdMap to IndexedDB');
-    await MONSTER_NAME_ID_MAP.setMany(Object.entries(monsterIdMap));
+    await MONSTER_NAME_ID_MAP.updateMany(Object.entries(monsterIdMap));
   }
   if (databaseV2) {
     logger.debug('Migrating old databaseV2 to IndexedDB');
-    await LOCAL_MONSTER_DATABASE_PERSISTENT.setMany(Object.entries(databaseV2).map(([k, v]) => [Number(k), v]));
+    await LOCAL_MONSTER_DATABASE_PERSISTENT.updateMany(Object.entries(databaseV2).map(([k, v]) => [Number(k), v]));
   }
   if (databaseIsekaiV2) {
     logger.debug('Migrating old databaseIsekaiV2 to IndexedDB');
-    await LOCAL_MONSTER_DATABASE_ISEKAI.setMany(Object.entries(databaseIsekaiV2).map(([k, v]) => [Number(k), v]));
+    await LOCAL_MONSTER_DATABASE_ISEKAI.updateMany(Object.entries(databaseIsekaiV2).map(([k, v]) => [Number(k), v]));
   }
 
   return Promise.all([

@@ -33,7 +33,10 @@ const fuckThisShitfari14IndexedDBStupidBug = () => {
 };
 
 export class IDBKV<T> {
-  private store: UseStore;
+  dbName: string;
+  storeName: string;
+  dbVersion?: number;
+  private databasePromise: Promise<IDBDatabase> | null = null;
 
   static createObjectStore(dbName: string, storeNames: string[], dbVersion?: number): Promise<IDBDatabase> {
     return fuckThisShitfari14IndexedDBStupidBug().then(() => {
@@ -43,45 +46,40 @@ export class IDBKV<T> {
     });
   }
 
-  static createStore(dbName: string, storeName: string, dbVersion?: number): UseStore {
-    return (txMode, callback) => fuckThisShitfari14IndexedDBStupidBug().then(() => {
-      const request = indexedDB.open(dbName, dbVersion);
-      request.onupgradeneeded = () => request.result.createObjectStore(storeName);
-      return promisifyRequest(request);
-    }).then((db) => {
-      return callback(db.transaction(storeName, txMode).objectStore(storeName));
-    });
-  }
-
   constructor(dbName: string, storeName: string, dbVersion?: number) {
-    this.store = IDBKV.createStore(dbName, storeName, dbVersion);
+    this.dbName = dbName;
+    this.storeName = storeName;
+    this.dbVersion = dbVersion;
+    this.initializeOpenDatabasePromise();
   }
 
   get<K extends IDBValidKey & keyof T>(key: K): Promise<T[K] | undefined> {
-    return this.store('readonly', (store) => promisifyRequest(store.get(key)));
+    return this.performDatabaseOperation('readonly', (store) => {
+      return promisifyRequest(store.get(key));
+    });
   }
 
   set<K extends IDBValidKey & keyof T>(key: K, value: T[K]): Promise<void> {
-    return this.store('readwrite', (store) => {
+    return this.performDatabaseOperation('readwrite', (store) => {
       store.put(value, key);
       return promisifyRequest(store.transaction);
     });
   }
 
   setMany<K extends IDBValidKey & keyof T>(entries: [K, T[K]][]): Promise<void> {
-    return this.store('readwrite', (store) => {
+    return this.performDatabaseOperation('readwrite', (store) => {
       entries.forEach((entry) => store.put(entry[1], entry[0]));
       return promisifyRequest(store.transaction);
     });
   }
 
   getMany<K extends IDBValidKey & keyof T>(keys: K[]): Promise<T[K][]> {
-    return this.store('readonly', (store) => Promise.all(keys.map((key) => promisifyRequest(store.get(key)))));
+    return this.performDatabaseOperation('readonly', (store) => Promise.all(keys.map((key) => promisifyRequest(store.get(key)))));
   }
 
   /** Update a value. This lets you see the old value and update it as an atomic operation. */
   update<K extends IDBValidKey & keyof T, V extends T[K]>(key: K, updater: (oldValue?: V) => V): Promise<void> {
-    return this.store(
+    return this.performDatabaseOperation(
       'readwrite',
       // Need to create the promise manually.
       // If I try to chain promises, the transaction closes in browsers
@@ -100,21 +98,21 @@ export class IDBKV<T> {
   }
 
   del<K extends IDBValidKey & keyof T>(key: K): Promise<void> {
-    return this.store('readwrite', (store) => {
+    return this.performDatabaseOperation('readwrite', (store) => {
       store.delete(key);
       return promisifyRequest(store.transaction);
     });
   }
 
   delMany<K extends IDBValidKey & keyof T>(keys: K[]): Promise<void> {
-    return this.store('readwrite', (store) => {
+    return this.performDatabaseOperation('readwrite', (store) => {
       keys.forEach((key: IDBValidKey) => store.delete(key));
       return promisifyRequest(store.transaction);
     });
   }
 
-  clear(): Promise<void> {
-    return this.store('readwrite', (store) => {
+  async clear(): Promise<void> {
+    return this.performDatabaseOperation('readwrite', (store) => {
       store.clear();
       return promisifyRequest(store.transaction);
     });
@@ -122,37 +120,63 @@ export class IDBKV<T> {
 
   keys<K extends IDBValidKey & keyof T>(): Promise<K[]> {
     const items: K[] = [];
-    return eachCursor(this.store, (cursor) => items.push(cursor.key as K)).then(() => items);
+    return this.eachCursor((cursor) => items.push(cursor.key as K)).then(() => items);
   }
 
   values<K extends IDBValidKey & keyof T>(): Promise<T[K][]> {
     const items: T[K][] = [];
-    return eachCursor(this.store, (cursor) => items.push(cursor.value)).then(() => items);
+    return this.eachCursor((cursor) => items.push(cursor.value)).then(() => items);
   }
 
   entries<K extends IDBValidKey & keyof T>(): Promise<[K, T[K]][]> {
     const items: [K, T[K]][] = [];
-    return eachCursor(this.store, (cursor) => items.push([cursor.key as K, cursor.value])).then(() => items);
+    return this.eachCursor((cursor) => items.push([cursor.key as K, cursor.value])).then(() => items);
+  }
+
+  private initializeOpenDatabasePromise() {
+    if (this.databasePromise === null) {
+      this.databasePromise = new Promise<IDBDatabase>((resolve, reject) => {
+        const request = self.indexedDB.open(this.dbName, this.dbVersion);
+        request.onsuccess = () => {
+          const database = request.result;
+
+          database.onclose = () => { this.databasePromise = null; };
+          database.onversionchange = () => {
+            database.close();
+            this.databasePromise = null;
+          };
+          resolve(database);
+        };
+        request.onerror = () => reject(request.error);
+        request.onupgradeneeded = () => {
+          try { request.result.createObjectStore(this.storeName); } catch (e) { reject(e); }
+        };
+      });
+    }
+  }
+
+  async performDatabaseOperation<T>(txMode: IDBTransactionMode, callback: (store: IDBObjectStore) => T | PromiseLike<T>): Promise<T> {
+    if (!this.databasePromise) {
+      this.initializeOpenDatabasePromise();
+    }
+    const db = await this.databasePromise;
+    const store = db!.transaction(this.storeName, txMode).objectStore(this.storeName);
+    return callback(store);
+  }
+
+  private eachCursor(callback: (cursor: IDBCursorWithValue) => void): Promise<void> {
+    return this.performDatabaseOperation('readonly', (store) => {
+      store.openCursor().onsuccess = function () {
+        if (!this.result) return;
+        callback(this.result);
+        this.result.continue();
+      };
+      return promisifyRequest(store.transaction);
+    });
   }
 }
 
-function eachCursor(
-  customStore: UseStore,
-  callback: (cursor: IDBCursorWithValue) => void
-): Promise<void> {
-  return customStore('readonly', (store) => {
-    // This would be store.getAllKeys(), but it isn't supported by Edge or Safari.
-    // And openKeyCursor isn't supported by Safari.
-    store.openCursor().onsuccess = function () {
-      if (!this.result) return;
-      callback(this.result);
-      this.result.continue();
-    };
-    return promisifyRequest(store.transaction);
-  });
-}
-
-function promisifyRequest<T = undefined>(
+export function promisifyRequest<T = undefined>(
   request: IDBRequest<T> | IDBTransaction
 ): Promise<T> {
   return new Promise<T>((resolve, reject) => {
