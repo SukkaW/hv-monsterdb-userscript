@@ -17,7 +17,7 @@ export function getHowManyDaysSinceLastIsekaiReset(): number | null {
 export async function isIsekaiHaveBeenResetSinceLastVisit(): Promise<boolean> {
   const storedLevel = await getStoredValue('isekaiLevel');
   const currentLevel = Number(document.getElementById('level_readout')?.textContent?.match(/Lv.(\d+)/)?.[1]);
-  if (currentLevel) {
+  if (currentLevel !== storedLevel) {
     await setStoredValue('isekaiLevel', currentLevel);
 
     if (storedLevel && currentLevel < storedLevel) {
