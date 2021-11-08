@@ -5,20 +5,18 @@ import { MONSTER_NAME_ID_MAP } from './store';
 const rMatchMonsterId = /MID=(\d+) \((.+)\)/;
 const rMatchScan = /Scanning (.+?)\.\.\..+?Monster Class.+>([A-Z][a-z]+)(?:, Power Level (\d+)<|<).+?Monster Trainer:<\/strong><\/td><td>([^<>]*)<.+?<\/strong><\/td><td>([A-Za-z]+)<.+?Fire:.+?>([+-])(\d+)%<.+?Cold:.+?>([+-])(\d+)%<.+?Elec:.+?>([+-])(\d+)%<.+?Wind:.+?>([+-])(\d+)%<.+?Holy:.+?>([+-])(\d+)%<.+?Dark:.+?>([+-])(\d+)%<.+?Crushing:.+?>([+-])(\d+)%<.+?Slashing:.+?>([+-])(\d+)%<.+?Piercing:.+?>([+-])(\d+)%/;
 
-export function parseMonsterNameAndId(singleLogHtml: string): {
+export function parseMonsterNameAndId(singleLogText: string): {
   monsterId: number,
   monsterName: string
 } | void {
-  if (singleLogHtml.includes('Spawned')) {
-    const matches = singleLogHtml.match(rMatchMonsterId);
+  const matches = singleLogText.match(rMatchMonsterId);
 
-    if (matches) {
-      const monsterId = Number(matches[1]);
-      const monsterName = matches[2];
+  if (matches) {
+    const monsterId = Number(matches[1]);
+    const monsterName = matches[2];
 
-      if (!Number.isNaN(monsterId)) {
-        return { monsterId, monsterName };
-      }
+    if (!Number.isNaN(monsterId)) {
+      return { monsterId, monsterName };
     }
   }
 }

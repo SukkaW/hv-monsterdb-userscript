@@ -3,6 +3,7 @@ import { HVMonsterDatabase } from '../types';
 import { isIsekai } from '../util/common';
 import { getStoredValue, setStoredValue } from '../util/store';
 import { IDBKV, promisifyRequest } from '../util/idbkv';
+import { logger } from '../util/logger';
 
 const DBNAME = 'hv-monster-database-script';
 
@@ -27,6 +28,7 @@ export class MONSTER_NAME_ID_MAP {
 
   static async get(monsterName: string): Promise<number | undefined> {
     if (MONSTER_NAME_ID_MAP.cache.has(monsterName)) return MONSTER_NAME_ID_MAP.cache.get(monsterName);
+
     const monsterId = await MONSTER_NAME_ID_MAP.store.get(monsterName);
     if (monsterId) {
       MONSTER_NAME_ID_MAP.cache.set(monsterName, monsterId);
@@ -49,7 +51,12 @@ export class MONSTER_NAME_ID_MAP {
   }
 
   static async update(monsterName: string, newMonsterId: number): Promise<void> {
+    // Cache match, resolve directly
+    if (this.cache.get(monsterName) === newMonsterId) return;
+
+    // Cache not match, delete cache entry first
     this.cache.delete(monsterName);
+
     return MONSTER_NAME_ID_MAP.store.performDatabaseOperation(
       'readwrite',
       (store) => new Promise((resolve, reject) => {
@@ -68,6 +75,7 @@ export class MONSTER_NAME_ID_MAP {
 
   static async updateMany(entries: [string, number][]): Promise<void> {
     this.cache.clear();
+
     return MONSTER_NAME_ID_MAP.store.performDatabaseOperation('readwrite', (store) => {
       entries.forEach(([monsterName, monsterId]) => {
         store.get(monsterName).onsuccess = function () {
@@ -121,17 +129,49 @@ class LocalMonsterDatabase {
   }
 
   updateMany(entries: [number, EncodedMonsterDatabase.MonsterInfo][]): Promise<void> {
+    let updatedMonsterCount = 0;
+
     this.cache.clear();
+
     return this.store.performDatabaseOperation('readwrite', (store) => {
       entries.forEach(([monsterId, monsterInfo]) => {
         store.get(monsterId).onsuccess = function () {
-          if ((this.result as EncodedMonsterDatabase.MonsterInfo)?.[EncodedMonsterDatabase.EMonsterInfo.lastUpdate] !== monsterInfo[EncodedMonsterDatabase.EMonsterInfo.lastUpdate]) {
+          if (!LocalMonsterDatabase.monsterInfoIsEquial(this.result as EncodedMonsterDatabase.MonsterInfo, monsterInfo)) {
+            updatedMonsterCount++;
             store.put(monsterInfo, monsterId);
           }
         };
       });
+
+      logger.debug('Updated (indexeddb) monsters count:', updatedMonsterCount);
       return promisifyRequest(store.transaction);
     });
+  }
+
+  static monsterInfoIsEquial(monster1: EncodedMonsterDatabase.MonsterInfo, monster2: EncodedMonsterDatabase.MonsterInfo): boolean {
+    if (
+      ([
+        EncodedMonsterDatabase.EMonsterInfo.monsterName,
+        EncodedMonsterDatabase.EMonsterInfo.monsterClass,
+        EncodedMonsterDatabase.EMonsterInfo.plvl,
+        EncodedMonsterDatabase.EMonsterInfo.attack,
+        EncodedMonsterDatabase.EMonsterInfo.trainer,
+        EncodedMonsterDatabase.EMonsterInfo.piercing,
+        EncodedMonsterDatabase.EMonsterInfo.crushing,
+        EncodedMonsterDatabase.EMonsterInfo.slashing,
+        EncodedMonsterDatabase.EMonsterInfo.cold,
+        EncodedMonsterDatabase.EMonsterInfo.wind,
+        EncodedMonsterDatabase.EMonsterInfo.elec,
+        EncodedMonsterDatabase.EMonsterInfo.fire,
+        EncodedMonsterDatabase.EMonsterInfo.dark,
+        EncodedMonsterDatabase.EMonsterInfo.holy,
+        EncodedMonsterDatabase.EMonsterInfo.lastUpdate
+      ] as const).every(k => monster1[k] === monster2[k])
+    ) {
+      return true;
+    }
+
+    return false;
   }
 }
 

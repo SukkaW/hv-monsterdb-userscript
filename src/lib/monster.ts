@@ -37,7 +37,7 @@ export class MonsterStatus {
     }
   }
 
-  async init(): Promise<void> {
+  async init(): Promise<this> {
     if (!this.mid) {
       this.mid = await MONSTER_NAME_ID_MAP.get(this.name);
     }
@@ -48,6 +48,8 @@ export class MonsterStatus {
         this.lastUpdate = encodedMonsterInfo[EncodedMonsterDatabase.EMonsterInfo.lastUpdate];
       }
     }
+
+    return this;
   }
 
   updateInfoFromScan(scanResult: HVMonsterDatabase.MonsterInfo): void {

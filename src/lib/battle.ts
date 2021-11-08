@@ -47,34 +47,39 @@ export async function inBattle(): Promise<void> {
 
 /** Tasks like "get monster id and monster name" only have to run at the start of per round */
 async function tasksRunAtStartOfPerRound(): Promise<void> {
-  await Promise.all([...document.querySelectorAll('#textlog > tbody > tr')].map(async logEl => {
-    const logHtml = logEl.innerHTML;
-
-    // Get Monster Name & ID
-    if (logHtml.includes('Spawned')) {
-      const monsterNameAndId = parseMonsterNameAndId(logHtml);
-      if (monsterNameAndId) {
-        logger.debug('Monster Name & ID', monsterNameAndId.monsterId, monsterNameAndId.monsterName);
-        return MONSTER_NAME_ID_MAP.update(monsterNameAndId.monsterName, monsterNameAndId.monsterId);
-      }
-    }
-  }));
+  const monsterInTheRoundNameIdMap: Map<string, number> = new Map();
 
   MONSTERS.clear();
+
+  if (document.getElementById('textlog')?.textContent?.includes('Spawned')) {
+    await Promise.all([...document.querySelectorAll('#textlog > tbody > tr')].reverse().map(async logEl => {
+      // Get Monster Name & ID
+      if (logEl.textContent?.trim().startsWith('Spawned')) {
+        const monsterNameAndId = parseMonsterNameAndId(logEl.textContent);
+        if (monsterNameAndId) {
+          logger.debug('Monster Name & ID', monsterNameAndId.monsterId, monsterNameAndId.monsterName);
+          monsterInTheRoundNameIdMap.set(monsterNameAndId.monsterName, monsterNameAndId.monsterId);
+          return MONSTER_NAME_ID_MAP.update(monsterNameAndId.monsterName, monsterNameAndId.monsterId);
+        }
+      }
+    }));
+  }
+
   // I am not sure the order that monster showed up in battle log
   // is consistent with actually in #battle_right. It is unstable
   // and unreliable method. So I will manually get monster info
   // directly from DOM.
   (await Promise.all(
-    [...document.getElementsByClassName('btm1')].map(async el => {
-      const mkey = el.getAttribute('id');
+    [...document.getElementsByClassName('btm1')].map(el => {
+      const mkey = el.id;
       const name = el.getElementsByClassName('btm3')[0].textContent?.trim();
 
       if (mkey && name) {
-        const monster = new MonsterStatus(name, mkey, null);
-        await monster.init();
-        return monster;
+        const monster = new MonsterStatus(name, mkey, monsterInTheRoundNameIdMap.get(name) ?? null);
+        return monster.init();
       }
+
+      return null;
     })
   )).forEach(monster => {
     if (monster?.name) {
