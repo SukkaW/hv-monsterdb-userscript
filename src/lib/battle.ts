@@ -161,13 +161,13 @@ function showMonsterInfoAndHighlightMonster(): void {
   MONSTERS_NEED_SCAN.clear();
 
   if (SETTINGS.showMonsterInfoBox) {
-    const monsterStatus = [...MONSTERS.values()];
+    const allMonsterStatus = [...MONSTERS.values()];
 
     if (!document.getElementById('monsterdb_info')) {
       requestAnimationFrameCallbackQueue.push(() => {
         createMonsterInfoBox();
         monsterInfoVElement = createElement(
-          monsterInfoVirtualNodeFactory(monsterStatus)
+          monsterInfoVirtualNodeFactory(allMonsterStatus)
         );
         document.getElementById('monsterdb_container')?.appendChild(monsterInfoVElement);
       });
@@ -175,7 +175,7 @@ function showMonsterInfoAndHighlightMonster(): void {
       requestAnimationFrameCallbackQueue.push(() => {
         const container = document.getElementById('monsterdb_container');
         if (container && monsterInfoVElement) {
-          patch(monsterInfoVElement, monsterInfoVirtualNodeFactory(monsterStatus));
+          patch(monsterInfoVElement, monsterInfoVirtualNodeFactory(allMonsterStatus));
         }
       });
     }
