@@ -11,7 +11,7 @@ interface FetchQueueItem {
   state: ItemState;
 }
 
-enum ItemState {
+const enum ItemState {
   Pending,
   Active,
   Succeeded,
