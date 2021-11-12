@@ -52,16 +52,15 @@ async function tasksRunAtStartOfPerRound(): Promise<void> {
   MONSTERS.clear();
 
   if (document.getElementById('textlog')?.textContent?.includes('Spawned')) {
-    await Promise.all([...document.querySelectorAll('#textlog > tbody > tr')].reverse().map(async logEl => {
+    await MONSTER_NAME_ID_MAP.updateMany([...document.querySelectorAll('#textlog > tbody > tr')].map(logEl => {
       // Get Monster Name & ID
       if (logEl.textContent?.trim().startsWith('Spawned')) {
         const monsterNameAndId = parseMonsterNameAndId(logEl.textContent);
         if (monsterNameAndId) {
-          logger.debug('Monster Name & ID', monsterNameAndId.monsterId, monsterNameAndId.monsterName);
-          monsterInTheRoundNameIdMap.set(monsterNameAndId.monsterName, monsterNameAndId.monsterId);
-          return MONSTER_NAME_ID_MAP.update(monsterNameAndId.monsterName, monsterNameAndId.monsterId);
+          return [monsterNameAndId.monsterName, monsterNameAndId.monsterId] as [string, number];
         }
       }
+      return null;
     }));
   }
 

@@ -50,39 +50,22 @@ export class MONSTER_NAME_ID_MAP {
     return MONSTER_NAME_ID_MAP.store.setMany(entries);
   }
 
-  static async update(monsterName: string, newMonsterId: number): Promise<void> {
-    // Cache match, resolve directly
-    if (this.cache.get(monsterName) === newMonsterId) return;
-
-    // Cache not match, delete cache entry first
-    this.cache.delete(monsterName);
-
-    return MONSTER_NAME_ID_MAP.store.performDatabaseOperation(
-      'readwrite',
-      (store) => new Promise((resolve, reject) => {
-        store.get(monsterName).onsuccess = function () {
-          try {
-            const oldMonsterId = this.result;
-            if (oldMonsterId !== newMonsterId) store.put(newMonsterId, monsterName);
-            resolve(promisifyRequest(store.transaction));
-          } catch (err) {
-            reject(err);
-          }
-        };
-      })
-    );
-  }
-
-  static async updateMany(entries: [string, number][]): Promise<void> {
-    this.cache.clear();
-
+  static async updateMany(entries: ([string, number] | null)[]): Promise<void> {
     return MONSTER_NAME_ID_MAP.store.performDatabaseOperation('readwrite', (store) => {
-      entries.forEach(([monsterName, monsterId]) => {
-        store.get(monsterName).onsuccess = function () {
-          if (this.result !== monsterId) {
-            store.put(monsterId, monsterName);
+      entries.forEach((entry) => {
+        if (entry) {
+          const [monsterName, newMonsterId] = entry;
+
+          if (this.cache.get(monsterName) !== newMonsterId) {
+            this.cache.set(monsterName, newMonsterId);
+
+            store.get(monsterName).onsuccess = function () {
+              if (this.result !== newMonsterId) {
+                store.put(newMonsterId, monsterName);
+              }
+            };
           }
-        };
+        }
       });
       return promisifyRequest(store.transaction);
     });
