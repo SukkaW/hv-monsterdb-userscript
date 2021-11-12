@@ -15,17 +15,6 @@ export class MONSTER_NAME_ID_MAP {
   private static cache: Map<string, number> = new Map();
   private static store = new IDBKV<{ [key: string]: number }>(DBNAME, 'MONSTER_NAME_ID_MAP');
 
-  static async has(monsterName: string): Promise<boolean> {
-    if (MONSTER_NAME_ID_MAP.cache.has(monsterName)) return true;
-
-    const monsterId = await MONSTER_NAME_ID_MAP.store.get(monsterName);
-    if (monsterId) {
-      MONSTER_NAME_ID_MAP.cache.set(monsterName, monsterId);
-      return true;
-    }
-    return false;
-  }
-
   static async get(monsterName: string): Promise<number | undefined> {
     if (MONSTER_NAME_ID_MAP.cache.has(monsterName)) return MONSTER_NAME_ID_MAP.cache.get(monsterName);
 
@@ -34,20 +23,6 @@ export class MONSTER_NAME_ID_MAP {
       MONSTER_NAME_ID_MAP.cache.set(monsterName, monsterId);
     }
     return monsterId;
-  }
-
-  static getMany(monsterNames: string[]): Promise<(number | undefined)[]> {
-    return MONSTER_NAME_ID_MAP.store.getMany(monsterNames);
-  }
-
-  static set(monsterName: string, monsterId: number): Promise<void> {
-    this.cache.set(monsterName, monsterId);
-    return MONSTER_NAME_ID_MAP.store.set(monsterName, monsterId);
-  }
-
-  static setMany(entries: [string, number][]): Promise<void> {
-    this.cache.clear();
-    return MONSTER_NAME_ID_MAP.store.setMany(entries);
   }
 
   static async updateMany(entries: ([string, number] | null)[]): Promise<void> {
@@ -80,17 +55,6 @@ class LocalMonsterDatabase {
     this.store = new IDBKV<HVMonsterDatabase.LocalDatabaseVersion2>(DBNAME, storeName);
   }
 
-  async has(monsterId: number): Promise<boolean> {
-    if (this.cache.has(monsterId)) return true;
-
-    const encodedMonsterInfo = await this.store.get(monsterId);
-    if (encodedMonsterInfo) {
-      this.cache.set(monsterId, encodedMonsterInfo);
-      return true;
-    }
-    return false;
-  }
-
   async get(monsterId: number): Promise<EncodedMonsterDatabase.MonsterInfo | undefined> {
     if (this.cache.has(monsterId)) return this.cache.get(monsterId);
 
@@ -104,11 +68,6 @@ class LocalMonsterDatabase {
   set(monsterId: number, monsterInfo: EncodedMonsterDatabase.MonsterInfo): Promise<void> {
     this.cache.set(monsterId, monsterInfo);
     return this.store.set(monsterId, monsterInfo);
-  }
-
-  setMany(entries: [number, EncodedMonsterDatabase.MonsterInfo][]): Promise<void> {
-    this.cache.clear();
-    return this.store.setMany(entries);
   }
 
   updateMany(entries: [number, EncodedMonsterDatabase.MonsterInfo][]): Promise<void> {
