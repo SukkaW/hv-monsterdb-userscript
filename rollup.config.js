@@ -37,16 +37,11 @@ const babelConfig = {
       corejs: {
         version: '3.10'
       },
-      shippedProposals: true,
+      shippedProposals: false,
       loose: true
     }]
   ],
-  targets: {
-    chrome: 50,
-    firefox: 52,
-    edge: 14,
-    safari: 10
-  },
+  targets: 'chrome >= 79, firefox >= 60, edge >= 79, safari >= 11, not ie 11',
   comments: false
 };
 
@@ -97,7 +92,7 @@ export default [{
   plugins: [
     nodeResolve(),
     typescript({
-      target: 'ES5',
+      target: 'ES2016',
       downlevelIteration: true,
       tsconfig: './tsconfig.json'
     }),
