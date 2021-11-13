@@ -1,50 +1,15 @@
+import { OBJECT_STORES } from '../lib/store';
+
 export type UseStore = <T>(
   txMode: IDBTransactionMode,
   callback: (store: IDBObjectStore) => T | PromiseLike<T>,
 ) => Promise<T>;
-
-const isSafashit// @ts-expect-error Only chormium based browser has navigator.userAgentData
-  = !navigator.userAgentData
-  && navigator.userAgent.includes('Safari')
-  && (
-    // @ts-expect-error Only chormium based browser has window.chrome
-    !(typeof window.chrome !== 'undefined')
-    || !/Chrom(e|ium)\//.test(navigator.userAgent)
-  );
-// https://bugs.webkit.org/show_bug.cgi?id=226547
-const fuckThisShitfari14IndexedDBStupidBug = () => {
-  if (
-    !isSafashit
-    // @ts-expect-error IDBFactory.databases is only supported since Chrome 71+, Firefox 79+ & Safashit 14+
-    || !indexedDB.databases
-  ) {
-    return Promise.resolve();
-  }
-
-  let intervalId: ReturnType<typeof setInterval>;
-
-  return new Promise((resolve) => {
-    // @ts-expect-error IDBFactory.databases is only supported since Chrome 71+, Firefox 79+ & Safashit 14+
-    const tryIdb = () => indexedDB.databases().finally(resolve);
-    // Constantly fucking safarshit until this pile of horsesh*t finally wakes up
-    intervalId = setInterval(tryIdb, 100);
-    tryIdb();
-  }).finally(() => clearInterval(intervalId));
-};
 
 export class IDBKV<T> {
   dbName: string;
   storeName: string;
   dbVersion?: number;
   private databasePromise: Promise<IDBDatabase> | null = null;
-
-  static createObjectStore(dbName: string, storeNames: string[], dbVersion?: number): Promise<IDBDatabase> {
-    return fuckThisShitfari14IndexedDBStupidBug().then(() => {
-      const request = indexedDB.open(dbName, dbVersion);
-      request.onupgradeneeded = () => storeNames.forEach(storeName => request.result.createObjectStore(storeName));
-      return promisifyRequest(request);
-    });
-  }
 
   constructor(dbName: string, storeName: string, dbVersion?: number) {
     this.dbName = dbName;
@@ -149,7 +114,12 @@ export class IDBKV<T> {
         };
         request.onerror = () => reject(request.error);
         request.onupgradeneeded = () => {
-          try { request.result.createObjectStore(this.storeName); } catch (e) { reject(e); }
+          try {
+            // Whatever the KV instance is opened, always create all objectStore we needed
+            OBJECT_STORES.forEach(storeName => request.result.createObjectStore(storeName));
+          } catch (e) {
+            reject(e);
+          }
         };
       });
     }

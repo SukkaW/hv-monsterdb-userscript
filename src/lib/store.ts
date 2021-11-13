@@ -6,6 +6,7 @@ import { IDBKV, promisifyRequest } from '../util/idbkv';
 import { logger } from '../util/logger';
 
 const DBNAME = 'hv-monster-database-script';
+export const OBJECT_STORES = ['MONSTER_NAME_ID_MAP', 'databaseV2', 'databaseIsekaiV2'];
 
 /** The position of monster info box */
 export let MONSTER_INFO_BOX_POSITION = { x: 10, y: 10 };
@@ -78,7 +79,7 @@ class LocalMonsterDatabase {
     return this.store.performDatabaseOperation('readwrite', (store) => {
       entries.forEach(([monsterId, monsterInfo]) => {
         store.get(monsterId).onsuccess = function () {
-          if (!LocalMonsterDatabase.monsterInfoIsEquial(this.result as EncodedMonsterDatabase.MonsterInfo, monsterInfo)) {
+          if (!LocalMonsterDatabase.monsterInfoIsEquial(this.result as EncodedMonsterDatabase.MonsterInfo | undefined, monsterInfo)) {
             updatedMonsterCount++;
             store.put(monsterInfo, monsterId);
           }
@@ -90,7 +91,8 @@ class LocalMonsterDatabase {
     });
   }
 
-  static monsterInfoIsEquial(monster1: EncodedMonsterDatabase.MonsterInfo, monster2: EncodedMonsterDatabase.MonsterInfo): boolean {
+  static monsterInfoIsEquial(monster1: EncodedMonsterDatabase.MonsterInfo | undefined, monster2: EncodedMonsterDatabase.MonsterInfo): boolean {
+    if (!monster1) return false;
     if (
       ([
         EncodedMonsterDatabase.EMonsterInfo.monsterName,
@@ -136,7 +138,5 @@ export function storeTmpValue(): Promise<void> {
 }
 
 export async function retrieveTmpValue(): Promise<void> {
-  await IDBKV.createObjectStore(DBNAME, ['MONSTER_NAME_ID_MAP', 'databaseV2', 'databaseIsekaiV2']);
-
   MONSTER_INFO_BOX_POSITION = await getStoredValue('monsterInfoBoxPosition') || { x: 10, y: 10 };
 }
