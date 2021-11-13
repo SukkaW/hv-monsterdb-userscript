@@ -92,44 +92,48 @@ export function polyfill(): void {
       log: console.log.bind(console), // For Pale Moon compatibility
       info: {
         script: {
-          ...GM_info.script,
-          resources: GM_info.script.resources as Record<string, { name: string, url: string, mimetype: string }>,
+          ...globalThis.GM_info.script,
+          resources: globalThis.GM_info.script.resources as Record<string, { name: string, url: string, mimetype: string }>,
           // @ts-expect-error ViolentMonkey uses runAt while TamperMonkey uses "run-at"
-          runAt: (GM_info.script.runAt ?? GM_info.script['run-at']).replace('document-', '') as 'end' | 'start' | 'idle',
+          runAt: (globalThis.GM_info.script.runAt ?? globalThis.GM_info.script['run-at']).replace('document-', '') as 'end' | 'start' | 'idle',
           // In case some userscript really need it. Always return a random uuid
           uuid: createUuid(),
-          version: GM_info.script.version
+          version: globalThis.GM_info.script.version
         },
-        scriptMetaStr: GM_info.scriptMetaStr,
+        scriptMetaStr: globalThis.GM_info.scriptMetaStr,
         scriptHandler: 'GreaseMonkey V4 Standard API Polyfill',
-        version: GM_info.version
+        version: globalThis.GM_info.version
       },
-      setValue: promisify(GM_setValue),
+      setValue: promisify(globalThis.GM_setValue),
       // @ts-expect-error @types/greasemonkey@3 is completely bullshit
-      getValue: promisify(GM_getValue),
-      deleteValue: promisify(GM_deleteValue),
-      listValues: promisify(GM_listValues),
-      getResourceUrl: promisify(GM_getResourceURL),
-      notification: GM_notification ?? createNotification,
-      openInTab: GM_openInTab,
-      registerMenuCommand: GM_registerMenuCommand,
-      setClipboard: GM_setClipboard,
+      getValue: promisify(globalThis.GM_getValue),
+      deleteValue: promisify(globalThis.GM_deleteValue),
+      listValues: promisify(globalThis.GM_listValues),
+      getResourceUrl: promisify(globalThis.GM_getResourceURL),
+      notification: globalThis.GM_notification ?? createNotification,
+      openInTab: globalThis.GM_openInTab,
+      registerMenuCommand: globalThis.GM_registerMenuCommand,
+      setClipboard: globalThis.GM_setClipboard,
       // @ts-expect-error @types/greasemonkey@3 is completely bullshit
-      xmlHttpRequest: GM_xmlhttpRequest
+      xmlHttpRequest: globalThis.GM_xmlhttpRequest
     };
   }
 }
 
-function promisify<TArgs extends any[], TResult>(fn: (...args: TArgs) => TResult): (...args: TArgs) => Promise<TResult> {
-  return function (...args: TArgs) {
-    return new Promise((resolve, reject) => {
-      try {
-        resolve(Reflect.apply(fn, globalThis, args));
-      } catch (e) {
-        reject(e);
-      }
-    });
-  };
+function promisify<TArgs extends any[], TResult>(fn: (...args: TArgs) => TResult): (...args: TArgs) => Promise<TResult>;
+function promisify(fn: undefined): undefined;
+function promisify<TArgs extends any[], TResult>(fn?: (...args: TArgs) => TResult): ((...args: TArgs) => Promise<TResult>) | undefined {
+  if (fn) {
+    return function (...args: TArgs) {
+      return new Promise((resolve, reject) => {
+        try {
+          resolve(Reflect.apply(fn, globalThis, args));
+        } catch (e) {
+          reject(e);
+        }
+      });
+    };
+  }
 }
 
 function createNotification(options: {

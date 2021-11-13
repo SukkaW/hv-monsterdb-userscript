@@ -28,23 +28,6 @@ const userScriptMetaBlockConfig = {
   }
 };
 
-const babelConfig = {
-  presets: [
-    ['@babel/preset-env', {
-      bugfixes: true,
-      spec: false,
-      useBuiltIns: 'usage',
-      corejs: {
-        version: '3.10'
-      },
-      shippedProposals: false,
-      loose: true
-    }]
-  ],
-  targets: 'chrome >= 79, firefox >= 60, edge >= 79, safari >= 11, not ie 11',
-  comments: false
-};
-
 function rollupPluginSettingLiteral() {
   const settingsLiteral = readFileSync('src/settings.js', 'utf-8');
   return {
@@ -91,6 +74,7 @@ export default [{
   },
   plugins: [
     nodeResolve(),
+    commonjs(),
     typescript({
       target: 'ES2016',
       downlevelIteration: true,
@@ -101,12 +85,28 @@ export default [{
         cssnano()
       ]
     }),
-    commonjs(),
+    rollupPluginSettingLiteral(),
     babel({
       babelHelpers: 'bundled',
-      ...babelConfig
+      exclude: 'node_modules/core-js/**',
+      extensions: ['.ts', '.js'],
+      presets: [
+        [
+          '@babel/preset-env',
+          {
+            bugfixes: true,
+            spec: false,
+            useBuiltIns: 'usage',
+            corejs: '3',
+            // debug: true,
+            shippedProposals: true,
+            loose: true
+          }
+        ]
+      ],
+      comments: false,
+      targets: 'chrome >= 79, firefox >= 60, edge >= 79, safari >= 11, not ie 11'
     }),
-    rollupPluginSettingLiteral(),
     metablock({
       ...userScriptMetaBlockConfig,
       override: {
