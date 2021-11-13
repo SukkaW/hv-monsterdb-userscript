@@ -15,10 +15,11 @@ polyfill();
   const hasTextLog = isFightingInBattle();
   const hasRiddleMaster = Boolean(document.getElementById('riddlemaster'));
 
-  // Load monster database & monster id => name map
-  await retrieveTmpValue();
-  // Read how many days since last isekai reset for further usage
-  await readHowManyDaysSinceLastIsekaiReset();
+  await Promise.all([
+    retrieveTmpValue(),
+    // Read how many days since last isekai reset for further usage
+    readHowManyDaysSinceLastIsekaiReset()
+  ]);
 
   if (hasTextLog || hasRiddleMaster) {
     // Store in-memory value back to storage before window refresh / closes
