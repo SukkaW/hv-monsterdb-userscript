@@ -11,5 +11,12 @@
   "compatible": [
     "Chrome/Chromium + Tampermonkey",
     "Firefox + Greasemonkey"
+  ],
+  "match": [
+    "*://*.hentaiverse.org/*"
+  ],
+  "exclude": [
+    "http*://hentaiverse.org/pages/showequip.php?*",
+    "*hentaiverse.org/equip/*"
   ]
 }

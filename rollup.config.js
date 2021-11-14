@@ -1,6 +1,5 @@
 /* eslint-disable node/no-unsupported-features/es-syntax */
-import typescript from '@rollup/plugin-typescript';
-import { babel } from '@rollup/plugin-babel';
+import { swc, defineRollupSwcOption } from 'rollup-plugin-swc3';
 import commonjs from '@rollup/plugin-commonjs';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import postcss from 'rollup-plugin-postcss';
@@ -17,14 +16,7 @@ const userScriptMetaBlockConfig = {
   override: {
     version: pkgJson.version,
     description: pkgJson.description,
-    author: pkgJson.author,
-    match: [
-      '*://*.hentaiverse.org/*'
-    ],
-    exclude: [
-      'http*://hentaiverse.org/pages/showequip.php?*',
-      '*hentaiverse.org/equip/*'
-    ]
+    author: pkgJson.author
   }
 };
 
@@ -50,10 +42,12 @@ export default [{
   }],
   plugins: [
     nodeResolve(),
-    typescript({
-      target: 'ES2020',
+    swc(defineRollupSwcOption({
+      jsc: {
+        target: 'es2020'
+      },
       tsconfig: './tsconfig.json'
-    }),
+    })),
     postcss({
       plugins: [
         cssnano()
@@ -75,38 +69,27 @@ export default [{
   plugins: [
     nodeResolve(),
     commonjs(),
-    typescript({
-      target: 'ES2016',
-      downlevelIteration: true,
-      tsconfig: './tsconfig.json'
-    }),
     postcss({
       plugins: [
         cssnano()
       ]
     }),
     rollupPluginSettingLiteral(),
-    babel({
-      babelHelpers: 'bundled',
-      exclude: 'node_modules/core-js/**',
-      extensions: ['.ts', '.js'],
-      presets: [
-        [
-          '@babel/preset-env',
-          {
-            bugfixes: true,
-            spec: false,
-            useBuiltIns: 'usage',
-            corejs: '3',
-            // debug: true,
-            shippedProposals: true,
-            loose: true
-          }
-        ]
-      ],
-      comments: false,
-      targets: 'chrome >= 79, firefox >= 60, edge >= 79, safari >= 11, not ie 11'
-    }),
+    swc(defineRollupSwcOption({
+      exclude: /node_modules\/core-js/,
+      tsconfig: './tsconfig.json',
+      jsc: {
+        target: 'es2016',
+        externalHelpers: true,
+        loose: true
+      },
+      env: {
+        targets: 'chrome >= 79, firefox >= 60, edge >= 79, safari >= 11, not ie 11',
+        coreJs: 3,
+        mode: 'usage',
+        shippedProposals: true
+      }
+    })),
     metablock({
       ...userScriptMetaBlockConfig,
       override: {
