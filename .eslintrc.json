@@ -25,7 +25,7 @@
       "settings": {
         "node": {
           "resolvePaths": ["__dirname"],
-          "tryExtensions": [".js", ".json", ".node", ".ts", ".d.ts"]
+          "tryExtensions": [".js", ".json", ".node", ".ts", ".d.ts", ".tsx"]
         }
       }
     }, {

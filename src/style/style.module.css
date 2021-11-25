@@ -119,3 +119,7 @@
 .dark {
   color: rgb(129, 67, 153)
 }
+
+.hidden {
+  display: none;
+}

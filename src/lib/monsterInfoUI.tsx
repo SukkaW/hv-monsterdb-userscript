@@ -1,10 +1,12 @@
 import { MONSTER_INFO_BOX_POSITION } from './store';
 import styles from '../style/style.module.css';
-import { m, VElement } from 'million';
 
 import type { MonsterStatus } from './monster';
+import { HVMonsterDatabase } from '../types';
 
-export function createMonsterInfoBox(): void {
+/** @jsxImportSource million */
+
+export function createMonsterInfoBox() {
   // Monsterbation tends to completely wipe out DOM when changing round
   // However we still have to make sure the info box won't be added again & again
   if (document.getElementById('monsterdb_info')) return;
@@ -37,46 +39,66 @@ export function createMonsterInfoBox(): void {
 }
 
 const isCompactMonsterInfoBox = !SETTINGS.compactMonsterInfoBox;
-const padStr = (num: number) => String(num).padStart(2, ' ');
+const padStr = (num?: number) => {
+  if (typeof num !== 'number') return '';
+  return String(num).padStart(2, ' ');
+};
 // eslint-disable-next-line no-nested-ternary
-const symbolNum = (num: number) => (num === 0 ? ' ' : num > 0 ? '+' : '');
+const symbolNum = (num?: number) => num ? (num === 0 ? ' ' : num > 0 ? '+' : '') : '';
 
-export function monsterInfoVirtualNodeFactory(allMonsterStatus: MonsterStatus[]): VElement {
-  return m('div', {}, allMonsterStatus.map(({ info: monsterInfo }) => m('div', {
-    className: styles.table_container
-  }, [
-    monsterInfo
-      ? m('table', {
-        className: styles.table
-      }, [
-        m('tbody', {}, [
-          m('tr', {}, (isCompactMonsterInfoBox
-            ? (['fire', 'cold', 'elec'] as const).map(i => m('td', {
-              className: styles[i]
-            }, [`${i[0]}:${symbolNum(monsterInfo[i])}${padStr(monsterInfo[i])}`]))
-            : []
-          ).concat([
-            m('td', {}, [`${monsterInfo.monsterClass?.toLocaleLowerCase()?.substring(0, 5)}(${monsterInfo.attack?.toLocaleLowerCase()?.substring(0, 4)})`])
-          ])),
-          m('tr', {}, (isCompactMonsterInfoBox
-            ? (['wind', 'holy', 'dark'] as const).map(i => m('td', {
-              className: styles[i]
-            }, [`${i[0]}:${symbolNum(monsterInfo[i])}${padStr(monsterInfo[i])}`]))
-            : []
-          ).concat([
-            m('td', {}, [`PL: ${monsterInfo.plvl}`])
-          ])),
-          m('tr', {}, (isCompactMonsterInfoBox
-            ? (['crushing', 'slashing', 'piercing'] as const).map(i => m('td', {}, [`${i[0]}:${symbolNum(monsterInfo[i])}${padStr(monsterInfo[i])}`]))
-            : []
-          ).concat([
-            m('td', {}, [`${monsterInfo.trainer === '' ? 'System' : monsterInfo.trainer}`])
-          ]))
-        ])
-      ])
-      : ''
-  ])));
-}
+const MonsterTable = (props: { monsterInfo?: HVMonsterDatabase.MonsterInfo }) => (
+  <div className={[styles.table_container, props.monsterInfo ? false : styles.hidden].filter(Boolean).join(' ')}>
+    <table className={styles.table}>
+      <tbody>
+        <tr>
+          {isCompactMonsterInfoBox && (['fire', 'cold', 'elec'] as const).map(i => {
+            const text = `${i[0]}:${symbolNum(props.monsterInfo?.[i])}${padStr(props.monsterInfo?.[i])}`;
+            return (
+              <td className={styles[i]}>{text}</td>
+            );
+          })}
+          <td>
+            {props.monsterInfo?.monsterClass?.toLocaleLowerCase()?.substring(0, 5)}
+          ({props.monsterInfo?.attack?.toLocaleLowerCase()?.substring(0, 4)})
+      </td>
+        </tr>
+        <tr>
+          {isCompactMonsterInfoBox && (['wind', 'holy', 'dark'] as const).map(i => {
+            const text = `${i[0]}:${symbolNum(props.monsterInfo?.[i])}${padStr(props.monsterInfo?.[i])}`;
+            return (
+              <td className={styles[i]}>{text}</td>
+            );
+          })}
+          <td>
+            PL: {props.monsterInfo?.plvl}
+          </td>
+        </tr>
+        <tr>
+          {isCompactMonsterInfoBox && (['crushing', 'slashing', 'piercing'] as const).map(i => {
+            const text = `${i[0]}:${symbolNum(props.monsterInfo?.[i])}${padStr(props.monsterInfo?.[i])}`;
+            return (
+              <td>{text}</td>
+            );
+          })}
+          <td>
+            {props.monsterInfo?.trainer === '' ? 'System' : props.monsterInfo?.trainer}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+);
+
+export function MonsterInfo(allMonsterStatus: MonsterStatus[]) {
+  return (
+    <div>{/* Million doesn't support root VNode to be a Fragment, see https://github.com/aidenybai/million/issues/160 */}
+      {
+        /* Provide all 10 MonsterTable and only toggle their display property, significantly improve virtual dom performance */
+        [...Array(10).keys()].map(i => <MonsterTable monsterInfo={allMonsterStatus[i]?.info} />)
+      }
+    </div>
+  );
+};
 
 function makeMonsterInfoBoxDraggable(boxEl: HTMLDivElement, headerEl: HTMLDivElement): void {
   headerEl.addEventListener('mousedown', evt => {

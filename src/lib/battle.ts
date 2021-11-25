@@ -1,7 +1,7 @@
 import { MonsterStatus } from './monster';
 import { parseMonsterNameAndId, parseScanResult } from './parseLog';
 import { MONSTER_NAME_ID_MAP, LOCAL_MONSTER_DATABASE } from './store';
-import { createMonsterInfoBox, monsterInfoVirtualNodeFactory } from './monsterInfoUI';
+import { createMonsterInfoBox, MonsterInfo } from './monsterInfoUI';
 import { convertMonsterInfoToEncodedMonsterInfo } from './monsterDataEncode';
 import { logger } from '../util/logger';
 import { submitScanResults } from './submitScan';
@@ -166,15 +166,16 @@ function showMonsterInfoAndHighlightMonster(): void {
       requestAnimationFrameCallbackQueue.push(() => {
         createMonsterInfoBox();
         monsterInfoVElement = createElement(
-          monsterInfoVirtualNodeFactory(allMonsterStatus)
+          MonsterInfo(allMonsterStatus)
         );
         document.getElementById('monsterdb_container')?.appendChild(monsterInfoVElement);
       });
     } else {
       requestAnimationFrameCallbackQueue.push(() => {
         const container = document.getElementById('monsterdb_container');
+
         if (container && monsterInfoVElement) {
-          patch(monsterInfoVElement, monsterInfoVirtualNodeFactory(allMonsterStatus));
+          patch(monsterInfoVElement, MonsterInfo(allMonsterStatus));
         }
       });
     }
