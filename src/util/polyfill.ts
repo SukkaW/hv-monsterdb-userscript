@@ -1,7 +1,9 @@
 declare global {
   interface Window {
+    webkitRequestAnimationFrame?: typeof window.requestAnimationFrame
     mozRequestAnimationFrame?: typeof window.requestAnimationFrame
     msRequestAnimationFrame?: typeof window.requestAnimationFrame
+    webkitCancelAnimationFrame?: typeof window.cancelAnimationFrame
     mozCancelAnimationFrame?: typeof window.requestAnimationFrame
     msCancelAnimationFrame?: typeof window.requestAnimationFrame
   }
@@ -81,6 +83,7 @@ export function polyfill(): void {
           }
         }
 
+        // @ts-expect-error It is only a fetch polyfill
         request.send(options?.body || null);
       });
     };
