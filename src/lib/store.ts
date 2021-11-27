@@ -26,24 +26,26 @@ export class MONSTER_NAME_ID_MAP {
   }
 
   static async updateMany(entries: ([string, number] | null)[]): Promise<void> {
-    return MONSTER_NAME_ID_MAP.store.performDatabaseOperation('readwrite', (store) => {
-      entries.forEach((entry) => {
-        if (entry) {
-          const [monsterName, newMonsterId] = entry;
+    if (entries.length > 0) {
+      return MONSTER_NAME_ID_MAP.store.performDatabaseOperation('readwrite', (store) => {
+        entries.forEach((entry) => {
+          if (entry) {
+            const [monsterName, newMonsterId] = entry;
 
-          if (this.cache.get(monsterName) !== newMonsterId) {
-            this.cache.set(monsterName, newMonsterId);
+            if (this.cache.get(monsterName) !== newMonsterId) {
+              this.cache.set(monsterName, newMonsterId);
 
-            store.get(monsterName).onsuccess = function () {
-              if (this.result !== newMonsterId) {
-                store.put(newMonsterId, monsterName);
-              }
-            };
+              store.get(monsterName).onsuccess = function () {
+                if (this.result !== newMonsterId) {
+                  store.put(newMonsterId, monsterName);
+                }
+              };
+            }
           }
-        }
+        });
+        return IDBKV.promisifyRequest(store.transaction);
       });
-      return IDBKV.promisifyRequest(store.transaction);
-    });
+    }
   }
 }
 
@@ -97,18 +99,22 @@ class LocalMonsterDatabase {
   }
 
   updateMany(entries: [number, EncodedMonsterDatabase.MonsterInfo][]): Promise<void> {
-    this.cache.clear();
+    if (entries.length > 0) {
+      this.cache.clear();
 
-    return this.store.performDatabaseOperation('readwrite', (store) => {
-      entries.forEach(([monsterId, monsterInfo]) => {
-        store.get(monsterId).onsuccess = function () {
-          if (!LocalMonsterDatabase.monsterInfoIsEquial(this.result as UndefinedableEncodedMonsterInfo, monsterInfo)) {
-            store.put(monsterInfo, monsterId);
-          }
-        };
+      return this.store.performDatabaseOperation('readwrite', (store) => {
+        entries.forEach(([monsterId, monsterInfo]) => {
+          store.get(monsterId).onsuccess = function () {
+            if (!LocalMonsterDatabase.monsterInfoIsEquial(this.result as UndefinedableEncodedMonsterInfo, monsterInfo)) {
+              store.put(monsterInfo, monsterId);
+            }
+          };
+        });
+        return IDBKV.promisifyRequest(store.transaction);
       });
-      return IDBKV.promisifyRequest(store.transaction);
-    });
+    }
+
+    return Promise.resolve();
   }
 
   static monsterInfoIsEquial(monster1: UndefinedableEncodedMonsterInfo, monster2: EncodedMonsterDatabase.MonsterInfo): boolean {
