@@ -1,10 +1,7 @@
 import { HVMonsterDatabase } from '../types';
-import { FetchQueue } from '../util/fetchQueue';
-
-const fetchQueue = new FetchQueue({ maxConnections: 4 });
 
 export async function submitScanResults(payload: HVMonsterDatabase.MonsterInfo): Promise<Response> {
-  return fetchQueue.add('https://hvdata.lastmen.men/monsterdata/', {
+  return fetch('https://hvdata.lastmen.men/monsterdata/', {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json; charset=UTF-8'

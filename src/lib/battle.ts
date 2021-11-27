@@ -118,7 +118,7 @@ async function tasksRunDuringTheBattle(): Promise<void> {
         // Check if the monster is dead, being imperiled, or has spell effects
         if (monsterStatus?.checkScanResultValidity()) {
           logger.info(`Scan results for ${monsterName} is now queued to submit`);
-          submitScanResults(scanResult);
+          window.requestIdleCallback(() => submitScanResults(scanResult), { timeout: 3000 });
 
           // Update local database first, it will be used to update UI
           if (monsterStatus.mid) {
