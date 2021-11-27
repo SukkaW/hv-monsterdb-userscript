@@ -26,9 +26,13 @@ export async function updateLocalDatabase(force = false): Promise<void> {
   }
 
   const needUpdateLocalDatabaseFromRemoteServer = force
-    || !(isIsekai()
-      ? lastUpdateIsekaiDate === currentDate
-      : lastUpdateDate === currentDate
+    || (isIsekai() ? lastUpdateIsekaiDate : lastUpdateDate) !== currentDate
+    || (
+      (await (
+        isIsekai()
+          ? LOCAL_MONSTER_DATABASE_ISEKAI
+          : LOCAL_MONSTER_DATABASE_PERSISTENT
+      ).get(20))?.[EncodedMonsterDatabase.EMonsterInfo.monsterName] !== 'Konata'
     );
 
   if (needUpdateLocalDatabaseFromRemoteServer) {
@@ -56,40 +60,49 @@ export async function updateLocalDatabase(force = false): Promise<void> {
         logger.info(`${data.monsters.length} monsters' information processed.`);
 
         if (isIsekai()) {
-          LOCAL_MONSTER_DATABASE_ISEKAI.updateMany(db);
-          await setStoredValue('lastUpdateIsekaiV2', getUTCDate());
+          await LOCAL_MONSTER_DATABASE_ISEKAI.updateMany(db);
+          await setStoredValue('lastUpdateIsekaiV2', currentDate);
         } else {
-          LOCAL_MONSTER_DATABASE_PERSISTENT.updateMany(db);
-          await setStoredValue('lastUpdateV2', getUTCDate());
+          await LOCAL_MONSTER_DATABASE_PERSISTENT.updateMany(db);
+          await setStoredValue('lastUpdateV2', currentDate);
         }
       }, { timeout: 10000 });
     } catch (e) {
       logger.error(e);
 
-      showPopup('There is something wrong when trying to update the local database from the server!');
+      showPopup(`There is something wrong when trying to update the local database from the server!\n\n${JSON.stringify(e)}`);
     }
   } else {
     logger.info('There is no need to update local database.');
-  }
 
-  /** Database Migration */
-  databaseMigration();
+    /** Database Migration, only do when no need to download the remote database */
+    databaseMigration();
+  }
 }
 
 async function databaseMigration() {
   // Migrate all old userscript storage to IndexedDB
   const [monsterIdMap, databaseV2, databaseIsekaiV2] = await Promise.all([getStoredValue('monsterIdMap'), getStoredValue('databaseV2'), getStoredValue('databaseIsekaiV2')]);
+
   if (monsterIdMap) {
     logger.debug('Migrating old monsterIdMap to IndexedDB');
     await MONSTER_NAME_ID_MAP.updateMany(Object.entries(monsterIdMap));
   }
   if (databaseV2) {
     logger.debug('Migrating old databaseV2 to IndexedDB');
-    await LOCAL_MONSTER_DATABASE_PERSISTENT.updateMany(Object.entries(databaseV2).map(([k, v]) => [Number(k), v]));
+    await LOCAL_MONSTER_DATABASE_PERSISTENT.updateMany(Object.entries(databaseV2).map(([k, v]) => {
+      const newId = Number(k);
+      if (Number.isInteger(newId)) return [newId, v];
+      return null;
+    }));
   }
   if (databaseIsekaiV2) {
     logger.debug('Migrating old databaseIsekaiV2 to IndexedDB');
-    await LOCAL_MONSTER_DATABASE_ISEKAI.updateMany(Object.entries(databaseIsekaiV2).map(([k, v]) => [Number(k), v]));
+    await LOCAL_MONSTER_DATABASE_ISEKAI.updateMany(Object.entries(databaseIsekaiV2).map(([k, v]) => {
+      const newId = Number(k);
+      if (Number.isInteger(newId)) return [newId, v];
+      return null;
+    }));
   }
 
   return Promise.all([

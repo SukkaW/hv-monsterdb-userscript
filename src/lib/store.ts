@@ -98,17 +98,20 @@ class LocalMonsterDatabase {
     return this.store.set(monsterId, monsterInfo);
   }
 
-  updateMany(entries: [number, EncodedMonsterDatabase.MonsterInfo][]): Promise<void> {
+  updateMany(entries: ([number, EncodedMonsterDatabase.MonsterInfo] | null)[]): Promise<void> {
     if (entries.length > 0) {
       this.cache.clear();
 
       return this.store.performDatabaseOperation('readwrite', (store) => {
-        entries.forEach(([monsterId, monsterInfo]) => {
-          store.get(monsterId).onsuccess = function () {
-            if (!LocalMonsterDatabase.monsterInfoIsEquial(this.result as UndefinedableEncodedMonsterInfo, monsterInfo)) {
-              store.put(monsterInfo, monsterId);
-            }
-          };
+        entries.forEach(entry => {
+          if (entry) {
+            const [monsterId, newMonsterInfo] = entry;
+            store.get(monsterId).onsuccess = function () {
+              if (!LocalMonsterDatabase.monsterInfoIsEquial(this.result as UndefinedableEncodedMonsterInfo, newMonsterInfo)) {
+                store.put(newMonsterInfo, monsterId);
+              }
+            };
+          }
         });
         return IDBKV.promisifyRequest(store.transaction);
       });
