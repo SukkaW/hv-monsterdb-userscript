@@ -2,8 +2,7 @@ import { EncodedMonsterDatabase } from './monsterDataEncode';
 import { HVMonsterDatabase } from '../types';
 import { isIsekai } from '../util/common';
 import { getStoredValue, setStoredValue } from '../util/store';
-import { IDBKV, promisifyRequest } from '../util/idbkv';
-import { logger } from '../util/logger';
+import { IDBKV } from '../util/idbkv';
 
 const DBNAME = 'hv-monster-database-script';
 export const OBJECT_STORES = ['MONSTER_NAME_ID_MAP', 'databaseV2', 'databaseIsekaiV2'];
@@ -43,10 +42,12 @@ export class MONSTER_NAME_ID_MAP {
           }
         }
       });
-      return promisifyRequest(store.transaction);
+      return IDBKV.promisifyRequest(store.transaction);
     });
   }
 }
+
+type UndefinedableEncodedMonsterInfo = EncodedMonsterDatabase.MonsterInfo | undefined;
 
 class LocalMonsterDatabase {
   private cache: Map<number, EncodedMonsterDatabase.MonsterInfo> = new Map();
@@ -56,7 +57,7 @@ class LocalMonsterDatabase {
     this.store = new IDBKV<HVMonsterDatabase.LocalDatabaseVersion2>(DBNAME, storeName);
   }
 
-  async get(monsterId: number): Promise<EncodedMonsterDatabase.MonsterInfo | undefined> {
+  async get(monsterId: number): Promise<UndefinedableEncodedMonsterInfo> {
     if (this.cache.has(monsterId)) return this.cache.get(monsterId);
 
     const encodedMonsterInfo = await this.store.get(monsterId);
@@ -66,32 +67,51 @@ class LocalMonsterDatabase {
     }
   }
 
+  getMany(monsterIds: (number | undefined)[]): Promise<UndefinedableEncodedMonsterInfo[]> {
+    if (monsterIds.map(id => id && this.cache.has(id)).length === monsterIds.length) {
+      return Promise.resolve(monsterIds.map(id => (id ? this.cache.get(id) : undefined)));
+    }
+
+    return this.store.performDatabaseOperation('readonly', (store) => {
+      const resultPromises: (Promise<UndefinedableEncodedMonsterInfo> | UndefinedableEncodedMonsterInfo)[] = [];
+
+      monsterIds.forEach(id => {
+        if (id) {
+          if (this.cache.has(id)) {
+            resultPromises.push(this.cache.get(id));
+          } else {
+            resultPromises.push(IDBKV.promisifyRequest(store.get(id)));
+          }
+        } else {
+          resultPromises.push(undefined);
+        }
+      });
+
+      return Promise.all(resultPromises);
+    });
+  }
+
   set(monsterId: number, monsterInfo: EncodedMonsterDatabase.MonsterInfo): Promise<void> {
     this.cache.set(monsterId, monsterInfo);
     return this.store.set(monsterId, monsterInfo);
   }
 
   updateMany(entries: [number, EncodedMonsterDatabase.MonsterInfo][]): Promise<void> {
-    let updatedMonsterCount = 0;
-
     this.cache.clear();
 
     return this.store.performDatabaseOperation('readwrite', (store) => {
       entries.forEach(([monsterId, monsterInfo]) => {
         store.get(monsterId).onsuccess = function () {
-          if (!LocalMonsterDatabase.monsterInfoIsEquial(this.result as EncodedMonsterDatabase.MonsterInfo | undefined, monsterInfo)) {
-            updatedMonsterCount++;
+          if (!LocalMonsterDatabase.monsterInfoIsEquial(this.result as UndefinedableEncodedMonsterInfo, monsterInfo)) {
             store.put(monsterInfo, monsterId);
           }
         };
       });
-
-      logger.debug('Updated (indexeddb) monsters count:', updatedMonsterCount);
-      return promisifyRequest(store.transaction);
+      return IDBKV.promisifyRequest(store.transaction);
     });
   }
 
-  static monsterInfoIsEquial(monster1: EncodedMonsterDatabase.MonsterInfo | undefined, monster2: EncodedMonsterDatabase.MonsterInfo): boolean {
+  static monsterInfoIsEquial(monster1: UndefinedableEncodedMonsterInfo, monster2: EncodedMonsterDatabase.MonsterInfo): boolean {
     if (!monster1) return false;
     if (
       ([

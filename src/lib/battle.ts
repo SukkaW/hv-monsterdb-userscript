@@ -52,7 +52,7 @@ async function tasksRunAtStartOfPerRound(): Promise<void> {
   MONSTERS.clear();
 
   if (document.getElementById('textlog')?.textContent?.includes('Spawned')) {
-    await MONSTER_NAME_ID_MAP.updateMany([...document.querySelectorAll('#textlog > tbody > tr')].map(logEl => {
+    const monsterNameAndIds = [...document.querySelectorAll('#textlog > tbody > tr')].map(logEl => {
       // Get Monster Name & ID
       if (logEl.textContent?.trim().startsWith('Spawned')) {
         const monsterNameAndId = parseMonsterNameAndId(logEl.textContent);
@@ -61,7 +61,13 @@ async function tasksRunAtStartOfPerRound(): Promise<void> {
         }
       }
       return null;
-    }));
+    });
+
+    await Promise.all([
+      MONSTER_NAME_ID_MAP.updateMany(monsterNameAndIds),
+      // Prefetch monster info into the cache
+      LOCAL_MONSTER_DATABASE.getMany(monsterNameAndIds.map(x => x?.[1]))
+    ]);
   }
 
   // I am not sure the order that monster showed up in battle log

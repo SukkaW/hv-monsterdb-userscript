@@ -11,6 +11,21 @@ export class IDBKV<T> {
   dbVersion?: number;
   private databasePromise: Promise<IDBDatabase> | null = null;
 
+  static promisifyRequest<T = undefined>(
+    request: IDBRequest<T> | IDBTransaction
+  ): Promise<T> {
+    return new Promise<T>((resolve, reject) => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore - file size hacks
+      // eslint-disable-next-line no-multi-assign
+      request.oncomplete = request.onsuccess = () => resolve(request.result);
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore - file size hacks
+      // eslint-disable-next-line no-multi-assign
+      request.onabort = request.onerror = () => reject(request.error);
+    });
+  }
+
   constructor(dbName: string, storeName: string, dbVersion?: number) {
     this.dbName = dbName;
     this.storeName = storeName;
@@ -20,26 +35,26 @@ export class IDBKV<T> {
 
   get<K extends IDBValidKey & keyof T>(key: K): Promise<T[K] | undefined> {
     return this.performDatabaseOperation('readonly', (store) => {
-      return promisifyRequest(store.get(key));
+      return IDBKV.promisifyRequest(store.get(key));
     });
   }
 
   set<K extends IDBValidKey & keyof T>(key: K, value: T[K]): Promise<void> {
     return this.performDatabaseOperation('readwrite', (store) => {
       store.put(value, key);
-      return promisifyRequest(store.transaction);
+      return IDBKV.promisifyRequest(store.transaction);
     });
   }
 
   setMany<K extends IDBValidKey & keyof T>(entries: [K, T[K]][]): Promise<void> {
     return this.performDatabaseOperation('readwrite', (store) => {
       entries.forEach((entry) => store.put(entry[1], entry[0]));
-      return promisifyRequest(store.transaction);
+      return IDBKV.promisifyRequest(store.transaction);
     });
   }
 
   getMany<K extends IDBValidKey & keyof T>(keys: K[]): Promise<T[K][]> {
-    return this.performDatabaseOperation('readonly', (store) => Promise.all(keys.map((key) => promisifyRequest(store.get(key)))));
+    return this.performDatabaseOperation('readonly', (store) => Promise.all(keys.map((key) => IDBKV.promisifyRequest(store.get(key)))));
   }
 
   /** Update a value. This lets you see the old value and update it as an atomic operation. */
@@ -53,7 +68,7 @@ export class IDBKV<T> {
         store.get(key).onsuccess = function () {
           try {
             store.put(updater(this.result), key);
-            resolve(promisifyRequest(store.transaction));
+            resolve(IDBKV.promisifyRequest(store.transaction));
           } catch (err) {
             reject(err);
           }
@@ -65,21 +80,21 @@ export class IDBKV<T> {
   del<K extends IDBValidKey & keyof T>(key: K): Promise<void> {
     return this.performDatabaseOperation('readwrite', (store) => {
       store.delete(key);
-      return promisifyRequest(store.transaction);
+      return IDBKV.promisifyRequest(store.transaction);
     });
   }
 
   delMany<K extends IDBValidKey & keyof T>(keys: K[]): Promise<void> {
     return this.performDatabaseOperation('readwrite', (store) => {
       keys.forEach((key: IDBValidKey) => store.delete(key));
-      return promisifyRequest(store.transaction);
+      return IDBKV.promisifyRequest(store.transaction);
     });
   }
 
   async clear(): Promise<void> {
     return this.performDatabaseOperation('readwrite', (store) => {
       store.clear();
-      return promisifyRequest(store.transaction);
+      return IDBKV.promisifyRequest(store.transaction);
     });
   }
 
@@ -100,7 +115,7 @@ export class IDBKV<T> {
 
   private initializeOpenDatabasePromise() {
     if (this.databasePromise === null) {
-      this.databasePromise = new Promise<IDBDatabase>((resolve, reject) => {
+      const promise = new Promise<IDBDatabase>((resolve, reject) => {
         const request = self.indexedDB.open(this.dbName, this.dbVersion);
         request.onsuccess = () => {
           const database = request.result;
@@ -122,6 +137,9 @@ export class IDBKV<T> {
           }
         };
       });
+
+      this.databasePromise = promise;
+      return promise;
     }
   }
 
@@ -141,22 +159,7 @@ export class IDBKV<T> {
         callback(this.result);
         this.result.continue();
       };
-      return promisifyRequest(store.transaction);
+      return IDBKV.promisifyRequest(store.transaction);
     });
   }
-}
-
-export function promisifyRequest<T = undefined>(
-  request: IDBRequest<T> | IDBTransaction
-): Promise<T> {
-  return new Promise<T>((resolve, reject) => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore - file size hacks
-    // eslint-disable-next-line no-multi-assign
-    request.oncomplete = request.onsuccess = () => resolve(request.result);
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore - file size hacks
-    // eslint-disable-next-line no-multi-assign
-    request.onabort = request.onerror = () => reject(request.error);
-  });
 }

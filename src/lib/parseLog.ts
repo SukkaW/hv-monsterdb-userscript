@@ -8,7 +8,7 @@ const rMatchScan = /Scanning (.+?)\.\.\..+?Monster Class.+>([A-Z][a-z]+)(?:, Pow
 export function parseMonsterNameAndId(singleLogText: string): {
   monsterId: number,
   monsterName: string
-} | void {
+} | null {
   const matches = singleLogText.match(rMatchMonsterId);
 
   if (matches) {
@@ -19,9 +19,11 @@ export function parseMonsterNameAndId(singleLogText: string): {
       return { monsterId, monsterName };
     }
   }
+
+  return null;
 }
 
-const isPositiveOrNegative = (modifier: string): number => (modifier === '+' ? 1 : -1);
+const isPositiveOrNegative = (modifier: string): 1 | -1 => (modifier === '+' ? 1 : -1);
 
 export async function parseScanResult(singleLogHtml: string): Promise<void | HVMonsterDatabase.MonsterInfo> {
   if (singleLogHtml.includes('Scanning')) {
