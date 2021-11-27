@@ -8,10 +8,6 @@
     "GM.deleteValue"
   ],
   "run-at": "document-idle",
-  "compatible": [
-    "Chrome/Chromium + Tampermonkey",
-    "Firefox + Greasemonkey"
-  ],
   "match": [
     "*://*.hentaiverse.org/*"
   ],
