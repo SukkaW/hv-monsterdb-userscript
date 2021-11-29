@@ -86,7 +86,7 @@ export class IDBKV<T> {
 
   delMany<K extends IDBValidKey & keyof T>(keys: K[]): Promise<void> {
     return this.performDatabaseOperation('readwrite', (store) => {
-      keys.forEach((key: IDBValidKey) => store.delete(key));
+      keys.forEach(key => store.delete(key));
       return IDBKV.promisifyRequest(store.transaction);
     });
   }

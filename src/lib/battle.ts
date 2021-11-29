@@ -135,8 +135,8 @@ async function tasksRunDuringTheBattle(): Promise<void> {
   showMonsterInfoAndHighlightMonster();
 }
 
-const highlightExpireMonster = (monsterElement: HTMLElement | null, color: string) => () => {
-  const monsterBtm2El = monsterElement?.querySelector('div.btm2');
+const highlightExpireMonster = (monsterStatus: MonsterStatus, color: string) => () => {
+  const monsterBtm2El = monsterStatus.element?.querySelector('div.btm2');
   if (monsterBtm2El) {
     monsterBtm2El.style.backgroundColor = color;
   }
@@ -198,7 +198,7 @@ function showMonsterInfoAndHighlightMonster(): void {
       });
       // Highlight a monster hasn't been scanned for a while
       if (highlightScanColor !== false) {
-        requestAnimationFrameCallbackQueue.push(highlightExpireMonster(monsterStatus.element, highlightScanColor));
+        requestAnimationFrameCallbackQueue.push(highlightExpireMonster(monsterStatus, highlightScanColor));
       }
     }
   }
