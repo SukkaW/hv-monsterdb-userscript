@@ -5,7 +5,7 @@ const debugStyle = 'background: #7a7a7a; color: #fff';
 const infoStyle = 'background: #257942; color: #fff';
 const warnStyle = 'background: #947600; color: #fff';
 const errorStyle = 'background: #cc0f35; color: #fff';
-const msgStyle = 'background: transparent; color: #000';
+// const msgStyle = 'background: transparent; color: #000';
 
 class Logger {
   private DEBUG = false;
@@ -16,25 +16,37 @@ class Logger {
 
   debug(...msg: any[]): void {
     if (this.DEBUG) {
-      console.log('%c HVMDB %c DEBUG %c', nameStyle, debugStyle, msgStyle, ...msg);
+      console.debug('%c HVMDB %c DEBUG ', nameStyle, debugStyle, ...msg);
+      console.groupCollapsed();
+      console.trace();
+      console.groupEnd();
     }
   }
 
   info(...msg: any[]): void {
+    console.info('%c HVMDB %c INFO ', nameStyle, infoStyle, ...msg);
     if (this.DEBUG) {
-      console.info('%c HVMDB %c INFO %c', nameStyle, infoStyle, msgStyle, ...msg);
+      console.groupCollapsed();
+      console.trace();
+      console.groupEnd();
     }
   }
 
   warn(...msg: any[]): void {
+    console.warn('%c HVMDB %c WARN ', nameStyle, warnStyle, ...msg);
     if (this.DEBUG) {
-      console.warn('%c HVMDB %c WARN %c', nameStyle, warnStyle, msgStyle, ...msg);
+      console.groupCollapsed();
+      console.trace();
+      console.groupEnd();
     }
   }
 
   error(...msg: any[]): void {
+    console.error('%c HVMDB %c ERROR ', nameStyle, errorStyle, ...msg);
     if (this.DEBUG) {
-      console.error('%c HVMDB %c ERROR %c', nameStyle, errorStyle, msgStyle, ...msg);
+      console.groupCollapsed();
+      console.trace();
+      console.groupEnd();
     }
   }
 }
