@@ -10,9 +10,10 @@
     "strict": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
+    "resolveJsonModule": true,
     "plugins": [{ "name": "typescript-plugin-css-modules" }],
     "types": ["greasemonkey", "greasemonkey3"]
   },
-  "include": ["src"],
+  "include": ["src", "rollup.config.ts"],
   "exclude": ["dist", "test"]
 }

@@ -1,4 +1,5 @@
-/* eslint-disable node/no-unsupported-features/es-syntax */
+/// <reference types="node" />
+
 import { swc, defineRollupSwcOption } from 'rollup-plugin-swc3';
 import commonjs from '@rollup/plugin-commonjs';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
@@ -8,6 +9,7 @@ import metablock from 'rollup-plugin-userscript-metablock';
 import pkgJson from './package.json';
 import MagicString from 'magic-string';
 import { readFileSync } from 'fs';
+import type { Plugin } from 'rollup';
 
 let cache;
 
@@ -20,9 +22,10 @@ const userScriptMetaBlockConfig = {
   }
 };
 
-function rollupPluginSettingLiteral() {
+function rollupPluginSettingLiteral(): Plugin {
   const settingsLiteral = readFileSync('src/settings.js', 'utf-8');
   return {
+    name: 'rollup-plugin-setting-literal',
     renderChunk(code) {
       const magicString = new MagicString(code);
       magicString.prepend(`${settingsLiteral}\n`).trimEnd('\\n');
@@ -76,7 +79,7 @@ export default [{
     }),
     rollupPluginSettingLiteral(),
     swc(defineRollupSwcOption({
-      exclude: /node_modules\/core-js/,
+      exclude: 'node_modules/core-js/**',
       tsconfig: './tsconfig.json',
       jsc: {
         target: 'es2016',
@@ -85,7 +88,7 @@ export default [{
       },
       env: {
         targets: 'chrome >= 79, firefox >= 60, edge >= 79, safari >= 11, not ie 11',
-        coreJs: 3,
+        coreJs: '3',
         mode: 'usage',
         shippedProposals: true
       }
