@@ -67,8 +67,13 @@ export class IDBKV<T> {
       (store) => new Promise((resolve, reject) => {
         store.get(key).onsuccess = function () {
           try {
-            store.put(updater(this.result), key);
-            resolve(IDBKV.promisifyRequest(store.transaction));
+            const newValue = updater(this.result);
+            if (newValue !== this.result) {
+              store.put(updater(this.result), key);
+              resolve(IDBKV.promisifyRequest(store.transaction));
+            } else {
+              resolve();
+            }
           } catch (err) {
             reject(err);
           }
