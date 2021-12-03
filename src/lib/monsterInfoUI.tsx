@@ -47,8 +47,8 @@ const padStr = (num?: number) => {
 const symbolNum = (num?: number) => num ? (num === 0 ? ' ' : num > 0 ? '+' : '') : '';
 
 const MonsterTable = (props: { monsterInfo?: HVMonsterDatabase.MonsterInfo }) => (
-  <div className={[styles.table_container, props.monsterInfo ? false : styles.hidden].filter(Boolean).join(' ')}>
-    <table className={styles.table}>
+  <div className={styles.table_container}>
+    <table className={[styles.table, props.monsterInfo ? false : styles.hidden].filter(Boolean).join(' ')}>
       <tbody>
         <tr>
           {isCompactMonsterInfoBox && (['fire', 'cold', 'elec'] as const).map(i => {
