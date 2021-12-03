@@ -39,12 +39,7 @@ export async function updateLocalDatabase(force = false): Promise<void> {
     try {
       logger.info('Downloading Monster Database from the server...');
 
-      const resp = isIsekai()
-        // In Isekai
-        ? await fetch('https://hvdata.lastmen.men/exportgzipisekaimonsterdata/')
-        // In Persistent
-        : await fetch('https://hvdata.lastmen.men/exportgzipmonsterdata/');
-
+      const resp = await fetch(isIsekai() ? 'https://hvdata.lastmen.men/exportgzipisekaimonsterdata/' : 'https://hvdata.lastmen.men/exportgzipmonsterdata/');
       const data: ApiResponse = await resp.json();
 
       // Use window.requestIdleCallback again since conevrt database is a CPU intensive task.
