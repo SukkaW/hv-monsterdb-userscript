@@ -30,6 +30,7 @@
     "@babel/preset-env": "^7.13.15",
     "@rollup/plugin-commonjs": "^21.0.1",
     "@rollup/plugin-node-resolve": "^13.0.5",
+    "@rollup/plugin-replace": "^3.0.0",
     "@swc/helpers": "^0.2.14",
     "@types/cssnano": "^4.0.1",
     "@types/greasemonkey": "^4.0.1",

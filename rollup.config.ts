@@ -9,6 +9,8 @@ import metablock from 'rollup-plugin-userscript-metablock';
 import pkgJson from './package.json';
 import MagicString from 'magic-string';
 import { readFileSync } from 'fs';
+import replace from '@rollup/plugin-replace';
+
 import type { Plugin } from 'rollup';
 
 let cache;
@@ -45,6 +47,10 @@ export default [{
   }],
   plugins: [
     nodeResolve(),
+    replace({
+      __buildMatrix__: JSON.stringify('es2020'),
+      preventAssignment: true
+    }),
     swc(defineRollupSwcOption({
       jsc: {
         target: 'es2020'
@@ -76,6 +82,10 @@ export default [{
       plugins: [
         cssnano()
       ]
+    }),
+    replace({
+      __buildMatrix__: JSON.stringify('es2016'),
+      preventAssignment: true
     }),
     rollupPluginSettingLiteral(),
     swc(defineRollupSwcOption({

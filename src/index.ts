@@ -6,8 +6,10 @@ import { isFightingInBattle, isIsekai } from './util/common';
 import { logger } from './util/logger';
 import { polyfill } from './util/polyfill';
 
-// Add possible requestAnimationFrame fallback & window.requestIdleCallback
-polyfill();
+if (__buildMatrix__ === 'es2016') {
+  // Add possible requestAnimationFrame fallback & window.requestIdleCallback
+  polyfill();
+}
 
 (async () => {
   logger.setDebugMode(SETTINGS.debug);
