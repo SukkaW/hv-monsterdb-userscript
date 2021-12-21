@@ -52,7 +52,6 @@
 
 .table_container {
   height: 56px;
-  background-color: #eeece1;
   margin: 2px auto;
   font-weight: bold;
   font-family: Consolas, Monaco, SFMono-Regular, Andale Mono, Liberation Mono, Ubuntu Mono, Menlo, monospace;
@@ -71,6 +70,7 @@
 .table {
   line-height: 1;
   border: 2px ridge #5C0D12;
+  background-color: #eeece1;
   font-size: 12px;
   letter-spacing: -1px;
   border-spacing: 0;
