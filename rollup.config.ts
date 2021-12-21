@@ -11,7 +11,7 @@ import MagicString from 'magic-string';
 import { readFileSync } from 'fs';
 import replace from '@rollup/plugin-replace';
 
-import type { Plugin } from 'rollup';
+import { Plugin, defineConfig } from 'rollup';
 
 let cache;
 
@@ -37,13 +37,14 @@ function rollupPluginSettingLiteral(): Plugin {
   };
 }
 
-export default [{
+export default defineConfig([{
   input: 'src/index.ts',
   output: [{
     format: 'iife',
     file: 'dist/hv-monsterdb.es2020.user.js',
     name: 'unsafeWindow.HVMonsterDB',
-    sourcemap: false
+    sourcemap: false,
+    esModule: false
   }],
   plugins: [
     nodeResolve(),
@@ -73,7 +74,8 @@ export default [{
     format: 'iife',
     file: 'dist/hv-monsterdb.es5.user.js',
     name: 'unsafeWindow.HVMonsterDB',
-    sourcemap: false
+    sourcemap: false,
+    esModule: false
   },
   plugins: [
     nodeResolve(),
@@ -121,4 +123,4 @@ export default [{
   ],
   external: ['typed-query-selector'],
   cache
-}];
+}]);
