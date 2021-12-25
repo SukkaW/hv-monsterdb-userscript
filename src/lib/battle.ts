@@ -2,11 +2,12 @@ import { parseMonsterNameAndId, parseScanResult } from './parseLog';
 import { MONSTER_NAME_ID_MAP, LOCAL_MONSTER_DATABASE } from './store';
 import { createMonsterInfoBox, MonsterInfo } from './monsterInfoUI';
 import { convertEncodedMonsterInfoToMonsterInfo, convertMonsterInfoToEncodedMonsterInfo, EncodedMonsterDatabase } from './monsterDataEncode';
+import { isIsekai } from '../util/common';
 import { logger } from '../util/logger';
 import { submitScanResults } from './submitScan';
 
 import { checkScanResultValidity } from './monster';
-import { MonstersInCurrentRound, MonstersAndMkeysInCurrentRound, MonsterLastUpdate, MonsterNeedScan, MonsterNeedHighlight, StateSubscribed } from './states';
+import { MonstersInCurrentRound, MonstersAndMkeysInCurrentRound, MonstersAndTheirRandomness, MonsterLastUpdate, MonsterNeedScan, MonsterNeedHighlight, StateSubscribed } from './states';
 import { createElement, patch } from 'million';
 
 let monsterInfoVElement: ReturnType<typeof createElement> | undefined;
@@ -70,6 +71,11 @@ export async function inBattle(): Promise<void> {
   }
 }
 
+/** To prevent multiple users scan the same monster over and over again, some randomness has been added. Generate it once per monster */
+const createRandomness = () => (isIsekai()
+  ? Math.floor(Math.random() * Math.floor(SETTINGS.scanExpireDays / 3))
+  : Math.floor(Math.random() * Math.floor(SETTINGS.scanExpireDays / 5)) + 1);
+
 /** Tasks like "get monster id and monster name" only have to run at the start of per round */
 async function tasksRunAtStartOfPerRound(): Promise<void> {
   const monsterInTheRoundNameIdMap: Map<string, number> = new Map();
@@ -96,6 +102,7 @@ async function tasksRunAtStartOfPerRound(): Promise<void> {
   const monsters: Record<string, HVMonsterDatabase.MonsterInfo | null> = {};
   const mkeys: Record<string, string> = {};
   const monsterLastUpdates: Record<number, number> = {};
+  const monstersRandomness: Record<string, number> = {};
   (await Promise.all(
     [...document.getElementsByClassName('btm1')].map(async el => {
       const mkey = el.id;
@@ -103,6 +110,7 @@ async function tasksRunAtStartOfPerRound(): Promise<void> {
 
       if (mkey && monsterName) {
         mkeys[monsterName] = mkey;
+        monstersRandomness[monsterName] = createRandomness();
 
         const mid = monsterInTheRoundNameIdMap.get(monsterName) ?? await MONSTER_NAME_ID_MAP.get(monsterName);
         if (mid) {
@@ -126,6 +134,7 @@ async function tasksRunAtStartOfPerRound(): Promise<void> {
   MonstersInCurrentRound.set(monsters);
   MonstersAndMkeysInCurrentRound.set(mkeys);
   MonsterLastUpdate.set(monsterLastUpdates);
+  MonstersAndTheirRandomness.set(monstersRandomness);
 
   logger.debug('MonstersInCurrentRound', MonstersInCurrentRound.get());
 

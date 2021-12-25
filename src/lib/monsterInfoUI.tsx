@@ -1,7 +1,6 @@
 import { MONSTER_INFO_BOX_POSITION } from './store';
 import styles from '../style/style.module.css';
 
-import type { MonsterStatus } from './monster';
 import { HVMonsterDatabase } from '../types';
 
 /** @jsxImportSource million */

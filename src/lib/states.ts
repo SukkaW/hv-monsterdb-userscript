@@ -12,6 +12,10 @@ interface MonstersAndMkeyStore {
   [monsterName: string]: string | undefined
 }
 
+interface MonstersAndTheirRandomnessStore {
+  [monsterName: string]: number
+}
+
 interface MonstersLastUpdateStore {
   [mid: number]: number
 }
@@ -19,25 +23,31 @@ interface MonstersLastUpdateStore {
 const MonstersInCurrentRound = map<MonsterStore>({});
 const MonstersAndMkeysInCurrentRound = atom<MonstersAndMkeyStore>({});
 const MonsterLastUpdate = map<MonstersLastUpdateStore>({});
+const MonstersAndTheirRandomness = atom<MonstersAndTheirRandomnessStore>({});
 
 const MonsterNeedScan = computed([
   MonstersInCurrentRound,
   MonstersAndMkeysInCurrentRound,
-  MonsterLastUpdate
-], (monsters, monsterAndMkey, monsterLastUpdate) => {
+  MonsterLastUpdate,
+  MonstersAndTheirRandomness
+], (
+  monsters,
+  monsterAndMkey,
+  monsterLastUpdate,
+  monstersAndTheirRandomness
+) => {
   return Object.entries(monsters).map(([monsterName, monsterInfo]) => {
     const mkey = monsterAndMkey[monsterName];
+    const randomness = monstersAndTheirRandomness[monsterName];
     if (mkey) {
       if (checkScanResultValidity(mkey)) {
-        if (monsterInfo) {
-          const mid = monsterInfo.monsterId;
-          const lastUpdate = monsterLastUpdate[mid];
+        // If there is no monsterInfo, it means the monster need to be scanned
+        if (!monsterInfo) return { name: monsterName, mkey };
 
-          if (isMonsterNeedScan(mkey, lastUpdate)) {
-            return { mkey, name: monsterName };
-          }
-        } else {
-          return { name: monsterName, mkey };
+        const mid = monsterInfo.monsterId;
+        const lastUpdate = monsterLastUpdate[mid];
+        if (isMonsterNeedScan(mkey, randomness, lastUpdate)) {
+          return { mkey, name: monsterName };
         }
       }
     }
@@ -73,6 +83,7 @@ const StateSubscribed = atom(false);
 export {
   MonstersInCurrentRound,
   MonstersAndMkeysInCurrentRound,
+  MonstersAndTheirRandomness,
   MonsterLastUpdate,
   MonsterNeedScan,
   MonsterNeedHighlight,

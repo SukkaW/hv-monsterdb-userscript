@@ -4,12 +4,9 @@ import { getHowManyDaysSinceLastIsekaiReset } from './isekaiReset';
 import { convertEncodedMonsterInfoToMonsterInfo, EncodedMonsterDatabase } from './monsterDataEncode';
 import { LOCAL_MONSTER_DATABASE, MONSTER_NAME_ID_MAP } from './store';
 
-const EFFECTS_AFFECTING_SCAN_REAULT = ['nbardead.png', 'imperil.png', 'firedot.png', 'coldslow.png', 'coldslow.png', 'windmiss.png', 'holybreach.png', 'darknerf.png'];
+const EFFECTS_AFFECTING_SCAN_REAULT = ['nbardead.png', 'imperil.png', 'firedot.png', 'coldslow.png', 'coldslow.png', 'windmiss.png', 'holybreach.png', 'darknerf.png'] as const;
 
 const NOW = new Date().getTime();
-const RANDOMNESS = isIsekai()
-  ? Math.floor(Math.random() * Math.floor(SETTINGS.scanExpireDays / 3))
-  : Math.floor(Math.random() * Math.floor(SETTINGS.scanExpireDays / 5)) + 1;
 
 export const checkScanResultValidity = (mkey: string) => {
   const monsterHtml = document.getElementById(mkey)?.innerHTML;
@@ -42,9 +39,11 @@ export const getMonsterHighlightColor = (monsterInfo: HVMonsterDatabase.MonsterI
   return false;
 };
 
-export const isMonsterNeedScan = (mkey: string | undefined, lastUpdate?: number): boolean => {
+export const isMonsterNeedScan = (mkey: string | undefined, randomness: number | undefined, lastUpdate?: number): boolean => {
   const isDead = mkey && Boolean(document.getElementById(mkey)?.innerHTML.includes('nbardead.png'));
   if (isDead) return false;
+
+  randomness ??= Math.floor(Math.random() * Math.floor(SETTINGS.scanExpireDays / 5)) + 1;
 
   if (lastUpdate) {
     // How many days since lastUpdate to now.
@@ -57,7 +56,7 @@ export const isMonsterNeedScan = (mkey: string | undefined, lastUpdate?: number)
         // There is an Isekai Reset between last scan and now.
         && passedDays > howManyDaysSinceLastIsekaiReset
         // Add some randomness to prevent everyone scan monsters at the day one of the Isekai Reset
-        && howManyDaysSinceLastIsekaiReset > RANDOMNESS
+        && howManyDaysSinceLastIsekaiReset > randomness
       ) {
         return true;
       }
@@ -67,7 +66,7 @@ export const isMonsterNeedScan = (mkey: string | undefined, lastUpdate?: number)
       return false;
     }
 
-    if (passedDays < (SETTINGS.scanExpireDays + RANDOMNESS)) {
+    if (passedDays < (SETTINGS.scanExpireDays + randomness)) {
       return false;
     }
   }
