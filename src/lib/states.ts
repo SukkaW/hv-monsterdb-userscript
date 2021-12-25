@@ -16,7 +16,7 @@ interface MonstersLastUpdateStore {
   [mid: number]: number
 }
 
-const MonstersInCurrentRound = atom<MonsterStore>({});
+const MonstersInCurrentRound = map<MonsterStore>({});
 const MonstersAndMkeysInCurrentRound = atom<MonstersAndMkeyStore>({});
 const MonsterLastUpdate = map<MonstersLastUpdateStore>({});
 
@@ -28,23 +28,16 @@ const MonsterNeedScan = computed([
   return Object.entries(monsters).map(([monsterName, monsterInfo]) => {
     const mkey = monsterAndMkey[monsterName];
     if (mkey) {
-      const isValidToScan = checkScanResultValidity(mkey);
-      if (monsterInfo) {
-        const mid = monsterInfo.monsterId;
-        const lastUpdate = monsterLastUpdate[mid];
+      if (checkScanResultValidity(mkey)) {
+        if (monsterInfo) {
+          const mid = monsterInfo.monsterId;
+          const lastUpdate = monsterLastUpdate[mid];
 
-        if (isMonsterNeedScan(mkey, lastUpdate) && isValidToScan) {
-          return {
-            mkey,
-            name: monsterName
-          };
-        }
-      } else {
-        if (isValidToScan) {
-          return {
-            name: monsterName,
-            mkey
-          };
+          if (isMonsterNeedScan(mkey, lastUpdate)) {
+            return { mkey, name: monsterName };
+          }
+        } else {
+          return { name: monsterName, mkey };
         }
       }
     }

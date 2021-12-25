@@ -39,44 +39,6 @@ export async function inBattle(): Promise<void> {
   }
 
   if (StateSubscribed.get() === false) {
-    // Highlight Need Scanned Monsters
-    let highlightNeedScanMonsterRafId: number | null = null;
-    const highlightScanColor = SETTINGS.scanHighlightColor === true ? 'coral' : SETTINGS.scanHighlightColor;
-    if (highlightScanColor) {
-      MonsterNeedScan.subscribe(needScanMonsters => {
-        if (highlightNeedScanMonsterRafId) {
-          window.cancelAnimationFrame(highlightNeedScanMonsterRafId);
-        }
-        highlightNeedScanMonsterRafId = window.requestAnimationFrame(() => {
-          needScanMonsters.forEach(needScanMonster => {
-            if (needScanMonster.mkey) {
-              const monsterBtm2El = document.getElementById(needScanMonster.mkey)?.querySelector('div.btm2');
-              if (monsterBtm2El) {
-                monsterBtm2El.style.backgroundColor = highlightScanColor;
-              }
-            }
-          });
-        });
-      });
-    }
-
-    // Highlight Monster
-    let highlightMonsterRafId: number | null = null;
-    MonsterNeedHighlight.subscribe(needHighlightMonsters => {
-      if (highlightMonsterRafId) {
-        window.cancelAnimationFrame(highlightMonsterRafId);
-      }
-      highlightMonsterRafId = window.requestAnimationFrame(() => {
-        needHighlightMonsters.forEach(needHighlightMonster => {
-          const { color, mkey } = needHighlightMonster;
-          const monsterBtm2El = document.getElementById(mkey)?.querySelector('div.btm2');
-          if (monsterBtm2El) {
-            monsterBtm2El.style.backgroundColor = color;
-          }
-        });
-      });
-    });
-
     // Show monster info box
     let showMonsterInfoBoxRafId: number | null = null;
     if (SETTINGS.showMonsterInfoBox) {
@@ -164,9 +126,10 @@ async function tasksRunAtStartOfPerRound(): Promise<void> {
   MonstersInCurrentRound.set(monsters);
   MonstersAndMkeysInCurrentRound.set(mkeys);
   MonsterLastUpdate.set(monsterLastUpdates);
+
   logger.debug('MonstersInCurrentRound', MonstersInCurrentRound.get());
-  logger.debug('MonstersAndMkeysInCurrentRound', MonstersAndMkeysInCurrentRound.get());
-  logger.debug('MonsterLastUpdate', MonsterLastUpdate.get());
+
+  highlightMonsters();
 }
 
 async function tasksRunDuringTheBattle(): Promise<void> {
@@ -198,6 +161,7 @@ async function tasksRunDuringTheBattle(): Promise<void> {
           if (mid) {
             LOCAL_MONSTER_DATABASE.set(mid, convertMonsterInfoToEncodedMonsterInfo(scanResult));
             MonsterLastUpdate.setKey(mid, Date.now());
+            MonstersInCurrentRound.setKey(monsterName, scanResult);
           }
         } else {
           logger.warn(`${monsterName} is not legible for scan, ignoring the scan result!`);
@@ -208,6 +172,51 @@ async function tasksRunDuringTheBattle(): Promise<void> {
     }
   }
 
-  logger.debug('Monsters need to be highlighted', MonsterNeedHighlight.get());
-  logger.debug('Monsters need to be scanned', MonsterNeedScan.get());
+  highlightMonsters();
+}
+
+let highlightNeedScanMonsterRafId: number | null = null;
+let highlightMonsterRafId: number | null = null;
+const highlightScanColor = SETTINGS.scanHighlightColor === true ? 'coral' : SETTINGS.scanHighlightColor;
+const isHighlightMonsterEnabled = SETTINGS.highlightMonster && Object.keys(SETTINGS.highlightMonster).length > 0;
+
+// HentaiVerse always completely replace monsters element, so we need to re-highlight monsters on every turn.
+// Blame Tenboro for his lazily adapting new web technology.
+function highlightMonsters() {
+  // Highlight Need Scanned Monsters
+  if (highlightNeedScanMonsterRafId) {
+    window.cancelAnimationFrame(highlightNeedScanMonsterRafId);
+  }
+
+  if (highlightScanColor) {
+    const needScanMonsters = MonsterNeedScan.get();
+    highlightNeedScanMonsterRafId = window.requestAnimationFrame(() => {
+      needScanMonsters.forEach(needScanMonster => {
+        if (needScanMonster.mkey) {
+          const monsterBtm2El = document.getElementById(needScanMonster.mkey)?.querySelector('div.btm2');
+          if (monsterBtm2El) {
+            monsterBtm2El.style.backgroundColor = highlightScanColor;
+          }
+        }
+      });
+    });
+  }
+
+  if (isHighlightMonsterEnabled) {
+    // Highlight Monster
+    if (highlightMonsterRafId) {
+      window.cancelAnimationFrame(highlightMonsterRafId);
+    }
+
+    const needHighlightMonsters = MonsterNeedHighlight.get();
+    highlightMonsterRafId = window.requestAnimationFrame(() => {
+      needHighlightMonsters.forEach(needHighlightMonster => {
+        const { color, mkey } = needHighlightMonster;
+        const monsterBtm2El = document.getElementById(mkey)?.querySelector('div.btm2');
+        if (monsterBtm2El) {
+          monsterBtm2El.style.backgroundColor = color;
+        }
+      });
+    });
+  }
 }

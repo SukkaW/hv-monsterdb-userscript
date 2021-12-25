@@ -114,7 +114,7 @@ export function getCurrentNeedScannedMonsters(): {
     logger.error('"getCurrentNeedScannedMonsters" method is only avaliable during the battle!');
     throw new Error('"getCurrentNeedScannedMonsters" method is only avaliable during the battle!');
   }
-  return [...MonsterNeedScan.get()];
+  return MonsterNeedScan.get();
 }
 
 /**
