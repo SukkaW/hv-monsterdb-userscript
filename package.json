@@ -46,6 +46,7 @@
     "eslint-plugin-import": "^2.25.3",
     "eslint-plugin-node": "^11.1.0",
     "magic-string": "^0.25.7",
+    "nanostores": "^0.5.8",
     "rollup": "^2.41.4",
     "rollup-plugin-postcss": "^4.0.0",
     "rollup-plugin-swc3": "^0.1.4",

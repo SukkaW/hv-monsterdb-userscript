@@ -5,7 +5,7 @@ import { getStoredValue, setStoredValue } from '../util/store';
 import { IDBKV } from '../util/idbkv';
 
 const DBNAME = 'hv-monster-database-script';
-export const OBJECT_STORES = ['MONSTER_NAME_ID_MAP', 'databaseV2', 'databaseIsekaiV2'];
+export const OBJECT_STORES = ['MONSTER_NAME_ID_MAP', 'databaseV2', 'databaseIsekaiV2'] as const;
 
 /** The position of monster info box */
 export let MONSTER_INFO_BOX_POSITION = { x: 10, y: 10 };

@@ -1,24 +1,18 @@
-import { MonsterStatus } from './monster';
 import { parseMonsterNameAndId, parseScanResult } from './parseLog';
 import { MONSTER_NAME_ID_MAP, LOCAL_MONSTER_DATABASE } from './store';
 import { createMonsterInfoBox, MonsterInfo } from './monsterInfoUI';
-import { convertMonsterInfoToEncodedMonsterInfo } from './monsterDataEncode';
+import { convertEncodedMonsterInfoToMonsterInfo, convertMonsterInfoToEncodedMonsterInfo, EncodedMonsterDatabase } from './monsterDataEncode';
 import { logger } from '../util/logger';
 import { submitScanResults } from './submitScan';
+
+import { checkScanResultValidity } from './monster';
+import { MonstersInCurrentRound, MonstersAndMkeysInCurrentRound, MonsterLastUpdate, MonsterNeedScan, MonsterNeedHighlight, StateSubscribed } from './states';
 import { createElement, patch } from 'million';
 
 let monsterInfoVElement: ReturnType<typeof createElement> | undefined;
 
 import 'typed-query-selector';
-
-export const MONSTERS: Map<string, MonsterStatus> = new Map();
-
-export const MONSTERS_NEED_SCAN: Set<{
-  name: string,
-  /** Can be used with document#getElementById */
-  mkey: string,
-  mid?: number
-}> = new Set();
+import { HVMonsterDatabase } from '../types';
 
 /** Will execute at per round start */
 export async function inBattle(): Promise<void> {
@@ -43,13 +37,80 @@ export async function inBattle(): Promise<void> {
     const mo = new MutationObserver(tasksRunDuringTheBattle);
     mo.observe(logEl.firstChild, { childList: true });
   }
+
+  if (StateSubscribed.get() === false) {
+    // Highlight Need Scanned Monsters
+    let highlightNeedScanMonsterRafId: number | null = null;
+    const highlightScanColor = SETTINGS.scanHighlightColor === true ? 'coral' : SETTINGS.scanHighlightColor;
+    if (highlightScanColor) {
+      MonsterNeedScan.subscribe(needScanMonsters => {
+        if (highlightNeedScanMonsterRafId) {
+          window.cancelAnimationFrame(highlightNeedScanMonsterRafId);
+        }
+        highlightNeedScanMonsterRafId = window.requestAnimationFrame(() => {
+          needScanMonsters.forEach(needScanMonster => {
+            if (needScanMonster.mkey) {
+              const monsterBtm2El = document.getElementById(needScanMonster.mkey)?.querySelector('div.btm2');
+              if (monsterBtm2El) {
+                monsterBtm2El.style.backgroundColor = highlightScanColor;
+              }
+            }
+          });
+        });
+      });
+    }
+
+    // Highlight Monster
+    let highlightMonsterRafId: number | null = null;
+    MonsterNeedHighlight.subscribe(needHighlightMonsters => {
+      if (highlightMonsterRafId) {
+        window.cancelAnimationFrame(highlightMonsterRafId);
+      }
+      highlightMonsterRafId = window.requestAnimationFrame(() => {
+        needHighlightMonsters.forEach(needHighlightMonster => {
+          const { color, mkey } = needHighlightMonster;
+          const monsterBtm2El = document.getElementById(mkey)?.querySelector('div.btm2');
+          if (monsterBtm2El) {
+            monsterBtm2El.style.backgroundColor = color;
+          }
+        });
+      });
+    });
+
+    // Show monster info box
+    let showMonsterInfoBoxRafId: number | null = null;
+    if (SETTINGS.showMonsterInfoBox) {
+      MonstersInCurrentRound.subscribe(monstersInCurrentRound => {
+        // This to prevent rendering when new round starts and monsters data is still being fetching
+        if (showMonsterInfoBoxRafId) {
+          window.cancelAnimationFrame(showMonsterInfoBoxRafId);
+        }
+
+        showMonsterInfoBoxRafId = window.requestAnimationFrame(() => {
+          const allMonsterStatus = Object.values(monstersInCurrentRound);
+
+          if (!document.getElementById('monsterdb_info')) {
+            createMonsterInfoBox();
+            monsterInfoVElement = createElement(
+              MonsterInfo(allMonsterStatus)
+            );
+            document.getElementById('monsterdb_container')?.appendChild(monsterInfoVElement);
+          } else {
+            const container = document.getElementById('monsterdb_container');
+            if (container && monsterInfoVElement) {
+              patch(monsterInfoVElement, MonsterInfo(allMonsterStatus));
+            }
+          }
+        });
+      });
+    }
+    StateSubscribed.set(true);
+  }
 }
 
 /** Tasks like "get monster id and monster name" only have to run at the start of per round */
 async function tasksRunAtStartOfPerRound(): Promise<void> {
   const monsterInTheRoundNameIdMap: Map<string, number> = new Map();
-
-  MONSTERS.clear();
 
   if (document.getElementById('textlog')?.textContent?.includes('Spawned')) {
     [...document.querySelectorAll('#textlog > tbody > tr')].forEach(logEl => {
@@ -70,28 +131,42 @@ async function tasksRunAtStartOfPerRound(): Promise<void> {
   // is consistent with actually in #battle_right. It is unstable
   // and unreliable method. So I will manually get monster info
   // directly from DOM.
+  const monsters: Record<string, HVMonsterDatabase.MonsterInfo | null> = {};
+  const mkeys: Record<string, string> = {};
+  const monsterLastUpdates: Record<number, number> = {};
   (await Promise.all(
-    [...document.getElementsByClassName('btm1')].map(el => {
+    [...document.getElementsByClassName('btm1')].map(async el => {
       const mkey = el.id;
-      const name = el.getElementsByClassName('btm3')[0].textContent?.trim();
+      const monsterName = el.getElementsByClassName('btm3')[0].textContent?.trim();
 
-      if (mkey && name) {
-        const monster = new MonsterStatus(name, mkey, monsterInTheRoundNameIdMap.get(name) ?? null);
-        return monster.init();
+      if (mkey && monsterName) {
+        mkeys[monsterName] = mkey;
+
+        const mid = monsterInTheRoundNameIdMap.get(monsterName) ?? await MONSTER_NAME_ID_MAP.get(monsterName);
+        if (mid) {
+          const encodedMonsterInfo = await LOCAL_MONSTER_DATABASE.get(mid);
+          if (encodedMonsterInfo) {
+            const monsterInfo = convertEncodedMonsterInfoToMonsterInfo(mid, encodedMonsterInfo);
+            const lastUpdate = encodedMonsterInfo[EncodedMonsterDatabase.EMonsterInfo.lastUpdate];
+
+            monsters[monsterName] = monsterInfo;
+            monsterLastUpdates[mid] = lastUpdate;
+
+            return;
+          }
+        }
+
+        monsters[monsterName] = null;
       }
-
-      return null;
     })
-  )).forEach(monster => {
-    if (monster?.name) {
-      MONSTERS.set(monster.name, monster);
-    }
-  });
+  ));
 
-  logger.debug('Monsters in the round', MONSTERS);
-
-  // This function is related with API, so it can't be wrapped in requestAnimationFrame.
-  showMonsterInfoAndHighlightMonster();
+  MonstersInCurrentRound.set(monsters);
+  MonstersAndMkeysInCurrentRound.set(mkeys);
+  MonsterLastUpdate.set(monsterLastUpdates);
+  logger.debug('MonstersInCurrentRound', MonstersInCurrentRound.get());
+  logger.debug('MonstersAndMkeysInCurrentRound', MonstersAndMkeysInCurrentRound.get());
+  logger.debug('MonsterLastUpdate', MonsterLastUpdate.get());
 }
 
 async function tasksRunDuringTheBattle(): Promise<void> {
@@ -113,106 +188,26 @@ async function tasksRunDuringTheBattle(): Promise<void> {
         logger.info('Scanned a monster:', monsterName);
         logger.debug('Scan result', scanResult);
 
-        const monsterStatus = MONSTERS.get(monsterName);
-
-        // Check if the monster is dead, being imperiled, or has spell effects
-        if (monsterStatus?.checkScanResultValidity()) {
+        const scannedMonsterMkey = MonstersAndMkeysInCurrentRound.get()[monsterName];
+        if (scannedMonsterMkey && checkScanResultValidity(scannedMonsterMkey)) {
           logger.info(`Scan results for ${monsterName} is now queued to submit`);
           window.requestIdleCallback(() => submitScanResults(scanResult), { timeout: 3000 });
 
-          // Update local database first, it will be used to update UI
-          if (monsterStatus.mid) {
-            LOCAL_MONSTER_DATABASE.set(monsterStatus.mid, convertMonsterInfoToEncodedMonsterInfo(scanResult));
-            monsterStatus.updateInfoFromScan(scanResult);
+          // eslint-disable-next-line no-await-in-loop
+          const mid = await MONSTER_NAME_ID_MAP.get(monsterName);
+          if (mid) {
+            LOCAL_MONSTER_DATABASE.set(mid, convertMonsterInfoToEncodedMonsterInfo(scanResult));
+            MonsterLastUpdate.setKey(mid, Date.now());
           }
         } else {
           logger.warn(`${monsterName} is not legible for scan, ignoring the scan result!`);
         }
       }
+
+      break;
     }
   }
 
-  showMonsterInfoAndHighlightMonster();
-}
-
-const highlightExpireMonster = (monsterStatus: MonsterStatus, color: string) => () => {
-  const monsterBtm2El = monsterStatus.element?.querySelector('div.btm2');
-  if (monsterBtm2El) {
-    monsterBtm2El.style.backgroundColor = color;
-  }
-};
-const highlightMonster = (monsterStatus: MonsterStatus) => () => {
-  const color = monsterStatus.highlightColor;
-  if (color) {
-    const monsterBtm2El = monsterStatus.element?.querySelector('div.btm2');
-    if (monsterBtm2El) {
-      monsterBtm2El.style.backgroundColor = color;
-    }
-  }
-};
-
-let requestAnimationFrameId: ReturnType<typeof globalThis.requestAnimationFrame> | undefined;
-const isHighlightMonsterEnabled = SETTINGS.highlightMonster && Object.keys(SETTINGS.highlightMonster).length > 0;
-const highlightScanColor = SETTINGS.scanHighlightColor === true ? 'coral' : SETTINGS.scanHighlightColor;
-
-function showMonsterInfoAndHighlightMonster(): void {
-  // A queue of function to be called, to avoid race condition
-  const requestAnimationFrameCallbackQueue: FrameRequestCallback[] = [];
-
-  MONSTERS_NEED_SCAN.clear();
-
-  if (SETTINGS.showMonsterInfoBox) {
-    const allMonsterStatus = [...MONSTERS.values()];
-
-    if (!document.getElementById('monsterdb_info')) {
-      requestAnimationFrameCallbackQueue.push(() => {
-        createMonsterInfoBox();
-        monsterInfoVElement = createElement(
-          MonsterInfo(allMonsterStatus)
-        );
-        document.getElementById('monsterdb_container')?.appendChild(monsterInfoVElement);
-      });
-    } else {
-      requestAnimationFrameCallbackQueue.push(() => {
-        const container = document.getElementById('monsterdb_container');
-
-        if (container && monsterInfoVElement) {
-          patch(monsterInfoVElement, MonsterInfo(allMonsterStatus));
-        }
-      });
-    }
-  }
-
-  for (const [monsterName, monsterStatus] of MONSTERS) {
-    // Highlight a monster based on SETTINGS.highlightMonster
-    if (isHighlightMonsterEnabled) {
-      requestAnimationFrameCallbackQueue.push(highlightMonster(monsterStatus));
-    }
-
-    // Find monster needs to be scanned
-    if (monsterStatus.isNeedScan && monsterStatus.checkScanResultValidity()) {
-      MONSTERS_NEED_SCAN.add({
-        name: monsterName,
-        mkey: monsterStatus.mkey,
-        mid: monsterStatus.mid
-      });
-      // Highlight a monster hasn't been scanned for a while
-      if (highlightScanColor !== false) {
-        requestAnimationFrameCallbackQueue.push(highlightExpireMonster(monsterStatus, highlightScanColor));
-      }
-    }
-  }
-
-  // Avoid stacking FrameRequestCallback causing memory leaks
-  if (requestAnimationFrameId && typeof window.cancelAnimationFrame === 'function') {
-    window.cancelAnimationFrame(requestAnimationFrameId);
-  }
-  requestAnimationFrameId = window.requestAnimationFrame((t) => {
-    // Batch FrameRequestCallback to avoid race condition
-    for (const func of requestAnimationFrameCallbackQueue) {
-      func(t);
-    }
-
-    requestAnimationFrameId = undefined;
-  });
+  logger.debug('Monsters need to be highlighted', MonsterNeedHighlight.get());
+  logger.debug('Monsters need to be scanned', MonsterNeedScan.get());
 }

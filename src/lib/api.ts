@@ -1,7 +1,8 @@
 import { HVMonsterDatabase } from '../types';
 import { isFightingInBattle } from '../util/common';
 import { logger } from '../util/logger';
-import { MONSTERS, MONSTERS_NEED_SCAN, inBattle as inBattleFunc } from './battle';
+import { inBattle as inBattleFunc } from './battle';
+import { MonstersInCurrentRound, MonstersAndMkeysInCurrentRound, MonsterNeedScan } from './states';
 import { updateLocalDatabase } from './localDataBase';
 import { convertEncodedMonsterInfoToMonsterInfo } from './monsterDataEncode';
 import { MONSTER_NAME_ID_MAP, LOCAL_MONSTER_DATABASE } from './store';
@@ -65,8 +66,11 @@ export function getCurrentMonstersInformation(): {
   }
 
   const results: Record<string, HVMonsterDatabase.MonsterInfo | null> = {};
-  for (const [, monsterStatus] of MONSTERS) {
-    results[monsterStatus.mkey] = monsterStatus.info || null;
+  for (const [monsterName, monsterInfo] of Object.entries(MonstersInCurrentRound.get())) {
+    const mkey = MonstersAndMkeysInCurrentRound.get()[monsterName];
+    if (mkey) {
+      results[mkey] = monsterInfo;
+    }
   }
 
   return results;
@@ -104,14 +108,13 @@ export async function getMonsterInfoByName(name: string): Promise<HVMonsterDatab
  */
 export function getCurrentNeedScannedMonsters(): {
   name: string,
-  mkey: string,
-  mid?: number
+  mkey: string
 }[] {
   if (!isFightingInBattle()) {
     logger.error('"getCurrentNeedScannedMonsters" method is only avaliable during the battle!');
     throw new Error('"getCurrentNeedScannedMonsters" method is only avaliable during the battle!');
   }
-  return [...MONSTERS_NEED_SCAN];
+  return [...MonsterNeedScan.get()];
 }
 
 /**

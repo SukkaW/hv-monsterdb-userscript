@@ -50,6 +50,7 @@ export default defineConfig([{
     nodeResolve(),
     replace({
       __buildMatrix__: JSON.stringify('es2020'),
+      'process.env.NODE_ENV': JSON.stringify('production'),
       preventAssignment: true
     }),
     swc(defineRollupSwcOption({

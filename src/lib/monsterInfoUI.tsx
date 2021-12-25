@@ -104,12 +104,12 @@ const MonsterTable = (props: { monsterInfo?: HVMonsterDatabase.MonsterInfo }) =>
   </div>
 );
 
-export function MonsterInfo(allMonsterStatus: MonsterStatus[]) {
+export function MonsterInfo(allMonsterStatus: (HVMonsterDatabase.MonsterInfo | null)[]) {
   return (
     <div>{/* Million doesn't support root VNode to be a Fragment, see https://github.com/aidenybai/million/issues/160 */}
       {
         /* Provide all 10 MonsterTable and only toggle their display property, significantly improve virtual dom performance */
-        [...Array(10).keys()].map(i => <MonsterTable monsterInfo={allMonsterStatus[i]?.info} />)
+        [...Array(10).keys()].map(i => <MonsterTable monsterInfo={allMonsterStatus[i] ?? undefined} />)
       }
     </div>
   );
