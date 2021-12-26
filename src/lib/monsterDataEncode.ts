@@ -18,7 +18,8 @@ export namespace EncodedMonsterDatabase {
     Undead,
     Rare,
     Legendary,
-    Ultimate
+    Ultimate,
+    Common
   }
 
   export enum EMonsterAttack {
