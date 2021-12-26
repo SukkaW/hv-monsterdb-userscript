@@ -1,17 +1,14 @@
 import { getStoredValue, setStoredValue } from '../util/store';
+import { atom } from 'nanostores';
 
-let HOW_MANY_DAYS_SINCE_LAST_ISEKAI_RESET: number | null = null;
+export const HowManyDaysSinceLastIsekaiReset = atom<number | null>(0);
 
 export async function readHowManyDaysSinceLastIsekaiReset(): Promise<void> {
   const lastIsekaiReset = await getStoredValue('lastIsekaiReset') ?? null;
 
   if (lastIsekaiReset) {
-    HOW_MANY_DAYS_SINCE_LAST_ISEKAI_RESET = (new Date().getTime() - lastIsekaiReset) / 1000 / 60 / 60 / 24;
+    HowManyDaysSinceLastIsekaiReset.set((new Date().getTime() - lastIsekaiReset) / 1000 / 60 / 60 / 24);
   }
-}
-
-export function getHowManyDaysSinceLastIsekaiReset(): number | null {
-  return HOW_MANY_DAYS_SINCE_LAST_ISEKAI_RESET;
 }
 
 export async function isIsekaiHaveBeenResetSinceLastVisit(): Promise<boolean> {

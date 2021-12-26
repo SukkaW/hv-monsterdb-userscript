@@ -1,6 +1,6 @@
 import { HVMonsterDatabase } from '../types';
 import { isIsekai } from '../util/common';
-import { getHowManyDaysSinceLastIsekaiReset } from './isekaiReset';
+import { HowManyDaysSinceLastIsekaiReset } from './isekaiReset';
 
 const EFFECTS_AFFECTING_SCAN_REAULT = ['nbardead.png', 'imperil.png', 'firedot.png', 'coldslow.png', 'elecweak.png', 'windmiss.png', 'holybreach.png', 'darknerf.png'] as const;
 
@@ -48,7 +48,7 @@ export const isMonsterNeedScan = (mkey: string | undefined, randomness: number |
     const passedDays = Math.round((NOW - lastUpdate) / (24 * 60 * 60 * 1000));
 
     if (isIsekai()) {
-      const howManyDaysSinceLastIsekaiReset = getHowManyDaysSinceLastIsekaiReset();
+      const howManyDaysSinceLastIsekaiReset = HowManyDaysSinceLastIsekaiReset.get();
       if (
         howManyDaysSinceLastIsekaiReset
         // There is an Isekai Reset between last scan and now.

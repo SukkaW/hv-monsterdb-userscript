@@ -56,22 +56,19 @@ const MonsterNeedScan = computed([
   }).filter(isTruthy);
 });
 
-const isHighlightMonsterEnabled = SETTINGS.highlightMonster && Object.keys(SETTINGS.highlightMonster).length > 0;
 const MonsterNeedHighlight = computed([
   MonstersInCurrentRound,
   MonstersAndMkeysInCurrentRound
 ], (monsters, monsterAndMkey) => {
   return Object.entries(monsters).map(([monsterName, monsterInfo]) => {
-    if (isHighlightMonsterEnabled) {
-      const mkey = monsterAndMkey[monsterName];
-      const color = monsterInfo ? getMonsterHighlightColor(monsterInfo) : false;
+    const mkey = monsterAndMkey[monsterName];
+    const color = monsterInfo ? getMonsterHighlightColor(monsterInfo) : false;
 
-      if (color && mkey) {
-        return {
-          mkey,
-          color
-        };
-      }
+    if (color && mkey) {
+      return {
+        mkey,
+        color
+      };
     }
 
     return null;

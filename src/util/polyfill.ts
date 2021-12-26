@@ -34,6 +34,7 @@ export function polyfill(): void {
   // GM v4 API Polyfill
   if (typeof GM === 'undefined' || GM == null) {
     globalThis.GM = {
+      // eslint-disable-next-line no-console
       log: console.log.bind(console), // For Pale Moon compatibility
       info: {
         script: {

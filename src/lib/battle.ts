@@ -171,6 +171,9 @@ async function tasksRunDuringTheBattle(): Promise<void> {
           LOCAL_MONSTER_DATABASE.set(scanResult.monsterId, convertMonsterInfoToEncodedMonsterInfo(scanResult));
           MonsterLastUpdate.setKey(scanResult.monsterId, Date.now());
           MonstersInCurrentRound.setKey(monsterName, scanResult);
+
+          // Highlight monsters again with newly scanned monsters' state
+          highlightMonsters();
         } else {
           logger.warn(`${monsterName} is not legible for scan, ignoring the scan result!`);
         }
