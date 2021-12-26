@@ -2,7 +2,7 @@ import { HVMonsterDatabase } from '../types';
 import { isIsekai } from '../util/common';
 import { getHowManyDaysSinceLastIsekaiReset } from './isekaiReset';
 
-const EFFECTS_AFFECTING_SCAN_REAULT = ['nbardead.png', 'imperil.png', 'firedot.png', 'coldslow.png', 'coldslow.png', 'windmiss.png', 'holybreach.png', 'darknerf.png'] as const;
+const EFFECTS_AFFECTING_SCAN_REAULT = ['nbardead.png', 'imperil.png', 'firedot.png', 'coldslow.png', 'elecweak.png', 'windmiss.png', 'holybreach.png', 'darknerf.png'] as const;
 
 const NOW = new Date().getTime();
 
