@@ -41,8 +41,9 @@ export async function inBattle(): Promise<void> {
 
   if (StateSubscribed.get() === false) {
     // Show monster info box
-    let showMonsterInfoBoxRafId: number | null = null;
     if (SETTINGS.showMonsterInfoBox) {
+      let showMonsterInfoBoxRafId: number | null = null;
+
       MonstersInCurrentRound.subscribe(monstersInCurrentRound => {
         // This to prevent rendering when new round starts and monsters data is still being fetching
         if (showMonsterInfoBoxRafId) {
@@ -142,16 +143,17 @@ async function tasksRunAtStartOfPerRound(): Promise<void> {
 }
 
 async function tasksRunDuringTheBattle(): Promise<void> {
+  highlightMonsters();
+
   // Handle batleLog
   const logEls = document.querySelectorAll('#textlog > tbody > tr');
-  for (const logEl of logEls) {
-    const logHtml = logEl.innerHTML;
-
+  for (const { innerHTML: logHtml } of logEls) {
     // This turn is over, do not proceed
     if (logHtml.includes('<td class="tls">')) break;
 
     // This turn scan a monster
     if (logHtml.includes('Scanning')) {
+      // Every turn you'd only scan one monster
       // eslint-disable-next-line no-await-in-loop
       const scanResult = await parseScanResult(logHtml);
       if (scanResult) {
@@ -165,13 +167,10 @@ async function tasksRunDuringTheBattle(): Promise<void> {
           logger.info(`Scan results for ${monsterName} is now queued to submit`);
           window.requestIdleCallback(() => submitScanResults(scanResult), { timeout: 3000 });
 
-          // eslint-disable-next-line no-await-in-loop
-          const mid = await MONSTER_NAME_ID_MAP.get(monsterName);
-          if (mid) {
-            LOCAL_MONSTER_DATABASE.set(mid, convertMonsterInfoToEncodedMonsterInfo(scanResult));
-            MonsterLastUpdate.setKey(mid, Date.now());
-            MonstersInCurrentRound.setKey(monsterName, scanResult);
-          }
+          // We already fetch monsterId during parseScanResult
+          LOCAL_MONSTER_DATABASE.set(scanResult.monsterId, convertMonsterInfoToEncodedMonsterInfo(scanResult));
+          MonsterLastUpdate.setKey(scanResult.monsterId, Date.now());
+          MonstersInCurrentRound.setKey(monsterName, scanResult);
         } else {
           logger.warn(`${monsterName} is not legible for scan, ignoring the scan result!`);
         }
@@ -180,8 +179,6 @@ async function tasksRunDuringTheBattle(): Promise<void> {
       break;
     }
   }
-
-  highlightMonsters();
 }
 
 let highlightNeedScanMonsterRafId: number | null = null;

@@ -11,7 +11,7 @@ export function getUTCDate(): string {
 }
 
 const MonsterDatabaseCompatibleDateCache = new Map();
-
+const padNumber = (num: number) => num.toString().padStart(2, '0');
 export function getMonsterDatabaseCompatibleDate(timestamp?: number): string {
   if (timestamp && MonsterDatabaseCompatibleDateCache.has(timestamp)) return MonsterDatabaseCompatibleDateCache.get(timestamp);
 
@@ -19,7 +19,6 @@ export function getMonsterDatabaseCompatibleDate(timestamp?: number): string {
   const year = date.getUTCFullYear();
   const month = date.getUTCMonth() + 1;
   const day = date.getUTCDate();
-  const padNumber = (num: number) => num.toString().padStart(2, '0');
   const result = `${year}-${padNumber(month)}-${padNumber(day)}`;
 
   if (timestamp) {

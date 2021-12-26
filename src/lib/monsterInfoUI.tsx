@@ -66,9 +66,10 @@ const MonsterTable = (props: { monsterInfo?: HVMonsterDatabase.MonsterInfo }) =>
       <tbody>
         <tr>
           {isCompactMonsterInfoBox && (['fire', 'cold', 'elec'] as const).map(i => {
-            const text = `${i[0]}:${symbolNum(props.monsterInfo?.[i])}${padStr(props.monsterInfo?.[i])}`;
             return (
-              <td className={styles[i]}>{text}</td>
+              <td className={styles[i]}>
+                {i[0]}:{symbolNum(props.monsterInfo?.[i])}{padStr(props.monsterInfo?.[i])}
+              </td>
             );
           })}
           <td>
@@ -78,9 +79,10 @@ const MonsterTable = (props: { monsterInfo?: HVMonsterDatabase.MonsterInfo }) =>
         </tr>
         <tr>
           {isCompactMonsterInfoBox && (['wind', 'holy', 'dark'] as const).map(i => {
-            const text = `${i[0]}:${symbolNum(props.monsterInfo?.[i])}${padStr(props.monsterInfo?.[i])}`;
             return (
-              <td className={styles[i]}>{text}</td>
+              <td className={styles[i]}>
+                {i[0]}:{symbolNum(props.monsterInfo?.[i])}{padStr(props.monsterInfo?.[i])}
+              </td>
             );
           })}
           <td>
@@ -89,9 +91,10 @@ const MonsterTable = (props: { monsterInfo?: HVMonsterDatabase.MonsterInfo }) =>
         </tr>
         <tr>
           {isCompactMonsterInfoBox && (['crushing', 'slashing', 'piercing'] as const).map(i => {
-            const text = `${i[0]}:${symbolNum(props.monsterInfo?.[i])}${padStr(props.monsterInfo?.[i])}`;
             return (
-              <td>{text}</td>
+              <td>
+                {i[0]}:{symbolNum(props.monsterInfo?.[i])}{padStr(props.monsterInfo?.[i])}
+              </td>
             );
           })}
           <td>
