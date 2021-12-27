@@ -100,7 +100,9 @@ async function tasksRunAtStartOfPerRound(): Promise<void> {
   // is consistent with actually in #battle_right. It is unstable
   // and unreliable method. So I will manually get monster info
   // directly from DOM.
-  const monsters: Record<string, HVMonsterDatabase.MonsterInfo | null> = {};
+
+  // Use Map to ensure the order of monsters
+  const monsters: Map<string, HVMonsterDatabase.MonsterInfo | null> = new Map();
   const mkeys: Record<string, string> = {};
   const monsterLastUpdates: Record<number, number> = {};
   const monstersRandomness: Record<string, number> = {};
@@ -112,6 +114,8 @@ async function tasksRunAtStartOfPerRound(): Promise<void> {
       if (mkey && monsterName) {
         mkeys[monsterName] = mkey;
         monstersRandomness[monsterName] = createRandomness();
+        // Add a null monster info to monsters object first, to prevent race condition later on.
+        monsters.set(monsterName, null);
 
         const mid = monsterInTheRoundNameIdMap.get(monsterName) ?? await MONSTER_NAME_ID_MAP.get(monsterName);
         if (mid) {
@@ -120,19 +124,19 @@ async function tasksRunAtStartOfPerRound(): Promise<void> {
             const monsterInfo = convertEncodedMonsterInfoToMonsterInfo(mid, encodedMonsterInfo);
             const lastUpdate = encodedMonsterInfo[EncodedMonsterDatabase.EMonsterInfo.lastUpdate];
 
-            monsters[monsterName] = monsterInfo;
+            monsters.set(monsterName, monsterInfo);
             monsterLastUpdates[mid] = lastUpdate;
 
             return;
           }
         }
 
-        monsters[monsterName] = null;
+        monsters.set(monsterName, null);
       }
     })
   ));
 
-  MonstersInCurrentRound.set(monsters);
+  MonstersInCurrentRound.set(Object.fromEntries(monsters.entries()));
   MonstersAndMkeysInCurrentRound.set(mkeys);
   MonsterLastUpdate.set(monsterLastUpdates);
   MonstersAndTheirRandomness.set(monstersRandomness);
