@@ -69,6 +69,15 @@ class LocalMonsterDatabase {
     }
   }
 
+  getAll() {
+    return this.store.performDatabaseOperation('readonly', (store) => {
+      return Promise.all([
+        IDBKV.promisifyRequest(store.getAllKeys()),
+        IDBKV.promisifyRequest(store.getAll() as IDBRequest<UndefinedableEncodedMonsterInfo[]>)
+      ]).then(([keys, values]) => keys.map((key, i) => [key, values[i]] as const));
+    });
+  }
+
   getMany(monsterIds: (number | undefined)[]): Promise<UndefinedableEncodedMonsterInfo[]> {
     if (monsterIds.map(id => id && this.cache.has(id)).length === monsterIds.length) {
       return Promise.resolve(monsterIds.map(id => (id ? this.cache.get(id) : undefined)));

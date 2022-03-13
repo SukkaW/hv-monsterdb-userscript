@@ -5,7 +5,7 @@ import { inBattle as inBattleFunc } from './battle';
 import { MonstersInCurrentRound, MonstersAndMkeysInCurrentRound, MonsterNeedScan } from './states';
 import { updateLocalDatabase } from './localDataBase';
 import { convertEncodedMonsterInfoToMonsterInfo } from './monsterDataEncode';
-import { MONSTER_NAME_ID_MAP, LOCAL_MONSTER_DATABASE } from './store';
+import { MONSTER_NAME_ID_MAP, LOCAL_MONSTER_DATABASE, LOCAL_MONSTER_DATABASE_PERSISTENT, LOCAL_MONSTER_DATABASE_ISEKAI } from './store';
 
 /**
  * Although Monster Database script have tried best to be compatible with Monsterbation's ajaxRound feature, in order to workaround TamperMonkey on Firefox cross userscript sandbox event handler issue (one userscript can't recevied a document Event event from another one), a fallback API is provided.
@@ -139,7 +139,22 @@ export function forceUpdateLocalDatabase(): Promise<void> {
  * window.HVMonsterDB.dumpRawLocalDataBase();
  * ```
  */
-export function dumpRawLocalDataBase(): never {
-  logger.error('"dumpRawLocalDataBase" method is deprecated, please view the raw local database direcly in the DevTools -> IndexedDB!');
-  throw new Error('"dumpRawLocalDataBase" method is deprecated!');
+export async function dumpRawLocalDataBase() {
+  if (SETTINGS.debug) {
+    logger.warn('"dumpRawLocalDataBase" method is deprecated, please view the raw local database direcly in the DevTools -> IndexedDB!');
+
+    await Promise.all([LOCAL_MONSTER_DATABASE_PERSISTENT, LOCAL_MONSTER_DATABASE_ISEKAI].map(async (db) => {
+      const rawLocalDataBase = await db.getAll();
+
+      logger.info(JSON.stringify(rawLocalDataBase.map(([monsterId, encodedMonsterInfo]) => {
+        if (encodedMonsterInfo) {
+          return convertEncodedMonsterInfoToMonsterInfo(monsterId as unknown as number, encodedMonsterInfo);
+        }
+        return null;
+      })));
+    }));
+  } else {
+    logger.error('"dumpRawLocalDataBase" method is only avaliable when "debug" setting is enabled!');
+    return Promise.reject(new Error('"dumpRawLocalDataBase" method is only avaliable when "debug" setting is enabled!'));
+  }
 }
