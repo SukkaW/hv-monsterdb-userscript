@@ -60,7 +60,7 @@ const padStr = (num?: number) => {
 // eslint-disable-next-line no-nested-ternary
 const symbolNum = (num?: number) => num ? (num === 0 ? ' ' : num > 0 ? '+' : '') : '';
 
-const MonsterTable = (props: { monsterInfo?: HVMonsterDatabase.MonsterInfo }) => (
+const MonsterTable = (props: { monsterInfo: HVMonsterDatabase.MonsterInfo | null }) => (
   <div className={styles.table_container}>
     <table className={[styles.table, props.monsterInfo ? false : styles.hidden].filter(Boolean).join(' ')}>
       <tbody>
@@ -111,7 +111,7 @@ export function MonsterInfo(allMonsterStatus: (HVMonsterDatabase.MonsterInfo | n
     <div>{/* Million doesn't support root VNode to be a Fragment, see https://github.com/aidenybai/million/issues/160 */}
       {
         /* Provide all 10 MonsterTable and only toggle their display property, significantly improve virtual dom performance */
-        [...Array(10).keys()].map(i => <MonsterTable monsterInfo={allMonsterStatus[i] ?? undefined} />)
+        [...Array(10).keys()].map(i => <MonsterTable monsterInfo={allMonsterStatus[i] ?? null} />)
       }
     </div>
   );

@@ -70,7 +70,7 @@ function promisify<TArgs extends any[], TResult>(fn: (...args: TArgs) => TResult
 function promisify(fn: undefined): undefined;
 function promisify<TArgs extends any[], TResult>(fn?: (...args: TArgs) => TResult): ((...args: TArgs) => Promise<TResult>) | undefined {
   if (fn) {
-    return function (...args: TArgs) {
+    return function (...args) {
       return new Promise((resolve, reject) => {
         try {
           resolve(Reflect.apply(fn, globalThis, args));

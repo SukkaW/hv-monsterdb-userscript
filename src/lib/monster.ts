@@ -26,8 +26,7 @@ export const getMonsterHighlightColor = (monsterInfo: HVMonsterDatabase.MonsterI
           return color;
         }
       } else if (typeof matcher === 'string') {
-        const regexp = new RegExp(matcher);
-        if (regexp.test(JSON.stringify(monsterInfo))) {
+        if (new RegExp(matcher).test(JSON.stringify(monsterInfo))) {
           return color;
         }
       }

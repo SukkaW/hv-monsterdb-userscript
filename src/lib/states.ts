@@ -21,6 +21,7 @@ interface MonstersLastUpdateStore {
 }
 
 const MonstersInCurrentRound = map<MonsterStore>({});
+// Store element id instead of element itself, as HentaiVerse always replace the whole element every turn
 const MonstersAndMkeysInCurrentRound = atom<MonstersAndMkeyStore>({});
 const MonsterLastUpdate = map<MonstersLastUpdateStore>({});
 const MonstersAndTheirRandomness = atom<MonstersAndTheirRandomnessStore>({});
@@ -44,8 +45,7 @@ const MonsterNeedScan = computed([
         // If there is no monsterInfo, it means the monster need to be scanned
         if (!monsterInfo) return { name: monsterName, mkey };
 
-        const mid = monsterInfo.monsterId;
-        const lastUpdate = monsterLastUpdate[mid];
+        const lastUpdate = monsterLastUpdate[monsterInfo.monsterId];
         if (isMonsterNeedScan(mkey, randomness, lastUpdate)) {
           return { mkey, name: monsterName };
         }

@@ -191,7 +191,7 @@ async function tasksRunDuringTheBattle(): Promise<void> {
 let highlightNeedScanMonsterRafId: number | null = null;
 let highlightMonsterRafId: number | null = null;
 const highlightScanColor = SETTINGS.scanHighlightColor === true ? 'coral' : SETTINGS.scanHighlightColor;
-const isHighlightMonsterEnabled = SETTINGS.highlightMonster && Object.keys(SETTINGS.highlightMonster).length > 0;
+const isHighlightMonsterEnabled = typeof SETTINGS.highlightMonster === 'object' && Object.keys(SETTINGS.highlightMonster).length > 0;
 
 // HentaiVerse always completely replace monsters element, so we need to re-highlight monsters on every turn.
 // Blame Tenboro for his lazily adapting new web technology.
