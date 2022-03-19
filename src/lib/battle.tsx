@@ -8,12 +8,12 @@ import { submitScanResults } from './submitScan';
 
 import { checkScanResultValidity } from './monster';
 import { MonstersInCurrentRound, MonstersAndMkeysInCurrentRound, MonstersAndTheirRandomness, MonsterLastUpdate, MonsterNeedScan, MonsterNeedHighlight, StateSubscribed } from './states';
-import { createElement, patch } from 'million';
-
-let monsterInfoVElement: ReturnType<typeof createElement> | undefined;
+import { render } from 'million';
 
 import 'typed-query-selector';
 import { HVMonsterDatabase } from '../types';
+
+/** @jsxImportSource million */
 
 /** Will execute at per round start */
 export async function inBattle(): Promise<void> {
@@ -53,17 +53,14 @@ export async function inBattle(): Promise<void> {
         showMonsterInfoBoxRafId = window.requestAnimationFrame(() => {
           const allMonsterStatus = Object.values(monstersInCurrentRound);
 
+          // There is first monsterdb_info, then we have monsterdb_container
           if (!document.getElementById('monsterdb_info')) {
             createMonsterInfoBox();
-            monsterInfoVElement = createElement(
-              MonsterInfo(allMonsterStatus)
-            );
-            document.getElementById('monsterdb_container')?.appendChild(monsterInfoVElement);
-          } else {
-            const container = document.getElementById('monsterdb_container');
-            if (container && monsterInfoVElement) {
-              patch(monsterInfoVElement, MonsterInfo(allMonsterStatus));
-            }
+          }
+
+          const container = document.getElementById('monsterdb_container');
+          if (container) {
+            render(container, <MonsterInfo allMonsterStatus={allMonsterStatus} />);
           }
         });
       });

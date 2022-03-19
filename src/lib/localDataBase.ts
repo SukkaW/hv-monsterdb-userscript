@@ -5,14 +5,12 @@ import { getStoredValue, removeStoredValue, setStoredValue } from '../util/store
 import { convertMonsterInfoToEncodedMonsterInfo, EncodedMonsterDatabase } from './monsterDataEncode';
 import { MONSTER_NAME_ID_MAP, LOCAL_MONSTER_DATABASE_PERSISTENT, LOCAL_MONSTER_DATABASE_ISEKAI } from './store';
 
-interface ApiResponse {
-  monsters: (HVMonsterDatabase.MonsterInfo & {
-    /**
-     * @description Last time update (can be parsed through Date)
-     */
-    lastUpdate: string
-  })[]
-}
+type ApiResponse = (HVMonsterDatabase.MonsterInfo & {
+  /**
+   * @description Last time update (can be parsed through Date)
+   */
+  lastUpdate: string
+})[];
 
 export async function updateLocalDatabase(force = false): Promise<void> {
   const currentDate = getUTCDate();
@@ -39,20 +37,20 @@ export async function updateLocalDatabase(force = false): Promise<void> {
     try {
       logger.info('Downloading Monster Database from the server...');
 
-      const resp = await fetch(isIsekai() ? 'https://hvdata.lastmen.men/exportgzipisekaimonsterdata/' : 'https://hvdata.lastmen.men/exportgzipmonsterdata/');
+      const resp = await fetch(isIsekai() ? 'https://hv-monsterdb-data.skk.moe/isekai.json' : 'https://hv-monsterdb-data.skk.moe/persistent.json');
       const data: ApiResponse = await resp.json();
 
       // Use window.requestIdleCallback again since conevrt database is a CPU intensive task.
       window.requestIdleCallback(async () => {
         logger.info('Processing Monster Database...');
-        MONSTER_NAME_ID_MAP.updateMany(data.monsters.map(monster => [monster.monsterName, monster.monsterId]));
+        MONSTER_NAME_ID_MAP.updateMany(data.map(monster => [monster.monsterName, monster.monsterId]));
 
-        const db = data.monsters.map(monster => {
+        const db = data.map(monster => {
           const EncodedMonsterInfo = convertMonsterInfoToEncodedMonsterInfo(monster);
           return [monster.monsterId, EncodedMonsterInfo] as [number, EncodedMonsterDatabase.MonsterInfo];
         });
 
-        logger.info(`${data.monsters.length} monsters' information processed.`);
+        logger.info(`${data.length} monsters' information processed.`);
 
         if (isIsekai()) {
           await Promise.all([

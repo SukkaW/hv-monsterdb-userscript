@@ -106,7 +106,7 @@ export function convertMonsterInfoToEncodedMonsterInfo(monster: HVMonsterDatabas
     [EncodedMonsterDatabase.EMonsterInfo.fire]: monster.fire,
     [EncodedMonsterDatabase.EMonsterInfo.dark]: monster.dark,
     [EncodedMonsterDatabase.EMonsterInfo.holy]: monster.holy,
-    [EncodedMonsterDatabase.EMonsterInfo.lastUpdate]: new Date(monster.lastUpdate).getTime()
+    [EncodedMonsterDatabase.EMonsterInfo.lastUpdate]: monster.lastUpdate ? new Date(monster.lastUpdate).getTime() : new Date('1970-1-1').getTime()
   };
 }
 

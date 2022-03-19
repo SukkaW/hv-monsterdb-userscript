@@ -55,7 +55,13 @@ export default defineConfig([{
     }),
     swc(defineRollupSwcOption({
       jsc: {
-        target: 'es2020'
+        target: 'es2020',
+        externalHelpers: true,
+        transform: {
+          react: {
+            runtime: 'automatic'
+          }
+        }
       },
       tsconfig: './tsconfig.json'
     })),
@@ -73,7 +79,7 @@ export default defineConfig([{
   input: 'src/index.ts',
   output: {
     format: 'iife',
-    file: 'dist/hv-monsterdb.es5.user.js',
+    file: 'dist/hv-monsterdb.es2016.user.js',
     name: 'unsafeWindow.HVMonsterDB',
     sourcemap: false,
     esModule: false

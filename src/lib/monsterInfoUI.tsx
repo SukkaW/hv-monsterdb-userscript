@@ -2,6 +2,7 @@ import { MONSTER_INFO_BOX_POSITION } from './store';
 import styles from '../style/style.module.css';
 
 import { HVMonsterDatabase } from '../types';
+import { className } from 'million';
 
 /** @jsxImportSource million */
 
@@ -62,7 +63,10 @@ const symbolNum = (num?: number) => num ? (num === 0 ? ' ' : num > 0 ? '+' : '')
 
 const MonsterTable = (props: { monsterInfo: HVMonsterDatabase.MonsterInfo | null }) => (
   <div className={styles.table_container}>
-    <table className={[styles.table, props.monsterInfo ? false : styles.hidden].filter(Boolean).join(' ')}>
+    <table className={className({
+      [styles.table]: true,
+      [styles.hidden]: !props.monsterInfo
+    })}>
       <tbody>
         <tr>
           {isCompactMonsterInfoBox && (['fire', 'cold', 'elec'] as const).map(i => {
@@ -98,7 +102,8 @@ const MonsterTable = (props: { monsterInfo: HVMonsterDatabase.MonsterInfo | null
             );
           })}
           <td>
-            {props.monsterInfo?.trainer === '' ? 'System' : props.monsterInfo?.trainer}
+            {/** million.js.org can not properly handle a undefined children, so always return a Unknown as fallback */}
+            {props.monsterInfo?.trainer === '' ? 'System' : (props.monsterInfo?.trainer ?? 'Unknown')}
           </td>
         </tr>
       </tbody>
@@ -106,12 +111,14 @@ const MonsterTable = (props: { monsterInfo: HVMonsterDatabase.MonsterInfo | null
   </div>
 );
 
-export function MonsterInfo(allMonsterStatus: (HVMonsterDatabase.MonsterInfo | null)[]) {
+const RANGE_OF_10 = [...Array(10).keys()];
+
+export function MonsterInfo(props: { allMonsterStatus: (HVMonsterDatabase.MonsterInfo | null)[] }) {
   return (
     <div>{/* Million doesn't support root VNode to be a Fragment, see https://github.com/aidenybai/million/issues/160 */}
       {
         /* Provide all 10 MonsterTable and only toggle their display property, significantly improve virtual dom performance */
-        [...Array(10).keys()].map(i => <MonsterTable monsterInfo={allMonsterStatus[i] ?? null} />)
+        RANGE_OF_10.map(i => <MonsterTable monsterInfo={props.allMonsterStatus[i] ?? null} />)
       }
     </div>
   );

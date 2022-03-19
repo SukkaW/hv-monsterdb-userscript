@@ -1,7 +1,7 @@
 import { HVMonsterDatabase } from '../types';
 
 export async function submitScanResults(payload: HVMonsterDatabase.MonsterInfo): Promise<Response> {
-  return fetch('https://hvdata.lastmen.men/monsterdata/', {
+  return fetch('https://hv-monster-submit.skk.moe/api/monsterdata', {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json; charset=UTF-8'
