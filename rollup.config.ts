@@ -85,8 +85,12 @@ export default defineConfig([{
     esModule: false
   },
   plugins: [
-    nodeResolve(),
-    commonjs(),
+    commonjs({
+      esmExternals: true
+    }),
+    nodeResolve({
+      exportConditions: ['import', 'module', 'default']
+    }),
     postcss({
       plugins: [
         cssnano()
@@ -107,7 +111,7 @@ export default defineConfig([{
       },
       env: {
         targets: 'chrome >= 79, firefox >= 60, edge >= 79, safari >= 11, not ie 11',
-        coreJs: '3',
+        coreJs: '3.23',
         mode: 'usage',
         shippedProposals: true
       }
