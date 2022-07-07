@@ -98,8 +98,8 @@ export class FetchQueue {
     item.reject('Canceled');
   }
 
-  private handleResult(item: FetchQueueItem, state: ItemState.Succeeded, result: Response): void
-  private handleResult(item: FetchQueueItem, state: ItemState.Failed, result: Error): void
+  private handleResult(item: FetchQueueItem, state: ItemState.Succeeded, result: Response): void;
+  private handleResult(item: FetchQueueItem, state: ItemState.Failed, result: Error): void;
   private handleResult(item: FetchQueueItem, state: ItemState.Succeeded | ItemState.Failed, result: Response | Error): void {
     this.activeItems = this.activeItems.filter((i) => i !== item);
     item.state = state;
