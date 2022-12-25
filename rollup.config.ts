@@ -57,14 +57,8 @@ export default defineConfig([{
     swc(defineRollupSwcOption({
       jsc: {
         target: 'es2020',
-        externalHelpers: true,
-        transform: {
-          react: {
-            runtime: 'automatic'
-          }
-        }
-      },
-      tsconfig: './tsconfig.json'
+        externalHelpers: true
+      }
     })),
     postcss({
       plugins: [
@@ -107,8 +101,8 @@ export default defineConfig([{
       tsconfig: './tsconfig.json',
       jsc: {
         target: 'es2016',
-        externalHelpers: true,
-        loose: true
+        externalHelpers: true
+        // loose: true
       },
       env: {
         targets: 'chrome >= 79, firefox >= 60, edge >= 79, safari >= 11, not ie 11',

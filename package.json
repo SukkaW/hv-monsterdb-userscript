@@ -33,7 +33,7 @@
     "@swc/helpers": "^0.4.14",
     "@types/greasemonkey": "^4.0.4",
     "@types/greasemonkey3": "npm:@types/greasemonkey@^3.0.1",
-    "@types/node": "^16.11.11",
+    "@types/node": "^18.11.17",
     "@types/requestidlecallback": "^0.3.5",
     "@typescript-eslint/eslint-plugin": "^5.47.0",
     "@typescript-eslint/parser": "^5.47.0",
@@ -45,7 +45,7 @@
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-node": "^11.1.0",
     "magic-string": "^0.27.0",
-    "nanostores": "^0.5.12",
+    "nanostores": "^0.7.1",
     "rollup": "^3.8.1",
     "rollup-plugin-postcss": "^4.0.2",
     "rollup-plugin-swc3": "^0.8.0",
@@ -58,6 +58,6 @@
     "node": ">=14.0.0"
   },
   "dependencies": {
-    "million": "^1.11.0"
+    "million": "^1.12.6-beta.2"
   }
 }
