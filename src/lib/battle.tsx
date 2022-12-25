@@ -103,17 +103,30 @@ async function tasksRunAtStartOfPerRound(): Promise<void> {
   const mkeys: Record<string, string> = {};
   const monsterLastUpdates: Record<number, number> = {};
   const monstersRandomness: Record<string, number> = {};
+
+  const monsterNamesOfMonstersInCurrentRound: (string | null)[] = [];
+
+  const btm1 = document.getElementsByClassName('btm1');
+  // Add a null monster info to monsters object first, to prevent race condition later on
+  for (let i = 0, len = btm1.length; i < len; i++) {
+    const el = btm1[i];
+    const mkey = el.id;
+    const monsterName = el.getElementsByClassName('btm3')[0].textContent?.trim();
+    if (mkey && monsterName) {
+      monsters.set(monsterName, null);
+
+      mkeys[monsterName] = mkey;
+      monstersRandomness[monsterName] = createRandomness();
+
+      monsterNamesOfMonstersInCurrentRound.push(monsterName);
+    } else {
+      monsterNamesOfMonstersInCurrentRound.push(null);
+    }
+  }
+
   (await Promise.all(
-    [...document.getElementsByClassName('btm1')].map(async el => {
-      const mkey = el.id;
-      const monsterName = el.getElementsByClassName('btm3')[0].textContent?.trim();
-
-      if (mkey && monsterName) {
-        mkeys[monsterName] = mkey;
-        monstersRandomness[monsterName] = createRandomness();
-        // Add a null monster info to monsters object first, to prevent race condition later on.
-        monsters.set(monsterName, null);
-
+    monsterNamesOfMonstersInCurrentRound.map(async monsterName => {
+      if (monsterName) {
         const mid = monsterInTheRoundNameIdMap.get(monsterName) ?? await MONSTER_NAME_ID_MAP.get(monsterName);
         if (mid) {
           const encodedMonsterInfo = await LOCAL_MONSTER_DATABASE.get(mid);
@@ -199,9 +212,8 @@ function highlightMonsters() {
   }
 
   if (highlightScanColor) {
-    const needScanMonsters = MonsterNeedScan.get();
     highlightNeedScanMonsterRafId = window.requestAnimationFrame(() => {
-      needScanMonsters.forEach(needScanMonster => {
+      MonsterNeedScan.get().forEach(needScanMonster => {
         if (needScanMonster.mkey) {
           const monsterBtm2El = document.getElementById(needScanMonster.mkey)?.querySelector('div.btm2');
           if (monsterBtm2El) {
@@ -218,9 +230,8 @@ function highlightMonsters() {
       window.cancelAnimationFrame(highlightMonsterRafId);
     }
 
-    const needHighlightMonsters = MonsterNeedHighlight.get();
     highlightMonsterRafId = window.requestAnimationFrame(() => {
-      needHighlightMonsters.forEach(needHighlightMonster => {
+      MonsterNeedHighlight.get().forEach(needHighlightMonster => {
         const { color, mkey } = needHighlightMonster;
         const monsterBtm2El = document.getElementById(mkey)?.querySelector('div.btm2');
         if (monsterBtm2El) {

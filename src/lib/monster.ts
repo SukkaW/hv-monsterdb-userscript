@@ -2,14 +2,19 @@ import type { HVMonsterDatabase } from '../types';
 import { isIsekai } from '../util/common';
 import { HowManyDaysSinceLastIsekaiReset } from './isekaiReset';
 
-const EFFECTS_AFFECTING_SCAN_REAULT = ['nbardead.png', 'imperil.png', 'firedot.png', 'coldslow.png', 'elecweak.png', 'windmiss.png', 'holybreach.png', 'darknerf.png'] as const;
+// const EFFECTS_AFFECTING_SCAN_REAULT = ['nbardead.png', 'imperil.png', 'firedot.png', 'coldslow.png', 'elecweak.png', 'windmiss.png', 'holybreach.png', 'darknerf.png'] as const;
+
+const EFFECTS_AFFECTING_SCAN_REAULT = /nbardead|imperil|firedot|coldslow|elecweak|windmiss|holybreach|darknerf/;
 
 const NOW = new Date().getTime();
 
 export const checkScanResultValidity = (mkey: string) => {
   const monsterHtml = document.getElementById(mkey)?.innerHTML;
   if (monsterHtml) {
-    return !EFFECTS_AFFECTING_SCAN_REAULT.some(effectImg => monsterHtml.includes(effectImg));
+    if (EFFECTS_AFFECTING_SCAN_REAULT.test(monsterHtml)) {
+      return false;
+    }
+    return true;
   }
   return false;
 };
@@ -37,7 +42,7 @@ export const getMonsterHighlightColor = (monsterInfo: HVMonsterDatabase.MonsterI
 };
 
 export const isMonsterNeedScan = (mkey: string | undefined, randomness: number | undefined, lastUpdate?: number): boolean => {
-  const isDead = mkey && Boolean(document.getElementById(mkey)?.innerHTML.includes('nbardead.png'));
+  const isDead = mkey && !!(document.getElementById(mkey)?.innerHTML.includes('nbardead.png'));
   if (isDead) return false;
 
   randomness ??= Math.floor(Math.random() * Math.floor(SETTINGS.scanExpireDays / 5)) + 1;
