@@ -1,4 +1,4 @@
-import { HVMonsterDatabase } from '../types';
+import type { HVMonsterDatabase } from '../types';
 import { isFightingInBattle } from '../util/common';
 import { logger } from '../util/logger';
 import { inBattle as inBattleFunc } from './battle';

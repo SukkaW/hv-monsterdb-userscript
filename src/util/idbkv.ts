@@ -1,9 +1,9 @@
-import { OBJECT_STORES } from '../lib/store';
-
 export type UseStore = <T>(
   txMode: IDBTransactionMode,
   callback: (store: IDBObjectStore) => T | PromiseLike<T>,
 ) => Promise<T>;
+
+const OBJECT_STORES = ['MONSTER_NAME_ID_MAP', 'databaseV2', 'databaseIsekaiV2'] as const;
 
 export class IDBKV<T> {
   dbName: string;
@@ -121,6 +121,7 @@ export class IDBKV<T> {
   private initializeOpenDatabasePromise() {
     if (this.databasePromise === null) {
       const promise = new Promise<IDBDatabase>((resolve, reject) => {
+        // eslint-disable-next-line no-restricted-globals
         const request = self.indexedDB.open(this.dbName, this.dbVersion);
         request.onsuccess = () => {
           const database = request.result;

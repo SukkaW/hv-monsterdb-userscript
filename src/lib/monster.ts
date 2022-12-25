@@ -1,4 +1,4 @@
-import { HVMonsterDatabase } from '../types';
+import type { HVMonsterDatabase } from '../types';
 import { isIsekai } from '../util/common';
 import { HowManyDaysSinceLastIsekaiReset } from './isekaiReset';
 

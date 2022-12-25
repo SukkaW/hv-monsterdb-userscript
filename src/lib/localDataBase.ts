@@ -1,4 +1,4 @@
-import { HVMonsterDatabase } from '../types';
+import type { HVMonsterDatabase } from '../types';
 import { getUTCDate, isIsekai, showPopup } from '../util/common';
 import { logger } from '../util/logger';
 import { getStoredValue, removeStoredValue, setStoredValue } from '../util/store';
@@ -18,9 +18,9 @@ export async function updateLocalDatabase(force = false): Promise<void> {
   const lastUpdateIsekaiDate = await getStoredValue('lastUpdateIsekaiV2');
 
   if (isIsekai()) {
-    logger.info(`Local database (isekai) last updated: ${lastUpdateIsekaiDate}`);
+    logger.info(`Local database (isekai) last updated: ${lastUpdateIsekaiDate || 'Unknown'}`);
   } else {
-    logger.info(`Local database last updated: ${lastUpdateDate}`);
+    logger.info(`Local database last updated: ${lastUpdateDate || 'Unknown'}`);
   }
 
   const needUpdateLocalDatabaseFromRemoteServer = force

@@ -1,4 +1,4 @@
-import { HVMonsterDatabase } from '../types';
+import type { HVMonsterDatabase } from '../types';
 import { getMonsterDatabaseCompatibleDate } from '../util/common';
 import { MONSTER_NAME_ID_MAP } from './store';
 

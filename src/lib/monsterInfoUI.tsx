@@ -1,7 +1,7 @@
 import { MONSTER_INFO_BOX_POSITION } from './store';
 import styles from '../style/style.module.css';
 
-import { HVMonsterDatabase } from '../types';
+import type { HVMonsterDatabase } from '../types';
 import { className } from 'million';
 
 /** @jsxImportSource million */
@@ -59,7 +59,7 @@ const padStr = (num?: number) => {
   return String(num).padStart(2, ' ');
 };
 // eslint-disable-next-line no-nested-ternary
-const symbolNum = (num?: number) => num ? (num === 0 ? ' ' : num > 0 ? '+' : '') : '';
+const symbolNum = (num?: number) => (num ? (num === 0 ? ' ' : num > 0 ? '+' : '') : '');
 
 const MonsterTable = (props: { monsterInfo: HVMonsterDatabase.MonsterInfo | null }) => (
   <div className={styles.table_container}>
@@ -122,7 +122,7 @@ export function MonsterInfo(props: { allMonsterStatus: (HVMonsterDatabase.Monste
       }
     </div>
   );
-};
+}
 
 function makeMonsterInfoBoxDraggable(boxEl: HTMLDivElement, headerEl: HTMLDivElement): void {
   headerEl.addEventListener('mousedown', evt => {

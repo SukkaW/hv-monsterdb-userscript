@@ -1,4 +1,4 @@
-import { HVMonsterDatabase } from '../types';
+import type { HVMonsterDatabase } from '../types';
 
 export async function submitScanResults(payload: HVMonsterDatabase.MonsterInfo): Promise<Response> {
   return fetch('https://hv-monster-submit.skk.moe/api/monsterdata', {
