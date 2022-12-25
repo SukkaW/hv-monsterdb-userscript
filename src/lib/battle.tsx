@@ -11,7 +11,7 @@ import { MonstersInCurrentRound, MonstersAndMkeysInCurrentRound, MonstersAndThei
 import { render } from 'million';
 
 import 'typed-query-selector';
-import { HVMonsterDatabase } from '../types';
+import type { HVMonsterDatabase } from '../types';
 
 /** @jsxImportSource million */
 

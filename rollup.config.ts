@@ -11,7 +11,8 @@ import MagicString from 'magic-string';
 import { readFileSync } from 'fs';
 import replace from '@rollup/plugin-replace';
 
-import { Plugin, defineConfig } from 'rollup';
+import type { Plugin } from 'rollup';
+import { defineConfig } from 'rollup';
 
 let cache;
 
@@ -111,7 +112,7 @@ export default defineConfig([{
       },
       env: {
         targets: 'chrome >= 79, firefox >= 60, edge >= 79, safari >= 11, not ie 11',
-        coreJs: '3.23',
+        coreJs: '3.26',
         mode: 'usage',
         shippedProposals: true
       }

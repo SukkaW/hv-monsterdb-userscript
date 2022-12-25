@@ -1,15 +1,17 @@
-
 {
   "root": true,
-  "extends": "sukka/node",
   "parserOptions": {
     "sourceType": "module"
   },
-  "ignorePatterns": ["dist/**/*", "test/**/*"],
+  "ignorePatterns": [
+    "dist/**/*",
+    "test/**/*"
+  ],
   "overrides": [
     {
       "files": [
-        "**/*.ts"
+        "**/*.ts",
+        "**/*.tsx"
       ],
       "parserOptions": {
         "project": "./tsconfig.json",
@@ -19,20 +21,38 @@
       "rules": {
         "node/no-unsupported-features/es-syntax": [
           "error",
-          { "ignores": ["modules"] }
+          {
+            "ignores": [
+              "modules"
+            ]
+          }
         ]
       },
       "settings": {
         "node": {
-          "resolvePaths": ["__dirname"],
-          "tryExtensions": [".js", ".json", ".node", ".ts", ".d.ts", ".tsx"]
+          "resolvePaths": [
+            "__dirname"
+          ],
+          "tryExtensions": [
+            ".js",
+            ".json",
+            ".node",
+            ".ts",
+            ".d.ts",
+            ".tsx"
+          ]
         }
       }
-    }, {
+    },
+    {
       "files": "src/settings.js",
       "rules": {
         "no-unused-vars": "off"
       }
+    },
+    {
+      "files": "**/*.js",
+      "extends": "sukka/node"
     }
   ]
 }
