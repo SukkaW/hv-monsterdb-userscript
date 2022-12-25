@@ -1,7 +1,7 @@
-import { HVMonsterDatabase } from '../types';
+import type { HVMonsterDatabase } from '../types';
 
 export function getStoredValue<T extends keyof HVMonsterDatabase.StoredValue>(key: T): Promise<HVMonsterDatabase.StoredValue[T] | undefined | null> {
-  return GM.getValue(key);
+  return GM.getValue(key) as Promise<HVMonsterDatabase.StoredValue[T] | undefined | null>;
 }
 
 export function setStoredValue<T extends keyof HVMonsterDatabase.StoredValue>(key: T, value: HVMonsterDatabase.StoredValue[T]): Promise<void> {

@@ -51,7 +51,6 @@ export function polyfill(): void {
         version: globalThis.GM_info.version
       },
       setValue: promisify(globalThis.GM_setValue),
-      // @ts-expect-error @types/greasemonkey@3 is completely bullshit
       getValue: promisify(globalThis.GM_getValue),
       deleteValue: promisify(globalThis.GM_deleteValue),
       listValues: promisify(globalThis.GM_listValues),
