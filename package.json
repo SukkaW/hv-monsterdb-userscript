@@ -58,6 +58,6 @@
     "node": ">=14.0.0"
   },
   "dependencies": {
-    "million": "^1.12.6-beta.2"
+    "million": "^1.12.5"
   }
 }
