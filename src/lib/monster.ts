@@ -8,8 +8,7 @@ const EFFECTS_AFFECTING_SCAN_REAULT = /nbardead|imperil|firedot|coldslow|elecwea
 
 const NOW = new Date().getTime();
 
-export const checkScanResultValidity = (mkey: string) => {
-  const monsterHtml = document.getElementById(mkey)?.innerHTML;
+export const checkScanResultValidity = (monsterHtml: string | undefined) => {
   if (monsterHtml) {
     if (EFFECTS_AFFECTING_SCAN_REAULT.test(monsterHtml)) {
       return false;
@@ -41,10 +40,7 @@ export const getMonsterHighlightColor = (monsterInfo: HVMonsterDatabase.MonsterI
   return false;
 };
 
-export const isMonsterNeedScan = (mkey: string | undefined, randomness: number | undefined, lastUpdate?: number): boolean => {
-  const isDead = mkey && !!(document.getElementById(mkey)?.innerHTML.includes('nbardead.png'));
-  if (isDead) return false;
-
+export const isMonsterNeedScan = (randomness: number | undefined, lastUpdate?: number): boolean => {
   randomness ??= Math.floor(Math.random() * Math.floor(SETTINGS.scanExpireDays / 5)) + 1;
 
   if (lastUpdate) {

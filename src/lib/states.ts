@@ -12,6 +12,10 @@ interface MonstersAndMkeyStore {
   [monsterName: string]: string | undefined
 }
 
+interface MonstersHtmlStore {
+  [mkey: string]: string | undefined
+}
+
 interface MonstersAndTheirRandomnessStore {
   [monsterName: string]: number
 }
@@ -20,33 +24,41 @@ interface MonstersLastUpdateStore {
   [mid: number]: number
 }
 
-const MonstersInCurrentRound = map<MonsterStore>({});
+export const MonstersInCurrentRound = map<MonsterStore>({});
 // Store element id instead of element itself, as HentaiVerse always replace the whole element every turn
-const MonstersAndMkeysInCurrentRound = atom<MonstersAndMkeyStore>({});
-const MonsterLastUpdate = map<MonstersLastUpdateStore>({});
-const MonstersAndTheirRandomness = atom<MonstersAndTheirRandomnessStore>({});
+export const MonstersAndMkeysInCurrentRound = atom<MonstersAndMkeyStore>({});
+export const MonstersHtmlStore = map<MonstersHtmlStore>({});
+export const MonsterLastUpdate = map<MonstersLastUpdateStore>({});
+export const MonstersAndTheirRandomness = atom<MonstersAndTheirRandomnessStore>({});
 
-const MonsterNeedScan = computed([
-  MonstersInCurrentRound,
+export const MonsterEntriesInCurrentRound = computed(MonstersInCurrentRound, (monsters) => Object.entries(monsters));
+
+export const MonsterNeedScan = computed([
+  MonsterEntriesInCurrentRound,
+  MonstersHtmlStore,
   MonstersAndMkeysInCurrentRound,
   MonsterLastUpdate,
   MonstersAndTheirRandomness
 ], (
-  monsters,
+  monstersEntries,
+  monsterHtmls,
   monsterAndMkey,
   monsterLastUpdate,
   monstersAndTheirRandomness
 ) => {
-  return Object.entries(monsters).map(([monsterName, monsterInfo]) => {
+  return monstersEntries.map(([monsterName, monsterInfo]) => {
     const mkey = monsterAndMkey[monsterName];
     const randomness = monstersAndTheirRandomness[monsterName];
     if (mkey) {
-      if (checkScanResultValidity(mkey)) {
+      const monsterHtml = monsterHtmls[mkey];
+      if (monsterHtml && checkScanResultValidity(monsterHtml)) {
         // If there is no monsterInfo, it means the monster need to be scanned
         if (!monsterInfo) return { name: monsterName, mkey };
+        // If monster is dead, no need to scan
+        if (monsterHtml.includes('nbardead.png')) return null;
 
         const lastUpdate = monsterLastUpdate[monsterInfo.monsterId];
-        if (isMonsterNeedScan(mkey, randomness, lastUpdate)) {
+        if (isMonsterNeedScan(randomness, lastUpdate)) {
           return { mkey, name: monsterName };
         }
       }
@@ -56,11 +68,11 @@ const MonsterNeedScan = computed([
   }).filter(isTruthy);
 });
 
-const MonsterNeedHighlight = computed([
-  MonstersInCurrentRound,
+export const MonsterNeedHighlight = computed([
+  MonsterEntriesInCurrentRound,
   MonstersAndMkeysInCurrentRound
-], (monsters, monsterAndMkey) => {
-  return Object.entries(monsters).map(([monsterName, monsterInfo]) => {
+], (monstersEntries, monsterAndMkey) => {
+  return monstersEntries.map(([monsterName, monsterInfo]) => {
     const mkey = monsterAndMkey[monsterName];
     const color = monsterInfo ? getMonsterHighlightColor(monsterInfo) : false;
 
@@ -75,14 +87,4 @@ const MonsterNeedHighlight = computed([
   }).filter(isTruthy);
 });
 
-const StateSubscribed = atom(false);
-
-export {
-  MonstersInCurrentRound,
-  MonstersAndMkeysInCurrentRound,
-  MonstersAndTheirRandomness,
-  MonsterLastUpdate,
-  MonsterNeedScan,
-  MonsterNeedHighlight,
-  StateSubscribed
-};
+export const StateSubscribed = atom(false);

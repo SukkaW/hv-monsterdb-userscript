@@ -7,7 +7,7 @@ import { logger } from '../util/logger';
 import { submitScanResults } from './submitScan';
 
 import { checkScanResultValidity } from './monster';
-import { MonstersInCurrentRound, MonstersAndMkeysInCurrentRound, MonstersAndTheirRandomness, MonsterLastUpdate, MonsterNeedScan, MonsterNeedHighlight, StateSubscribed } from './states';
+import { MonstersInCurrentRound, MonstersAndMkeysInCurrentRound, MonstersAndTheirRandomness, MonsterLastUpdate, MonsterNeedScan, MonsterNeedHighlight, StateSubscribed, MonstersHtmlStore } from './states';
 import { render } from 'million';
 
 import 'typed-query-selector';
@@ -107,6 +107,7 @@ async function tasksRunAtStartOfPerRound(): Promise<void> {
   const monsterNamesOfMonstersInCurrentRound: (string | null)[] = [];
 
   const btm1 = document.getElementsByClassName('btm1');
+  collectMonstersHtml(btm1);
   // Add a null monster info to monsters object first, to prevent race condition later on
   for (let i = 0, len = btm1.length; i < len; i++) {
     const el = btm1[i];
@@ -157,6 +158,7 @@ async function tasksRunAtStartOfPerRound(): Promise<void> {
 }
 
 async function tasksRunDuringTheBattle(): Promise<void> {
+  collectMonstersHtml();
   highlightMonsters();
 
   // Handle batleLog
@@ -177,23 +179,42 @@ async function tasksRunDuringTheBattle(): Promise<void> {
         logger.debug('Scan result', scanResult);
 
         const scannedMonsterMkey = MonstersAndMkeysInCurrentRound.get()[monsterName];
-        if (scannedMonsterMkey && checkScanResultValidity(scannedMonsterMkey)) {
-          logger.info(`Scan results for ${monsterName} is now queued to submit`);
-          window.requestIdleCallback(() => submitScanResults(scanResult), { timeout: 3000 });
+        if (scannedMonsterMkey) {
+          const monsterHtml = MonstersHtmlStore.get()[scannedMonsterMkey];
+          if (checkScanResultValidity(monsterHtml)) {
 
-          // We already fetch monsterId during parseScanResult
-          LOCAL_MONSTER_DATABASE.set(scanResult.monsterId, convertMonsterInfoToEncodedMonsterInfo(scanResult));
-          MonsterLastUpdate.setKey(scanResult.monsterId, Date.now());
-          MonstersInCurrentRound.setKey(monsterName, scanResult);
+            logger.info(`Scan results for ${monsterName} is now queued to submit`);
+            window.requestIdleCallback(() => submitScanResults(scanResult), { timeout: 3000 });
 
-          // Highlight monsters again with newly scanned monsters' state
-          highlightMonsters();
-        } else {
-          logger.warn(`${monsterName} is not legible for scan, ignoring the scan result!`);
+            // We already fetch monsterId during parseScanResult
+            LOCAL_MONSTER_DATABASE.set(scanResult.monsterId, convertMonsterInfoToEncodedMonsterInfo(scanResult));
+            MonsterLastUpdate.setKey(scanResult.monsterId, Date.now());
+            MonstersInCurrentRound.setKey(monsterName, scanResult);
+
+            // Highlight monsters again with newly scanned monsters' state
+            highlightMonsters();
+          } else {
+            logger.warn(`${monsterName} is not legible for scan, ignoring the scan result!`);
+          }
         }
-      }
 
-      break;
+        break;
+      }
+    }
+  }
+}
+
+function collectMonstersHtml(btm1?: HTMLCollectionOf<Element>) {
+  btm1 ||= document.getElementsByClassName('btm1');
+  const prevHtmls = MonstersHtmlStore.get();
+  // Add a null monster info to monsters object first, to prevent race condition later on
+  for (let i = 0, len = btm1.length; i < len; i++) {
+    const el = btm1[i];
+    const mkey = el.id;
+    const prevHtml = prevHtmls[mkey];
+    const html = el.innerHTML;
+    if (prevHtml !== html) {
+      MonstersHtmlStore.setKey(mkey, html);
     }
   }
 }

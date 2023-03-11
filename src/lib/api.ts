@@ -2,7 +2,7 @@ import type { HVMonsterDatabase } from '../types';
 import { isFightingInBattle } from '../util/common';
 import { logger } from '../util/logger';
 import { inBattle as inBattleFunc } from './battle';
-import { MonstersInCurrentRound, MonstersAndMkeysInCurrentRound, MonsterNeedScan } from './states';
+import { MonstersAndMkeysInCurrentRound, MonsterNeedScan, MonsterEntriesInCurrentRound } from './states';
 import { updateLocalDatabase } from './localDataBase';
 import { convertEncodedMonsterInfoToMonsterInfo } from './monsterDataEncode';
 import { MONSTER_NAME_ID_MAP, LOCAL_MONSTER_DATABASE, LOCAL_MONSTER_DATABASE_PERSISTENT, LOCAL_MONSTER_DATABASE_ISEKAI } from './store';
@@ -66,8 +66,9 @@ export function getCurrentMonstersInformation(): {
   }
 
   const results: Record<string, HVMonsterDatabase.MonsterInfo | null> = {};
-  for (const [monsterName, monsterInfo] of Object.entries(MonstersInCurrentRound.get())) {
-    const mkey = MonstersAndMkeysInCurrentRound.get()[monsterName];
+  const mkeys = MonstersAndMkeysInCurrentRound.get();
+  for (const [monsterName, monsterInfo] of MonsterEntriesInCurrentRound.get()) {
+    const mkey = mkeys[monsterName];
     if (mkey) {
       results[mkey] = monsterInfo;
     }

@@ -1,4 +1,4 @@
-import { EncodedMonsterDatabase } from './lib/monsterDataEncode';
+import type { EncodedMonsterDatabase } from './lib/monsterDataEncode';
 
 export namespace HVMonsterDatabase {
   export type MonsterClass = 'Arthropod' | 'Avion' | 'Beast' | 'Celestial' | 'Daimon' | 'Dragonkin' | 'Elemental' | 'Giant' | 'Humanoid' | 'Mechanoid' | 'Reptilian' | 'Sprite' | 'Undead' | 'Common' | 'Rare' | 'Legendary' | 'Ultimate';
