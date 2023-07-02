@@ -7,13 +7,15 @@ import { logger } from '../util/logger';
 import { submitScanResults } from './submitScan';
 
 import { checkScanResultValidity } from './monster';
-import { MonstersInCurrentRound, MonstersAndMkeysInCurrentRound, MonstersAndTheirRandomness, MonsterLastUpdate, MonsterNeedScan, MonsterNeedHighlight, StateSubscribed, MonstersHtmlStore } from './states';
+import { MonstersInCurrentRound, MonstersAndMkeysInCurrentRound, MonstersAndTheirRandomness, MonsterLastUpdate, MonsterNeedScan, MonsterNeedHighlight, MonstersHtmlStore } from './states';
 import { render } from 'million';
 
 import 'typed-query-selector';
 import type { HVMonsterDatabase } from '../types';
 
 /** @jsxImportSource million */
+
+let StateSubscribed = false;
 
 /** Will execute at per round start */
 export async function inBattle(): Promise<void> {
@@ -33,13 +35,14 @@ export async function inBattle(): Promise<void> {
   document.getElementById('battle_right')?.appendChild(invokedEl); // battle_right contains monster elements
 
   const logEl = document.getElementById('textlog');
-  if (logEl && logEl.firstChild) {
+  let logFirstChild;
+  if (logEl && (logFirstChild = logEl.firstChild)) {
     await tasksRunAtStartOfPerRound();
     const mo = new MutationObserver(tasksRunDuringTheBattle);
-    mo.observe(logEl.firstChild, { childList: true });
+    mo.observe(logFirstChild, { childList: true });
   }
 
-  if (StateSubscribed.get() === false) {
+  if (StateSubscribed === false) {
     // Show monster info box
     if (SETTINGS.showMonsterInfoBox) {
       let showMonsterInfoBoxRafId: number | null = null;
@@ -65,7 +68,7 @@ export async function inBattle(): Promise<void> {
         });
       });
     }
-    StateSubscribed.set(true);
+    StateSubscribed = true;
   }
 }
 

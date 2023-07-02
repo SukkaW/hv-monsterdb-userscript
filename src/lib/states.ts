@@ -86,5 +86,3 @@ export const MonsterNeedHighlight = computed([
     return null;
   }).filter(isTruthy);
 });
-
-export const StateSubscribed = atom(false);
