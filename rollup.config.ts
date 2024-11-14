@@ -9,6 +9,7 @@ import metablock from 'rollup-plugin-userscript-metablock';
 import pkgJson from './package.json';
 import MagicString from 'magic-string';
 import { readFileSync } from 'node:fs';
+import path from 'node:path';
 import replace from '@rollup/plugin-replace';
 
 import type { Plugin } from 'rollup';
@@ -97,10 +98,10 @@ export default defineConfig([{
     }),
     rollupPluginSettingLiteral(),
     swc(defineRollupSwcOption({
-      exclude: 'node_modules/core-js/**',
+      exclude: path.join(path.dirname(require.resolve('core-js/package.json')), '**'),
       tsconfig: './tsconfig.json',
       jsc: {
-        target: 'es2016',
+        target: undefined,
         externalHelpers: true
         // loose: true
       },
