@@ -8,7 +8,7 @@ import cssnano from 'cssnano';
 import metablock from 'rollup-plugin-userscript-metablock';
 import pkgJson from './package.json';
 import MagicString from 'magic-string';
-import { readFileSync } from 'fs';
+import { readFileSync } from 'node:fs';
 import replace from '@rollup/plugin-replace';
 
 import type { Plugin } from 'rollup';
@@ -31,9 +31,9 @@ function rollupPluginSettingLiteral(): Plugin {
     name: 'rollup-plugin-setting-literal',
     renderChunk(code) {
       const magicString = new MagicString(code);
-      magicString.prepend(`${settingsLiteral}\n`).trimEnd('\\n');
-      const result = { code: magicString.toString() };
-      return result;
+      magicString.prepend(`${settingsLiteral}\n`).trimEnd(String.raw`\n`);
+
+      return { code: magicString.toString() };
     }
   };
 }

@@ -9,6 +9,7 @@ import { submitScanResults } from './submitScan';
 import { checkScanResultValidity } from './monster';
 import { MonstersInCurrentRound, MonstersAndMkeysInCurrentRound, MonstersAndTheirRandomness, MonsterLastUpdate, MonsterNeedScan, MonsterNeedHighlight, MonstersHtmlStore } from './states';
 import { render } from 'million';
+import { requestIdleCallback } from 'foxact/request-idle-callback';
 
 import 'typed-query-selector';
 import type { HVMonsterDatabase } from '../types';
@@ -42,7 +43,7 @@ export async function inBattle(): Promise<void> {
     mo.observe(logFirstChild, { childList: true });
   }
 
-  if (StateSubscribed === false) {
+  if (!StateSubscribed) {
     // Show monster info box
     if (SETTINGS.showMonsterInfoBox) {
       let showMonsterInfoBoxRafId: number | null = null;
@@ -73,13 +74,15 @@ export async function inBattle(): Promise<void> {
 }
 
 /** To prevent multiple users scan the same monster over and over again, some randomness has been added. Generate it once per monster */
-const createRandomness = () => (isIsekai()
-  ? Math.floor(Math.random() * Math.floor(SETTINGS.scanExpireDays / 3))
-  : Math.floor(Math.random() * Math.floor(SETTINGS.scanExpireDays / 5)) + 1);
+function createRandomness() {
+  return isIsekai()
+    ? Math.floor(Math.random() * Math.floor(SETTINGS.scanExpireDays / 3))
+    : Math.floor(Math.random() * Math.floor(SETTINGS.scanExpireDays / 5)) + 1;
+}
 
 /** Tasks like "get monster id and monster name" only have to run at the start of per round */
 async function tasksRunAtStartOfPerRound(): Promise<void> {
-  const monsterInTheRoundNameIdMap: Map<string, number> = new Map();
+  const monsterInTheRoundNameIdMap = new Map<string, number>();
 
   if (document.getElementById('textlog')?.textContent?.includes('Spawned')) {
     [...document.querySelectorAll('#textlog > tbody > tr')].forEach(logEl => {
@@ -102,12 +105,12 @@ async function tasksRunAtStartOfPerRound(): Promise<void> {
   // directly from DOM.
 
   // Use Map to ensure the order of monsters
-  const monsters: Map<string, HVMonsterDatabase.MonsterInfo | null> = new Map();
+  const monsters = new Map<string, HVMonsterDatabase.MonsterInfo | null>();
   const mkeys: Record<string, string> = {};
   const monsterLastUpdates: Record<number, number> = {};
   const monstersRandomness: Record<string, number> = {};
 
-  const monsterNamesOfMonstersInCurrentRound: (string | null)[] = [];
+  const monsterNamesOfMonstersInCurrentRound: Array<string | null> = [];
 
   const btm1 = document.getElementsByClassName('btm1');
   collectMonstersHtml(btm1);
@@ -173,10 +176,10 @@ async function tasksRunDuringTheBattle(): Promise<void> {
     // This turn scan a monster
     if (logHtml.includes('Scanning')) {
       // Every turn you'd only scan one monster
-      // eslint-disable-next-line no-await-in-loop
+      // eslint-disable-next-line no-await-in-loop -- sequential operation as we need to read IndexedDB
       const scanResult = await parseScanResult(logHtml);
       if (scanResult) {
-        const { monsterName } = scanResult;
+        const { monsterName, monsterId } = scanResult;
 
         logger.info('Scanned a monster:', monsterName);
         logger.debug('Scan result', scanResult);
@@ -185,13 +188,13 @@ async function tasksRunDuringTheBattle(): Promise<void> {
         if (scannedMonsterMkey) {
           const monsterHtml = MonstersHtmlStore.get()[scannedMonsterMkey];
           if (checkScanResultValidity(monsterHtml)) {
-
             logger.info(`Scan results for ${monsterName} is now queued to submit`);
-            window.requestIdleCallback(() => submitScanResults(scanResult), { timeout: 3000 });
+            // eslint-disable-next-line sukka/prefer-timer-id -- hang
+            requestIdleCallback(() => submitScanResults(scanResult), { timeout: 3000 });
 
             // We already fetch monsterId during parseScanResult
-            LOCAL_MONSTER_DATABASE.set(scanResult.monsterId, convertMonsterInfoToEncodedMonsterInfo(scanResult));
-            MonsterLastUpdate.setKey(scanResult.monsterId, Date.now());
+            LOCAL_MONSTER_DATABASE.set(monsterId, convertMonsterInfoToEncodedMonsterInfo(scanResult));
+            MonsterLastUpdate.setKey(monsterId, Date.now());
             MonstersInCurrentRound.setKey(monsterName, scanResult);
 
             // Highlight monsters again with newly scanned monsters' state
@@ -238,7 +241,7 @@ function highlightMonsters() {
   if (highlightScanColor) {
     highlightNeedScanMonsterRafId = window.requestAnimationFrame(() => {
       MonsterNeedScan.get().forEach(needScanMonster => {
-        if (needScanMonster.mkey) {
+        if (needScanMonster?.mkey) {
           const monsterBtm2El = document.getElementById(needScanMonster.mkey)?.querySelector('div.btm2');
           if (monsterBtm2El) {
             monsterBtm2El.style.backgroundColor = highlightScanColor;
@@ -256,10 +259,12 @@ function highlightMonsters() {
 
     highlightMonsterRafId = window.requestAnimationFrame(() => {
       MonsterNeedHighlight.get().forEach(needHighlightMonster => {
-        const { color, mkey } = needHighlightMonster;
-        const monsterBtm2El = document.getElementById(mkey)?.querySelector('div.btm2');
-        if (monsterBtm2El) {
-          monsterBtm2El.style.backgroundColor = color;
+        if (needHighlightMonster) {
+          const { color, mkey } = needHighlightMonster;
+          const monsterBtm2El = document.getElementById(mkey)?.querySelector('div.btm2');
+          if (monsterBtm2El) {
+            monsterBtm2El.style.backgroundColor = color;
+          }
         }
       });
     });

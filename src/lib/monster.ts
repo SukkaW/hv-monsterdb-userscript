@@ -6,19 +6,16 @@ import { HowManyDaysSinceLastIsekaiReset } from './isekaiReset';
 
 const EFFECTS_AFFECTING_SCAN_REAULT = /nbardead|imperil|firedot|coldslow|elecweak|windmiss|holybreach|darknerf/;
 
-const NOW = new Date().getTime();
+const NOW = Date.now();
 
-export const checkScanResultValidity = (monsterHtml: string | undefined) => {
+export function checkScanResultValidity(monsterHtml: string | undefined) {
   if (monsterHtml) {
-    if (EFFECTS_AFFECTING_SCAN_REAULT.test(monsterHtml)) {
-      return false;
-    }
-    return true;
+    return !(EFFECTS_AFFECTING_SCAN_REAULT.test(monsterHtml));
   }
   return false;
-};
+}
 
-export const getMonsterHighlightColor = (monsterInfo: HVMonsterDatabase.MonsterInfo): string | false => {
+export function getMonsterHighlightColor(monsterInfo: HVMonsterDatabase.MonsterInfo): string | false {
   if (typeof SETTINGS.highlightMonster === 'object') {
     for (const [color, matcher] of Object.entries(SETTINGS.highlightMonster)) {
       if (matcher instanceof RegExp) {
@@ -29,18 +26,16 @@ export const getMonsterHighlightColor = (monsterInfo: HVMonsterDatabase.MonsterI
         if (matcher(monsterInfo)) {
           return color;
         }
-      } else if (typeof matcher === 'string') {
-        if (new RegExp(matcher).test(JSON.stringify(monsterInfo))) {
-          return color;
-        }
+      } else if (typeof matcher === 'string' && new RegExp(matcher).test(JSON.stringify(monsterInfo))) {
+        return color;
       }
     }
   }
 
   return false;
-};
+}
 
-export const isMonsterNeedScan = (randomness: number | undefined, lastUpdate?: number): boolean => {
+export function isMonsterNeedScan(randomness: number | undefined, lastUpdate?: number): boolean {
   randomness ??= Math.floor(Math.random() * Math.floor(SETTINGS.scanExpireDays / 5)) + 1;
 
   if (lastUpdate) {
@@ -49,6 +44,7 @@ export const isMonsterNeedScan = (randomness: number | undefined, lastUpdate?: n
 
     if (isIsekai()) {
       const howManyDaysSinceLastIsekaiReset = HowManyDaysSinceLastIsekaiReset.get();
+      // eslint-disable-next-line sukka/prefer-single-boolean-return -- clarity
       if (
         howManyDaysSinceLastIsekaiReset
         // There is an Isekai Reset between last scan and now.
@@ -72,4 +68,4 @@ export const isMonsterNeedScan = (randomness: number | undefined, lastUpdate?: n
   // When lastUpdate is undefined / null, it means it is not in local database.
   // That also means it requires scan.
   return true;
-};
+}

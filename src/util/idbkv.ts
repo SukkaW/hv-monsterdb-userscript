@@ -6,37 +6,28 @@ export type UseStore = <T>(
 const OBJECT_STORES = ['MONSTER_NAME_ID_MAP', 'databaseV2', 'databaseIsekaiV2'] as const;
 
 export class IDBKV<T> {
-  dbName: string;
-  storeName: string;
-  dbVersion?: number;
   private databasePromise: Promise<IDBDatabase> | null = null;
 
   static promisifyRequest<T = undefined>(
+    this: void,
     request: IDBRequest<T> | IDBTransaction
   ): Promise<T> {
     return new Promise<T>((resolve, reject) => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore - file size hacks
-      // eslint-disable-next-line no-multi-assign
+      // @ts-expect-error - file size hacks
+      // eslint-disable-next-line no-multi-assign -- file size hacks
       request.oncomplete = request.onsuccess = () => resolve(request.result);
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore - file size hacks
-      // eslint-disable-next-line no-multi-assign
+      // @ts-expect-error - file size hacks
+      // eslint-disable-next-line no-multi-assign, @typescript-eslint/prefer-promise-reject-errors, sukka/unicorn/prefer-add-event-listener -- file size hacks
       request.onabort = request.onerror = () => reject(request.error);
     });
   }
 
-  constructor(dbName: string, storeName: string, dbVersion?: number) {
-    this.dbName = dbName;
-    this.storeName = storeName;
-    this.dbVersion = dbVersion;
+  constructor(public dbName: string, public storeName: string, public dbVersion?: number) {
     this.initializeOpenDatabasePromise();
   }
 
   get<K extends IDBValidKey & keyof T>(key: K): Promise<T[K] | undefined> {
-    return this.performDatabaseOperation('readonly', (store) => {
-      return IDBKV.promisifyRequest(store.get(key));
-    });
+    return this.performDatabaseOperation('readonly', (store) => IDBKV.promisifyRequest(store.get(key)));
   }
 
   set<K extends IDBValidKey & keyof T>(key: K, value: T[K]): Promise<void> {
@@ -46,14 +37,14 @@ export class IDBKV<T> {
     });
   }
 
-  setMany<K extends IDBValidKey & keyof T>(entries: [K, T[K]][]): Promise<void> {
+  setMany<K extends IDBValidKey & keyof T>(entries: Array<[K, T[K]]>): Promise<void> {
     return this.performDatabaseOperation('readwrite', (store) => {
       entries.forEach((entry) => store.put(entry[1], entry[0]));
       return IDBKV.promisifyRequest(store.transaction);
     });
   }
 
-  getMany<K extends IDBValidKey & keyof T>(keys: K[]): Promise<T[K][]> {
+  getMany<K extends IDBValidKey & keyof T>(keys: K[]): Promise<Array<T[K]>> {
     return this.performDatabaseOperation('readonly', (store) => Promise.all(keys.map((key) => IDBKV.promisifyRequest(store.get(key)))));
   }
 
@@ -68,14 +59,14 @@ export class IDBKV<T> {
         store.get(key).onsuccess = function () {
           try {
             const newValue = updater(this.result);
-            if (newValue !== this.result) {
+            if (newValue === this.result) {
+              resolve();
+            } else {
               store.put(updater(this.result), key);
               resolve(IDBKV.promisifyRequest(store.transaction));
-            } else {
-              resolve();
             }
           } catch (err) {
-            reject(err);
+            reject(err as Error);
           }
         };
       })
@@ -108,38 +99,38 @@ export class IDBKV<T> {
     return this.eachCursor((cursor) => items.push(cursor.key as K)).then(() => items);
   }
 
-  values<K extends IDBValidKey & keyof T>(): Promise<T[K][]> {
-    const items: T[K][] = [];
+  values<K extends IDBValidKey & keyof T>(): Promise<Array<T[K]>> {
+    const items: Array<T[K]> = [];
     return this.eachCursor((cursor) => items.push(cursor.value)).then(() => items);
   }
 
-  entries<K extends IDBValidKey & keyof T>(): Promise<[K, T[K]][]> {
-    const items: [K, T[K]][] = [];
+  entries<K extends IDBValidKey & keyof T>(): Promise<Array<[K, T[K]]>> {
+    const items: Array<[K, T[K]]> = [];
     return this.eachCursor((cursor) => items.push([cursor.key as K, cursor.value])).then(() => items);
   }
 
   private initializeOpenDatabasePromise() {
     if (this.databasePromise === null) {
       const promise = new Promise<IDBDatabase>((resolve, reject) => {
-        // eslint-disable-next-line no-restricted-globals
         const request = self.indexedDB.open(this.dbName, this.dbVersion);
         request.onsuccess = () => {
           const database = request.result;
 
-          database.onclose = () => { this.databasePromise = null; };
+          database.addEventListener('close', () => { this.databasePromise = null; });
           database.onversionchange = () => {
             database.close();
             this.databasePromise = null;
           };
           resolve(database);
         };
-        request.onerror = () => reject(request.error);
+        // eslint-disable-next-line sukka/unicorn/prefer-add-event-listener -- file size hacks
+        request.onerror = () => reject(request.error as Error);
         request.onupgradeneeded = () => {
           try {
             // Whatever the KV instance is opened, always create all objectStore we needed
             OBJECT_STORES.forEach(storeName => request.result.createObjectStore(storeName));
           } catch (e) {
-            reject(e);
+            reject(e as Error);
           }
         };
       });

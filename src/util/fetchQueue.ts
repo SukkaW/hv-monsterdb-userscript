@@ -1,28 +1,28 @@
 interface FetchQueueOption {
-  maxConnections?: number;
-  interval?: number;
+  maxConnections?: number,
+  interval?: number
 }
 
 interface FetchQueueItem {
-  readonly url: string;
-  readonly init?: RequestInit;
-  readonly resolve: (value: Response) => void;
-  readonly reject: (reason?: any) => void;
-  state: ItemState;
+  readonly url: string,
+  readonly init?: RequestInit,
+  readonly resolve: (value: Response) => void,
+  readonly reject: (reason?: Error | Response | 'Canceled') => void,
+  state: ItemState
 }
 
 const enum ItemState {
-  Pending,
-  Active,
-  Succeeded,
-  Failed,
-  Canceled
+  Pending = 0,
+  Active = 1,
+  Succeeded = 2,
+  Failed = 3,
+  Canceled = 4
 }
 
 /** Promise that can cancel the request. */
-interface FetchQueuePromise<T = any> extends Promise<T> {
+interface FetchQueuePromise<T> extends Promise<T> {
   /** Cancel the request and remove it from the queue. */
-  cancel(): void;
+  cancel(): void
 }
 
 export class FetchQueue {
@@ -34,11 +34,10 @@ export class FetchQueue {
   private lastCalled: number;
   private isFirstRequest = true;
 
-  constructor(options: FetchQueueOption = { maxConnections: 4, interval: 300 }) {
+  constructor({ maxConnections = 4, interval = 300 }: Partial<FetchQueueOption> = {}) {
     this.options = {
-      maxConnections: 4,
-      interval: 300,
-      ...options
+      maxConnections,
+      interval
     };
 
     this.lastCalled = Date.now();
@@ -63,7 +62,7 @@ export class FetchQueue {
     const promise = new Promise((resolve, reject) => {
       item = { url, init, resolve, reject, state: ItemState.Pending };
       this.pendingItems.push(item);
-    }) as FetchQueuePromise;
+    }) as FetchQueuePromise<Response>;
     promise.cancel = () => this.cancel(item);
 
     this.checkNext();
@@ -116,7 +115,7 @@ export class FetchQueue {
   }
 
   private checkNext() {
-    const threshold = this.lastCalled + (this.options?.interval || 300);
+    const threshold = this.lastCalled + (this.options.interval || 300);
     const now = Date.now();
 
     // Adjust timer if it is called too early
@@ -136,17 +135,18 @@ export class FetchQueue {
       // Paused. Wait until resume. Resume will call checkNext again.
       return;
     }
-    if (this.pendingCount > 0 && this.activeCount < (this.options?.maxConnections ?? 4)) {
+    if (this.pendingCount > 0 && this.activeCount < (this.options.maxConnections ?? 4)) {
       const item = this.pendingItems.shift()!;
       this.activeItems.push(item);
       item.state = ItemState.Active;
 
       this.lastCalled = now;
       const request = new Request(item.url, item.init);
+
       fetch(request).then(
         (resp) => this.handleResult(item, ItemState.Succeeded, resp),
-        (reason) => this.handleResult(item, ItemState.Failed, reason)
-      ).then(() => {
+        (error) => this.handleResult(item, ItemState.Failed, error)
+      ).finally(() => {
         if (this.pendingCount > 0) {
           this.checkNext();
         }

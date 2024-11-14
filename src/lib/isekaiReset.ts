@@ -7,7 +7,7 @@ export async function readHowManyDaysSinceLastIsekaiReset(): Promise<void> {
   const lastIsekaiReset = await getStoredValue('lastIsekaiReset') ?? null;
 
   if (lastIsekaiReset) {
-    HowManyDaysSinceLastIsekaiReset.set((new Date().getTime() - lastIsekaiReset) / 1000 / 60 / 60 / 24);
+    HowManyDaysSinceLastIsekaiReset.set((Date.now() - lastIsekaiReset) / 1000 / 60 / 60 / 24);
   }
 }
 
@@ -18,7 +18,7 @@ export async function isIsekaiHaveBeenResetSinceLastVisit(): Promise<boolean> {
     await setStoredValue('isekaiLevel', currentLevel);
 
     if (storedLevel && currentLevel < storedLevel) {
-      await setStoredValue('lastIsekaiReset', new Date().getTime());
+      await setStoredValue('lastIsekaiReset', Date.now());
 
       // Isekai has been reset
       return true;

@@ -54,53 +54,51 @@ export function createMonsterInfoBox() {
 }
 
 const isCompactMonsterInfoBox = !SETTINGS.compactMonsterInfoBox;
-const padStr = (num?: number) => {
+function padStr(num?: number) {
   if (typeof num !== 'number') return '';
   return String(num).padStart(2, ' ');
-};
-// eslint-disable-next-line no-nested-ternary
-const symbolNum = (num?: number) => (num ? (num === 0 ? ' ' : num > 0 ? '+' : '') : '');
+}
 
-const MonsterTable = (props: { monsterInfo: HVMonsterDatabase.MonsterInfo | null }) => (
-  <div className={styles.table_container}>
+function symbolNum(num?: number) {
+  if (typeof num !== 'number') return '';
+  if (num === 0) return ' ';
+  return num > 0 ? '+' : '-';
+}
+
+function MonsterTable(props: { monsterInfo: HVMonsterDatabase.MonsterInfo | null }) {
+  return <div className={styles.table_container}>
     <table className={className({
       [styles.table]: true,
       [styles.hidden]: !props.monsterInfo
     })}>
       <tbody>
         <tr>
-          {isCompactMonsterInfoBox && (['fire', 'cold', 'elec'] as const).map(i => {
-            return (
-              <td className={styles[i]}>
-                {i[0]}:{symbolNum(props.monsterInfo?.[i])}{padStr(props.monsterInfo?.[i])}
-              </td>
-            );
-          })}
+          {isCompactMonsterInfoBox && (['fire', 'cold', 'elec'] as const).map(i => (
+            <td className={styles[i]}>
+              {i[0]}:{symbolNum(props.monsterInfo?.[i])}{padStr(props.monsterInfo?.[i])}
+            </td>
+          ))}
           <td>
-            {props.monsterInfo?.monsterClass?.toLocaleLowerCase()?.substring(0, 5)}
-            ({props.monsterInfo?.attack?.toLocaleLowerCase()?.substring(0, 4)})
+            {props.monsterInfo?.monsterClass.toLowerCase().slice(0, 5)}
+            ({props.monsterInfo?.attack.toLowerCase().slice(0, 4)})
           </td>
         </tr>
         <tr>
-          {isCompactMonsterInfoBox && (['wind', 'holy', 'dark'] as const).map(i => {
-            return (
-              <td className={styles[i]}>
-                {i[0]}:{symbolNum(props.monsterInfo?.[i])}{padStr(props.monsterInfo?.[i])}
-              </td>
-            );
-          })}
+          {isCompactMonsterInfoBox && (['wind', 'holy', 'dark'] as const).map(i => (
+            <td className={styles[i]}>
+              {i[0]}:{symbolNum(props.monsterInfo?.[i])}{padStr(props.monsterInfo?.[i])}
+            </td>
+          ))}
           <td>
             PL: {props.monsterInfo?.plvl}
           </td>
         </tr>
         <tr>
-          {isCompactMonsterInfoBox && (['crushing', 'slashing', 'piercing'] as const).map(i => {
-            return (
-              <td>
-                {i[0]}:{symbolNum(props.monsterInfo?.[i])}{padStr(props.monsterInfo?.[i])}
-              </td>
-            );
-          })}
+          {isCompactMonsterInfoBox && (['crushing', 'slashing', 'piercing'] as const).map(i => (
+            <td>
+              {i[0]}:{symbolNum(props.monsterInfo?.[i])}{padStr(props.monsterInfo?.[i])}
+            </td>
+          ))}
           <td>
             {/** million.js.org can not properly handle a undefined children, so always return a Unknown as fallback */}
             {props.monsterInfo?.trainer === '' ? 'System' : (props.monsterInfo?.trainer ?? 'Unknown')}
@@ -108,12 +106,12 @@ const MonsterTable = (props: { monsterInfo: HVMonsterDatabase.MonsterInfo | null
         </tr>
       </tbody>
     </table>
-  </div>
-);
+  </div>;
+}
 
-const RANGE_OF_10 = [...Array(10).keys()];
+const RANGE_OF_10 = [...new Array(10).keys()];
 
-export function MonsterInfo(props: { allMonsterStatus: (HVMonsterDatabase.MonsterInfo | null)[] }) {
+export function MonsterInfo(props: { allMonsterStatus: Array<HVMonsterDatabase.MonsterInfo | null> }) {
   return (
     <div>{/* Million doesn't support root VNode to be a Fragment, see https://github.com/aidenybai/million/issues/160 */}
       {

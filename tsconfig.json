@@ -1,17 +1,17 @@
 {
   "compilerOptions": {
-    "lib": ["es2020", "dom", "dom.iterable"],
     "target": "es2015",
-    "module": "es2015",
+    "lib": ["es2020", "dom", "dom.iterable"],
     "jsx": "react-jsx",
     "jsxImportSource": "million",
+    "module": "es2015",
+    "moduleResolution": "node",
+    "types": ["greasemonkey", "greasemonkey3"],
+    "resolveJsonModule": true,
     "declaration": false,
     "outDir": ".",
-    "strict": true,
-    "moduleResolution": "node",
     "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "types": ["greasemonkey", "greasemonkey3"]
+    "strict": true
   },
   "include": ["src", "rollup.config.ts"],
   "exclude": ["dist", "test"]

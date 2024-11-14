@@ -1,11 +1,11 @@
-import { ISettings } from './types';
+import type { ISettings } from './types';
 
 declare global {
   const SETTINGS: ISettings;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+
   const __buildMatrix__: 'es2016' | 'es2020';
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @typescript-eslint/naming-convention -- global type
   function GM_notification(
     text: string,
     title: string,

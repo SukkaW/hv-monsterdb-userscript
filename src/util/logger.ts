@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable no-console */
+/* eslint-disable @typescript-eslint/no-explicit-any -- logger */
+/* eslint-disable no-console -- logger */
 const nameStyle = 'background: #000; color: #fff';
 const debugStyle = 'background: #7a7a7a; color: #fff';
 const infoStyle = 'background: #257942; color: #fff';
@@ -16,7 +16,7 @@ class Logger {
 
   debug(...msg: any[]): void {
     if (this.DEBUG) {
-      console.debug('%c HVMDB %c DEBUG ', nameStyle, debugStyle, ...msg);
+      console.debug('%c HVMDB %c DEBUG', nameStyle, debugStyle, ...msg);
       console.groupCollapsed();
       console.trace();
       console.groupEnd();
@@ -24,7 +24,7 @@ class Logger {
   }
 
   info(...msg: any[]): void {
-    console.info('%c HVMDB %c INFO ', nameStyle, infoStyle, ...msg);
+    console.info('%c HVMDB %c INFO', nameStyle, infoStyle, ...msg);
     if (this.DEBUG) {
       console.groupCollapsed();
       console.trace();
@@ -33,7 +33,7 @@ class Logger {
   }
 
   warn(...msg: any[]): void {
-    console.warn('%c HVMDB %c WARN ', nameStyle, warnStyle, ...msg);
+    console.warn('%c HVMDB %c WARN', nameStyle, warnStyle, ...msg);
     if (this.DEBUG) {
       console.groupCollapsed();
       console.trace();
@@ -42,7 +42,7 @@ class Logger {
   }
 
   error(...msg: any[]): void {
-    console.error('%c HVMDB %c ERROR ', nameStyle, errorStyle, ...msg);
+    console.error('%c HVMDB %c ERROR', nameStyle, errorStyle, ...msg);
     if (this.DEBUG) {
       console.groupCollapsed();
       console.trace();

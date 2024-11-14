@@ -6,6 +6,8 @@ import { isFightingInBattle, isIsekai } from './util/common';
 import { logger } from './util/logger';
 import { polyfill } from './util/polyfill';
 
+import { requestIdleCallback } from 'foxact/request-idle-callback';
+
 // Add possible requestAnimationFrame fallback & window.requestIdleCallback
 if (__buildMatrix__ === 'es2016') polyfill();
 
@@ -47,7 +49,8 @@ if (__buildMatrix__ === 'es2016') polyfill();
 
     // Trigger database update when out of battle.
     // "updateLocalDatabase" method will only update local database once a day.
-    window.requestIdleCallback(() => updateLocalDatabase()); // Use window.requesrIdleCallback to avoid performance impact.
+    // eslint-disable-next-line sukka/prefer-timer-id -- hang
+    requestIdleCallback(() => updateLocalDatabase()); // Use window.requesrIdleCallback to avoid performance impact.
   }
 })();
 

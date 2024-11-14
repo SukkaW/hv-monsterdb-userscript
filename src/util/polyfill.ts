@@ -1,10 +1,10 @@
 declare global {
   interface Window {
-    webkitRequestAnimationFrame?: typeof window.requestAnimationFrame
-    mozRequestAnimationFrame?: typeof window.requestAnimationFrame
-    msRequestAnimationFrame?: typeof window.requestAnimationFrame
-    webkitCancelAnimationFrame?: typeof window.cancelAnimationFrame
-    mozCancelAnimationFrame?: typeof window.requestAnimationFrame
+    webkitRequestAnimationFrame?: typeof window.requestAnimationFrame,
+    mozRequestAnimationFrame?: typeof window.requestAnimationFrame,
+    msRequestAnimationFrame?: typeof window.requestAnimationFrame,
+    webkitCancelAnimationFrame?: typeof window.cancelAnimationFrame,
+    mozCancelAnimationFrame?: typeof window.requestAnimationFrame,
     msCancelAnimationFrame?: typeof window.requestAnimationFrame
   }
 }
@@ -12,29 +12,16 @@ declare global {
 export function polyfill(): void {
   // globalThis is the "safeWindow" (no "un" here!)
 
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- polyfill for palemoon
   globalThis.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- polyfill for palemoon
   globalThis.cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame || window.webkitCancelAnimationFrame || window.msCancelAnimationFrame;
 
-  globalThis.requestIdleCallback = window.requestIdleCallback || (cb => {
-    const start = Date.now();
-    return setTimeout(() => {
-      cb({
-        didTimeout: false,
-        timeRemaining() {
-          return Math.max(0, 50 - (Date.now() - start));
-        }
-      });
-    }, 1);
-  });
-
-  globalThis.cancelIdleCallback = window.cancelIdleCallback || (id => {
-    clearTimeout(id);
-  });
-
   // GM v4 API Polyfill
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- we are polyfilling when GM not exists
   if (typeof GM === 'undefined' || GM == null) {
     globalThis.GM = {
-      // eslint-disable-next-line no-console
+      // eslint-disable-next-line no-console -- polyfill
       log: console.log.bind(console), // For Pale Moon compatibility
       info: {
         script: {
@@ -55,6 +42,7 @@ export function polyfill(): void {
       deleteValue: promisify(globalThis.GM_deleteValue),
       listValues: promisify(globalThis.GM_listValues),
       getResourceUrl: promisify(globalThis.GM_getResourceURL),
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- prefer GM3 notification before polyfill
       notification: globalThis.GM_notification ?? createNotification,
       openInTab: globalThis.GM_openInTab,
       registerMenuCommand: globalThis.GM_registerMenuCommand,
@@ -74,7 +62,7 @@ function promisify<TArgs extends any[], TResult>(fn?: (...args: TArgs) => TResul
         try {
           resolve(Reflect.apply(fn, globalThis, args));
         } catch (e) {
-          reject(e);
+          reject(e as Error);
         }
       });
     };
@@ -94,8 +82,8 @@ function createNotification(options: {
         icon: options.image
       });
       if (options.onClick) {
-        notification.onclick = options.onClick;
+        notification.addEventListener('click', options.onClick);
       }
     }
-  });
+  }).catch(console.error);
 }

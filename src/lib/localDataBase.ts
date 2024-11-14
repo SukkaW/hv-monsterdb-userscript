@@ -4,13 +4,14 @@ import { logger } from '../util/logger';
 import { getStoredValue, removeStoredValue, setStoredValue } from '../util/store';
 import { convertMonsterInfoToEncodedMonsterInfo, EncodedMonsterDatabase } from './monsterDataEncode';
 import { MONSTER_NAME_ID_MAP, LOCAL_MONSTER_DATABASE_PERSISTENT, LOCAL_MONSTER_DATABASE_ISEKAI } from './store';
+import { requestIdleCallback } from 'foxact/request-idle-callback';
 
-type ApiResponse = (HVMonsterDatabase.MonsterInfo & {
+type ApiResponse = Array<HVMonsterDatabase.MonsterInfo & {
   /**
    * @description Last time update (can be parsed through Date)
    */
   lastUpdate: string
-})[];
+}>;
 
 export async function updateLocalDatabase(force = false): Promise<void> {
   const currentDate = getUTCDate();
@@ -41,7 +42,8 @@ export async function updateLocalDatabase(force = false): Promise<void> {
       const data: ApiResponse = await resp.json();
 
       // Use window.requestIdleCallback again since conevrt database is a CPU intensive task.
-      window.requestIdleCallback(async () => {
+      // eslint-disable-next-line sukka/prefer-timer-id -- hang
+      requestIdleCallback(async () => {
         logger.info('Processing Monster Database...');
         MONSTER_NAME_ID_MAP.updateMany(data.map(monster => [monster.monsterName, monster.monsterId]));
 

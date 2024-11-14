@@ -2,6 +2,14 @@
   "name": "hv-monsterdb-userscript",
   "version": "2.0.0",
   "description": "M-M-M-MONSTER DATABASE!",
+  "homepage": "https://github.com/SukkaW/hv-monsterdb-userscript#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SukkaW/hv-monsterdb-userscript.git"
+  },
+  "bugs": {
+    "url": "https://github.com/SukkaW/hv-monsterdb-userscript/issues"
+  },
   "main": "dist/hv-monsterdb.es2020.user.js",
   "files": [
     "dist"
@@ -9,23 +17,20 @@
   "scripts": {
     "build": "rollup --configPlugin rollup-plugin-swc3 -c --bundleConfigAsCjs",
     "doc": "typedoc",
-    "lint": "eslint --ext .ts --ignore-path .gitignore ./",
-    "prepublishOnly": "npm run build"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/SukkaW/hv-monsterdb-userscript.git"
+    "lint": "eslint --format=sukka .",
+    "prepublishOnly": "pnpm run build"
   },
   "keywords": [
     "HentaiVerse"
   ],
   "author": "Sukka <https://skk.moe>",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/SukkaW/hv-monsterdb-userscript/issues"
+  "dependencies": {
+    "foxact": "^0.2.41",
+    "million": "^1.12.5"
   },
-  "homepage": "https://github.com/SukkaW/hv-monsterdb-userscript#readme",
   "devDependencies": {
+    "@eslint-sukka/node": "^6.10.1",
     "@rollup/plugin-commonjs": "^28.0.1",
     "@rollup/plugin-node-resolve": "^15.3.0",
     "@rollup/plugin-replace": "^6.0.1",
@@ -38,6 +43,7 @@
     "cssnano": "^7.0.6",
     "eslint": "^9.14.0",
     "eslint-config-sukka": "^6.10.1",
+    "eslint-formatter-sukka": "^6.10.1",
     "magic-string": "^0.30.12",
     "nanostores": "^0.11.3",
     "rollup": "^4.26.0",
@@ -50,9 +56,6 @@
   },
   "engines": {
     "node": ">=14.0.0"
-  },
-  "dependencies": {
-    "million": "^1.12.5"
   },
   "overrides": {
     "array-includes": "npm:@nolyfill/array-includes@latest",

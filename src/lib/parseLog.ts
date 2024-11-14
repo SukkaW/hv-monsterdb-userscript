@@ -3,13 +3,14 @@ import { getMonsterDatabaseCompatibleDate } from '../util/common';
 import { MONSTER_NAME_ID_MAP } from './store';
 
 const rMatchMonsterId = /MID=(\d+) \((.+)\)/;
+// eslint-disable-next-line regexp/no-super-linear-backtracking -- backw
 const rMatchScan = /Scanning (.+?)\.\.\..+?Monster Class.+>([A-Z][a-z]+)(?:, Power Level (\d+)<|<).+?Monster Trainer:<\/strong><\/td><td>([^<>]*)<.+?<\/strong><\/td><td>([A-Za-z]+)<.+?Fire:.+?>([+-])(\d+)%<.+?Cold:.+?>([+-])(\d+)%<.+?Elec:.+?>([+-])(\d+)%<.+?Wind:.+?>([+-])(\d+)%<.+?Holy:.+?>([+-])(\d+)%<.+?Dark:.+?>([+-])(\d+)%<.+?Crushing:.+?>([+-])(\d+)%<.+?Slashing:.+?>([+-])(\d+)%<.+?Piercing:.+?>([+-])(\d+)%/;
 
 export function parseMonsterNameAndId(singleLogText: string): {
   monsterId: number,
   monsterName: string
 } | null {
-  const matches = singleLogText.match(rMatchMonsterId);
+  const matches = rMatchMonsterId.exec(singleLogText);
 
   if (matches) {
     const monsterId = Number(matches[1]);
@@ -27,8 +28,7 @@ const isPositiveOrNegative = (modifier: string): 1 | -1 => (modifier === '+' ? 1
 
 export async function parseScanResult(singleLogHtml: string): Promise<void | HVMonsterDatabase.MonsterInfo> {
   if (singleLogHtml.includes('Scanning')) {
-
-    const matches = singleLogHtml.match(rMatchScan);
+    const matches = rMatchScan.exec(singleLogHtml);
 
     if (matches) {
       const monsterName = matches[1];
@@ -37,7 +37,7 @@ export async function parseScanResult(singleLogHtml: string): Promise<void | HVM
 
       // System Monster has no Power Level results in undefined
       // Treat it as PL 0 instead
-      const plvl = Number(matches[3] ?? 0);
+      const plvl = Number((matches[3] as string | null) ?? 0);
 
       const fire = Number(matches[7]) * isPositiveOrNegative(matches[6]);
       const cold = Number(matches[9]) * isPositiveOrNegative(matches[8]);

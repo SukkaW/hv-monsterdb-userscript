@@ -107,10 +107,10 @@ export async function getMonsterInfoByName(name: string): Promise<HVMonsterDatab
  * []
  * ```
  */
-export function getCurrentNeedScannedMonsters(): {
+export function getCurrentNeedScannedMonsters(): Array<{
   name: string,
   mkey: string
-}[] {
+}> {
   if (!isFightingInBattle()) {
     logger.error('"getCurrentNeedScannedMonsters" method is only avaliable during the battle!');
     throw new Error('"getCurrentNeedScannedMonsters" method is only avaliable during the battle!');
@@ -156,6 +156,6 @@ export async function dumpRawLocalDataBase() {
     }));
   } else {
     logger.error('"dumpRawLocalDataBase" method is only avaliable when "debug" setting is enabled!');
-    return Promise.reject(new Error('"dumpRawLocalDataBase" method is only avaliable when "debug" setting is enabled!'));
+    throw new Error('"dumpRawLocalDataBase" method is only avaliable when "debug" setting is enabled!');
   }
 }

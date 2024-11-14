@@ -42,11 +42,9 @@ export function showPopup(msgHtml: string, color = '#000', title = 'HentaiVerse 
   contentEl.innerHTML = msgHtml;
 
   const closePopupKeyboardEventHandler = (e: KeyboardEvent) => {
-    if (e instanceof KeyboardEvent) {
-      if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {
-        popupEl.remove();
-        document.removeEventListener('keydown', closePopupKeyboardEventHandler);
-      }
+    if (e instanceof KeyboardEvent && (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape')) {
+      popupEl.remove();
+      document.removeEventListener('keydown', closePopupKeyboardEventHandler);
     }
   };
 

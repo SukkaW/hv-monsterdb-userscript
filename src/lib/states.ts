@@ -2,7 +2,7 @@ import type { HVMonsterDatabase } from '../types';
 import { isMonsterNeedScan, checkScanResultValidity, getMonsterHighlightColor } from './monster';
 import { atom, map, computed } from 'nanostores';
 
-const isTruthy = <T>(x: T | null | false | undefined): x is T => Boolean(x);
+const isTruthy = Boolean;
 
 interface MonsterStore {
   [monsterName: string]: HVMonsterDatabase.MonsterInfo | null
@@ -45,44 +45,40 @@ export const MonsterNeedScan = computed([
   monsterAndMkey,
   monsterLastUpdate,
   monstersAndTheirRandomness
-) => {
-  return monstersEntries.map(([monsterName, monsterInfo]) => {
-    const mkey = monsterAndMkey[monsterName];
-    const randomness = monstersAndTheirRandomness[monsterName];
-    if (mkey) {
-      const monsterHtml = monsterHtmls[mkey];
-      if (monsterHtml && checkScanResultValidity(monsterHtml)) {
-        // If there is no monsterInfo, it means the monster need to be scanned
-        if (!monsterInfo) return { name: monsterName, mkey };
-        // If monster is dead, no need to scan
-        if (monsterHtml.includes('nbardead.png')) return null;
+) => monstersEntries.map(([monsterName, monsterInfo]) => {
+  const mkey = monsterAndMkey[monsterName];
+  const randomness = monstersAndTheirRandomness[monsterName];
+  if (mkey) {
+    const monsterHtml = monsterHtmls[mkey];
+    if (monsterHtml && checkScanResultValidity(monsterHtml)) {
+      // If there is no monsterInfo, it means the monster need to be scanned
+      if (!monsterInfo) return { name: monsterName, mkey };
+      // If monster is dead, no need to scan
+      if (monsterHtml.includes('nbardead.png')) return null;
 
-        const lastUpdate = monsterLastUpdate[monsterInfo.monsterId];
-        if (isMonsterNeedScan(randomness, lastUpdate)) {
-          return { mkey, name: monsterName };
-        }
+      const lastUpdate = monsterLastUpdate[monsterInfo.monsterId];
+      if (isMonsterNeedScan(randomness, lastUpdate)) {
+        return { mkey, name: monsterName };
       }
     }
+  }
 
-    return null;
-  }).filter(isTruthy);
-});
+  return null;
+}).filter(isTruthy));
 
 export const MonsterNeedHighlight = computed([
   MonsterEntriesInCurrentRound,
   MonstersAndMkeysInCurrentRound
-], (monstersEntries, monsterAndMkey) => {
-  return monstersEntries.map(([monsterName, monsterInfo]) => {
-    const mkey = monsterAndMkey[monsterName];
-    const color = monsterInfo ? getMonsterHighlightColor(monsterInfo) : false;
+], (monstersEntries, monsterAndMkey) => monstersEntries.map(([monsterName, monsterInfo]) => {
+  const mkey = monsterAndMkey[monsterName];
+  const color = monsterInfo ? getMonsterHighlightColor(monsterInfo) : false;
 
-    if (color && mkey) {
-      return {
-        mkey,
-        color
-      };
-    }
+  if (color && mkey) {
+    return {
+      mkey,
+      color
+    };
+  }
 
-    return null;
-  }).filter(isTruthy);
-});
+  return null;
+}).filter(isTruthy));

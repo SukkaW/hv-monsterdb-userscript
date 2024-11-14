@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/prefer-enum-initializers -- safe encode */
 import type { HVMonsterDatabase } from '../types';
 import { getMonsterDatabaseCompatibleDate } from '../util/common';
 
@@ -35,6 +36,7 @@ export namespace EncodedMonsterDatabase {
     Void
   }
 
+  // eslint-disable-next-line sukka/no-export-const-enum -- TODO
   export const enum EMonsterInfo {
     monsterName,
     monsterId,
@@ -56,33 +58,33 @@ export namespace EncodedMonsterDatabase {
 
   export interface MonsterInfo {
     /** Monster Name */
-    [EMonsterInfo.monsterName]: string
+    [EMonsterInfo.monsterName]: string,
     /** Monster Class */
-    [EMonsterInfo.monsterClass]: EMonsterClass
+    [EMonsterInfo.monsterClass]: EMonsterClass,
     /** Monster PL */
-    [EMonsterInfo.plvl]: number
+    [EMonsterInfo.plvl]: number,
     /** Attack Mode */
-    [EMonsterInfo.attack]: EMonsterAttack
+    [EMonsterInfo.attack]: EMonsterAttack,
     /** Trainer */
-    [EMonsterInfo.trainer]: string
+    [EMonsterInfo.trainer]: string,
     /** Piercing */
-    [EMonsterInfo.piercing]: number
+    [EMonsterInfo.piercing]: number,
     /** Crushing */
-    [EMonsterInfo.crushing]: number
+    [EMonsterInfo.crushing]: number,
     /** Slashing */
-    [EMonsterInfo.slashing]: number
+    [EMonsterInfo.slashing]: number,
     /** Cold */
-    [EMonsterInfo.cold]: number
+    [EMonsterInfo.cold]: number,
     /** Wind */
-    [EMonsterInfo.wind]: number
+    [EMonsterInfo.wind]: number,
     /** Elec */
-    [EMonsterInfo.elec]: number
+    [EMonsterInfo.elec]: number,
     /** Fire */
-    [EMonsterInfo.fire]: number
+    [EMonsterInfo.fire]: number,
     /** Dark */
-    [EMonsterInfo.dark]: number
+    [EMonsterInfo.dark]: number,
     /** Holy */
-    [EMonsterInfo.holy]: number
+    [EMonsterInfo.holy]: number,
     /**
      * @description Last time update timestamp
      */

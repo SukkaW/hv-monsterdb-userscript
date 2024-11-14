@@ -5,28 +5,28 @@ export namespace HVMonsterDatabase {
   export type MonsterAttack = 'Piercing' | 'Crushing' | 'Slashing' | 'Fire' | 'Cold' | 'Wind' | 'Elec' | 'Holy' | 'Dark' | 'Void';
 
   export interface MonsterInfo {
-    monsterId: number
-    monsterClass: MonsterClass
-    monsterName: string
+    monsterId: number,
+    monsterClass: MonsterClass,
+    monsterName: string,
     /**
      * @description PL
      */
-    plvl: number
+    plvl: number,
     /**
      * @description Attack Mode
      */
-    attack: MonsterAttack
+    attack: MonsterAttack,
 
-    trainer: string
-    piercing: number
-    crushing: number
-    slashing: number
-    cold: number
-    wind: number
-    elec: number
-    fire: number
-    dark: number
-    holy: number
+    trainer: string,
+    piercing: number,
+    crushing: number,
+    slashing: number,
+    cold: number,
+    wind: number,
+    elec: number,
+    fire: number,
+    dark: number,
+    holy: number,
 
     /**
      * @description Last time update (can be parsed through Date)
@@ -43,31 +43,31 @@ export namespace HVMonsterDatabase {
      * @description Last Update Date
      * @example "2021-03-17"
      */
-    lastUpdateV2?: string
-    lastUpdateIsekaiV2?: string
+    lastUpdateV2?: string,
+    lastUpdateIsekaiV2?: string,
 
     /** Isekai Level used to determine if isekai has been reset */
-    isekaiLevel?: number
+    isekaiLevel?: number,
     /** Timestamp of last recorded isekai reset date */
-    lastIsekaiReset?: number
+    lastIsekaiReset?: number,
 
     /** MonsterInfoBox position */
-    monsterInfoBoxPosition?: { x: number, y: number }
+    monsterInfoBoxPosition?: { x: number, y: number },
 
     /** @deprecated - Last Update Date of version 1 database */
-    lastUpdate?: string
+    lastUpdate?: string,
     /** @deprecated - Last Update Date of version 1 database */
-    lastUpdateIsekai?: string
+    lastUpdateIsekai?: string,
     /** @deprecated - Local Monsterbase version 1 */
-    database?: unknown
+    database?: unknown,
     /** @deprecated - Local Isekai Monsterbase version 1 */
-    databaseIsekai?: unknown
+    databaseIsekai?: unknown,
     /** @deprecated - Monster ID Map. Monster ID are shared in both persistent and isekai */
     monsterIdMap?: {
       [key: string]: number
-    }
+    },
     /** @deprecated */
-    databaseV2?: LocalDatabaseVersion2
+    databaseV2?: LocalDatabaseVersion2,
     /** @deprecated */
     databaseIsekaiV2?: LocalDatabaseVersion2
   }
