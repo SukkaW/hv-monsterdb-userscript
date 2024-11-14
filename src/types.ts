@@ -8,13 +8,9 @@ export namespace HVMonsterDatabase {
     monsterId: number,
     monsterClass: MonsterClass,
     monsterName: string,
-    /**
-     * @description PL
-     */
+    /** PL */
     plvl: number,
-    /**
-     * @description Attack Mode
-     */
+    /** Attack Mode */
     attack: MonsterAttack,
 
     trainer: string,
@@ -28,9 +24,7 @@ export namespace HVMonsterDatabase {
     dark: number,
     holy: number,
 
-    /**
-     * @description Last time update (can be parsed through Date)
-     */
+    /** Last time update (can be parsed through Date) */
     lastUpdate: string
   }
 

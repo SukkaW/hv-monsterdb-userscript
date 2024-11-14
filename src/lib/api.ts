@@ -110,7 +110,7 @@ export async function getMonsterInfoByName(name: string): Promise<HVMonsterDatab
 export function getCurrentNeedScannedMonsters(): Array<{
   name: string,
   mkey: string
-}> {
+} | null> {
   if (!isFightingInBattle()) {
     logger.error('"getCurrentNeedScannedMonsters" method is only avaliable during the battle!');
     throw new Error('"getCurrentNeedScannedMonsters" method is only avaliable during the battle!');

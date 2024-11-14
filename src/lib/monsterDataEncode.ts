@@ -85,9 +85,7 @@ export namespace EncodedMonsterDatabase {
     [EMonsterInfo.dark]: number,
     /** Holy */
     [EMonsterInfo.holy]: number,
-    /**
-     * @description Last time update timestamp
-     */
+    /** Last time update timestamp */
     [EMonsterInfo.lastUpdate]: number
   }
 }

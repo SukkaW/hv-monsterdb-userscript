@@ -7,9 +7,7 @@ import { MONSTER_NAME_ID_MAP, LOCAL_MONSTER_DATABASE_PERSISTENT, LOCAL_MONSTER_D
 import { requestIdleCallback } from 'foxact/request-idle-callback';
 
 type ApiResponse = Array<HVMonsterDatabase.MonsterInfo & {
-  /**
-   * @description Last time update (can be parsed through Date)
-   */
+  /** Last time update (can be parsed through Date) */
   lastUpdate: string
 }>;
 
