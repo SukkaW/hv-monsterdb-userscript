@@ -3,6 +3,7 @@ import styles from '../style/style.module.css';
 
 import type { HVMonsterDatabase } from '../types';
 import { className } from 'million';
+import { createFixedArray } from 'foxts/create-fixed-array';
 
 /** @jsxImportSource million */
 
@@ -109,14 +110,12 @@ function MonsterTable(props: { monsterInfo: HVMonsterDatabase.MonsterInfo | null
   </div>;
 }
 
-const RANGE_OF_10 = [...new Array(10).keys()];
-
 export function MonsterInfo(props: { allMonsterStatus: Array<HVMonsterDatabase.MonsterInfo | null> }) {
   return (
     <div>{/* Million doesn't support root VNode to be a Fragment, see https://github.com/aidenybai/million/issues/160 */}
       {
         /* Provide all 10 MonsterTable and only toggle their display property, significantly improve virtual dom performance */
-        RANGE_OF_10.map(i => <MonsterTable monsterInfo={props.allMonsterStatus[i] ?? null} />)
+        createFixedArray(10).map(i => <MonsterTable monsterInfo={props.allMonsterStatus[i] ?? null} />)
       }
     </div>
   );

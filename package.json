@@ -27,6 +27,7 @@
   "license": "MIT",
   "dependencies": {
     "foxact": "^0.2.41",
+    "foxts": "^1.5.1",
     "million": "^1.12.5"
   },
   "devDependencies": {

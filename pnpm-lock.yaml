@@ -11,6 +11,9 @@ importers:
       foxact:
         specifier: ^0.2.41
         version: 0.2.41
+      foxts:
+        specifier: ^1.5.1
+        version: 1.5.1
       million:
         specifier: ^1.12.5
         version: 1.12.5
@@ -1043,6 +1046,9 @@ packages:
       react:
         optional: true
 
+  foxts@1.5.1:
+    resolution: {integrity: sha512-Xf4fspqPxJw8dqSoLa6w3isYIuFULpTlfQa7FSPeKiZksG2Fz+/d3dcE1F9EqBAC2sa1NpDbAbjxY10Sm0zCXw==}
+
   fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
@@ -1967,6 +1973,9 @@ packages:
 
   uc.micro@2.1.0:
     resolution: {integrity: sha512-ARDJmphmdvUk6Glw7y9DQ2bFkKBHwQHLi2lsaH6PPmz/Ka9sFOBsBluozhDltWmnv9u/cF6Rt87znRTPV+yp/A==}
+
+  uncrypto@0.1.3:
+    resolution: {integrity: sha512-Ql87qFHB3s/De2ClA9e0gsnS6zXG27SkTiSJwjCc9MebbfapQfuPzumMIUMi38ezPZVNFcHI9sUIepeQfw8J8Q==}
 
   undici-types@6.19.8:
     resolution: {integrity: sha512-ve2KP6f/JnbPBFyobGHuerC9g1FYGn/F8n1LWTwNxCEzd6IfqTwUQcNXgEtmmQ6DlRrC1hrSrBnCZPokRrDHjw==}
@@ -3082,6 +3091,10 @@ snapshots:
       client-only: 0.0.1
       server-only: 0.0.1
 
+  foxts@1.5.1:
+    dependencies:
+      uncrypto: 0.1.3
+
   fsevents@2.3.3:
     optional: true
 
@@ -3972,6 +3985,8 @@ snapshots:
   typescript@5.6.3: {}
 
   uc.micro@2.1.0: {}
+
+  uncrypto@0.1.3: {}
 
   undici-types@6.19.8: {}
 
