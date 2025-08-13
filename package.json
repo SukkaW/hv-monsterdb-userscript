@@ -26,47 +26,50 @@
   "author": "Sukka <https://skk.moe>",
   "license": "MIT",
   "dependencies": {
-    "foxact": "^0.2.45",
-    "foxts": "^3.3.4",
+    "foxact": "^0.2.49",
+    "foxts": "^3.11.1",
     "million": "^1.12.5"
   },
   "devDependencies": {
-    "@eslint-sukka/node": "^6.21.0",
-    "@rollup/plugin-commonjs": "^28.0.3",
+    "@eslint-sukka/node": "^6.23.1",
+    "@rollup/plugin-commonjs": "^28.0.6",
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-replace": "^6.0.2",
-    "@swc/core": "^1.11.29",
+    "@swc/core": "^1.13.3",
     "@swc/helpers": "^0.5.17",
     "@types/greasemonkey": "^4.0.7",
     "@types/greasemonkey3": "npm:@types/greasemonkey@^3.0.3",
-    "@types/node": "^22.15.29",
-    "core-js": "^3.42.0",
-    "cssnano": "^7.0.7",
-    "eslint": "^9.28.0",
-    "eslint-config-sukka": "^6.21.0",
-    "eslint-formatter-sukka": "^6.21.0",
+    "@types/node": "^22.17.1",
+    "core-js": "^3.45.0",
+    "cssnano": "^7.1.0",
+    "eslint": "^9.33.0",
+    "eslint-config-sukka": "^6.23.1",
+    "eslint-formatter-sukka": "^6.23.1",
     "magic-string": "^0.30.17",
     "nanostores": "^0.11.4",
-    "rollup": "^4.41.1",
+    "rollup": "^4.46.2",
     "rollup-plugin-postcss": "^4.0.2",
     "rollup-plugin-swc3": "^0.12.1",
-    "rollup-plugin-userscript-metablock": "^0.4.2",
+    "rollup-plugin-userscript-metablock": "^0.4.3",
     "typed-query-selector": "^2.12.0",
-    "typedoc": "^0.28.5",
-    "typescript": "^5.8.3"
+    "typedoc": "^0.28.10",
+    "typescript": "^5.9.2"
   },
-  "packageManager": "pnpm@10.11.0",
+  "packageManager": "pnpm@10.14.0",
   "engines": {
     "node": ">=14.0.0"
   },
-  "overrides": {
-    "array-includes": "npm:@nolyfill/array-includes@latest",
-    "array.prototype.findlastindex": "npm:@nolyfill/array.prototype.findlastindex@latest",
-    "array.prototype.flat": "npm:@nolyfill/array.prototype.flat@latest",
-    "array.prototype.flatmap": "npm:@nolyfill/array.prototype.flatmap@latest",
-    "has": "npm:@nolyfill/has@latest",
-    "object.fromentries": "npm:@nolyfill/object.fromentries@latest",
-    "object.groupby": "npm:@nolyfill/object.groupby@latest",
-    "object.values": "npm:@nolyfill/object.values@latest"
+  "pnpm": {
+    "overrides": {
+      "array-includes": "npm:@nolyfill/array-includes@latest",
+      "array.prototype.findlastindex": "npm:@nolyfill/array.prototype.findlastindex@latest",
+      "array.prototype.flat": "npm:@nolyfill/array.prototype.flat@latest",
+      "array.prototype.flatmap": "npm:@nolyfill/array.prototype.flatmap@latest",
+      "has": "npm:@nolyfill/has@latest",
+      "object.fromentries": "npm:@nolyfill/object.fromentries@latest",
+      "object.groupby": "npm:@nolyfill/object.groupby@latest",
+      "object.values": "npm:@nolyfill/object.values@latest",
+      "eslint>chalk": "npm:picocolors@^1.1.1"
+    }
   }
 }
