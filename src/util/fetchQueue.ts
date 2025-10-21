@@ -143,6 +143,7 @@ export class FetchQueue {
       this.lastCalled = now;
       const request = new Request(item.url, item.init);
 
+      // eslint-disable-next-line promise/prefer-catch -- inconsistent behavior
       fetch(request).then(
         (resp) => this.handleResult(item, ItemState.Succeeded, resp),
         (error) => this.handleResult(item, ItemState.Failed, error)

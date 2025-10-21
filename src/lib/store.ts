@@ -48,8 +48,8 @@ export const MONSTER_NAME_ID_MAP = {
 type UndefinedableEncodedMonsterInfo = EncodedMonsterDatabase.MonsterInfo | undefined;
 
 class LocalMonsterDatabase {
-  private cache = new Map<number, EncodedMonsterDatabase.MonsterInfo>();
-  private store: IDBKV<HVMonsterDatabase.LocalDatabaseVersion2>;
+  private readonly cache = new Map<number, EncodedMonsterDatabase.MonsterInfo>();
+  private readonly store: IDBKV<HVMonsterDatabase.LocalDatabaseVersion2>;
 
   constructor(storeName: string) {
     this.store = new IDBKV<HVMonsterDatabase.LocalDatabaseVersion2>(DBNAME, storeName);
@@ -92,6 +92,7 @@ class LocalMonsterDatabase {
         }
       });
 
+      // eslint-disable-next-line @typescript-eslint/await-thenable -- ensure order
       return Promise.all(resultPromises);
     });
   }
