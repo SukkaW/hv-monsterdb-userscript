@@ -94,6 +94,7 @@ export default defineConfig([{
     }),
     replace({
       __buildMatrix__: JSON.stringify('es2016'),
+      'process.env.NODE_ENV': JSON.stringify('production'),
       preventAssignment: true
     }),
     rollupPluginSettingLiteral(),
