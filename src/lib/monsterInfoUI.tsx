@@ -2,7 +2,7 @@ import { MONSTER_INFO_BOX_POSITION } from './store';
 import styles from '../style/style.module.css';
 
 import type { HVMonsterDatabase } from '../types';
-import { className } from 'million';
+import { clsx } from 'clsx';
 import { createFixedArray } from 'foxts/create-fixed-array';
 
 /** @jsxImportSource million */
@@ -68,10 +68,7 @@ function symbolNum(num?: number) {
 
 function MonsterTable(props: { monsterInfo: HVMonsterDatabase.MonsterInfo | null }) {
   return <div className={styles.table_container}>
-    <table className={className({
-      [styles.table]: true,
-      [styles.hidden]: !props.monsterInfo
-    })}>
+    <table className={clsx(styles.table, props.monsterInfo ? null : styles.hidden)}>
       <tbody>
         <tr>
           {isCompactMonsterInfoBox && (['fire', 'cold', 'elec'] as const).map(i => (

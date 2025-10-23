@@ -27,6 +27,7 @@
   "author": "Sukka <https://skk.moe>",
   "license": "MIT",
   "dependencies": {
+    "clsx": "^2.1.1",
     "foxact": "^0.2.49",
     "foxts": "^5.0.0",
     "million": "^1.12.5"
