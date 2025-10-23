@@ -1,6 +1,6 @@
 export type UseStore = <T>(
   txMode: IDBTransactionMode,
-  callback: (store: IDBObjectStore) => T | PromiseLike<T>,
+  callback: (store: IDBObjectStore) => T | PromiseLike<T>
 ) => Promise<T>;
 
 const OBJECT_STORES = ['MONSTER_NAME_ID_MAP', 'databaseV2', 'databaseIsekaiV2'] as const;
