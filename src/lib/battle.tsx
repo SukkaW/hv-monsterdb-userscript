@@ -96,7 +96,8 @@ async function tasksRunAtStartOfPerRound(): Promise<void> {
     });
 
     // Update Monsters's ID only when browser is idle
-    window.requestIdleCallback(() => MONSTER_NAME_ID_MAP.updateMany([...monsterInTheRoundNameIdMap.entries()]), { timeout: 2000 });
+    // eslint-disable-next-line sukka/prefer-timer-id -- hang
+    requestIdleCallback(() => MONSTER_NAME_ID_MAP.updateMany([...monsterInTheRoundNameIdMap.entries()]), { timeout: 2000 });
   }
 
   // I am not sure the order that monster showed up in battle log
