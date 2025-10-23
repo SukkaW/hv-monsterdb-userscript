@@ -7,6 +7,7 @@ const SETTINGS = {
    * false - disable verbose output in console (default)
    */
   debug: false,
+
   /**
    * Scan Expire Date
    *
@@ -14,6 +15,7 @@ const SETTINGS = {
    * In the Isekai, monsters will only expire once per season.
    */
   scanExpireDays: 45,
+
   /**
    * Scan Highlight Color
    *
@@ -23,6 +25,7 @@ const SETTINGS = {
    * (In order to be compatible with Monsterbation's "monsterKeyword", only monster letters part will be highlighted)
    */
   scanHighlightColor: 'coral',
+
   /**
    * Monster Info Box
    *
@@ -30,6 +33,7 @@ const SETTINGS = {
    * like the ui, you can disable it here.
    */
   showMonsterInfoBox: true,
+
   /**
    * Compact Monster Info Box
    *
@@ -37,6 +41,7 @@ const SETTINGS = {
    * false - show all mitigation data along with trainer, PL, monster class in the float box (default)
    */
   compactMonsterInfoBox: false,
+
   /**
    * Highlight Monster
    *
@@ -73,6 +78,7 @@ const SETTINGS = {
     //   return false
     // }
   },
+
   /**
    * Dark Mode
    *
