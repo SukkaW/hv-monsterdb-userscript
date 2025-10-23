@@ -11,11 +11,12 @@ import MagicString from 'magic-string';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import replace from '@rollup/plugin-replace';
+import { adapter, analyzer } from 'vite-bundle-analyzer';
 
 import type { Plugin } from 'rollup';
 import { defineConfig } from 'rollup';
 
-let cache;
+import { version as coreJsVersion } from 'core-js/package.json';
 
 const userScriptMetaBlockConfig = {
   file: './userscript.meta.json',
@@ -34,101 +35,92 @@ function rollupPluginSettingLiteral(): Plugin {
       const magicString = new MagicString(code);
       magicString.prepend(`${settingsLiteral}\n`).trimEnd(String.raw`\n`);
 
-      return { code: magicString.toString() };
+      return { code: magicString.toString(), map: magicString.generateMap() };
     }
   };
 }
 
-export default defineConfig([{
-  input: 'src/index.ts',
-  output: [{
-    format: 'iife',
-    file: 'dist/hv-monsterdb.es2020.user.js',
-    name: 'unsafeWindow.HVMonsterDB',
-    sourcemap: false,
-    esModule: false
-  }],
-  plugins: [
-    nodeResolve(),
-    replace({
-      __buildMatrix__: JSON.stringify('es2020'),
-      'process.env.NODE_ENV': JSON.stringify('production'),
-      preventAssignment: true
-    }),
-    swc(defineRollupSwcOption({
-      jsc: {
-        target: 'es2020',
-        externalHelpers: true
-      }
-    })),
-    postcss({
-      plugins: [
-        cssnano()
-      ]
-    }),
-    rollupPluginSettingLiteral(),
-    metablock(userScriptMetaBlockConfig)
-  ],
-  external: ['typed-query-selector'],
-  cache
-}, {
-  input: 'src/index.ts',
-  output: {
-    format: 'iife',
-    file: 'dist/hv-monsterdb.es2016.user.js',
-    name: 'unsafeWindow.HVMonsterDB',
-    sourcemap: false,
-    esModule: false
-  },
-  plugins: [
-    commonjs({
-      esmExternals: true
-    }),
-    nodeResolve({
-      exportConditions: ['import', 'module', 'default']
-    }),
-    postcss({
-      plugins: [
-        cssnano()
-      ]
-    }),
-    replace({
-      __buildMatrix__: JSON.stringify('es2016'),
-      'process.env.NODE_ENV': JSON.stringify('production'),
-      preventAssignment: true
-    }),
-    rollupPluginSettingLiteral(),
-    swc(defineRollupSwcOption({
-      exclude: path.join(path.dirname(require.resolve('core-js/package.json')), '**'),
-      tsconfig: './tsconfig.json',
-      jsc: {
-        target: undefined,
-        externalHelpers: true
-        // loose: true
-      },
-      env: {
-        targets: 'chrome >= 79, firefox >= 60, edge >= 79, safari >= 11, not ie 11',
-        coreJs: '3.26',
-        mode: 'usage',
-        shippedProposals: true
-      }
-    })),
-    metablock({
-      ...userScriptMetaBlockConfig,
-      override: {
-        ...userScriptMetaBlockConfig.override,
-        grant: [
-          'unsafeWindow',
-          'GM.getValue',
-          'GM_getValue', // GMv3 Legacy API support
-          'GM.setValue',
-          'GM_setValue', // GMv3 Legacy API support
-          'GM.deleteValue',
-          'GM_deleteValue' // GMv3 Legacy API support
+function buildConfig(target: 'es2020' | 'es2016') {
+  return defineConfig({
+    input: 'src/index.ts',
+    output: {
+      format: 'iife',
+      file: `dist/hv-monsterdb.${target}.user.js`,
+      name: 'unsafeWindow.HVMonsterDB',
+      sourcemap: false,
+      esModule: false
+    },
+    plugins: [
+      target === 'es2016'
+        ? commonjs({ esmExternals: true })
+        : null,
+      nodeResolve({
+        exportConditions: ['import', 'module', 'default']
+      }),
+      replace({
+        __buildMatrix__: JSON.stringify(target),
+        'process.env.NODE_ENV': JSON.stringify('production'),
+        'typeof process': JSON.stringify('undefined'),
+        preventAssignment: true
+      }),
+      swc(defineRollupSwcOption({
+        exclude: path.join(path.dirname(require.resolve('core-js/package.json')), '**'),
+        jsc: {
+          externalHelpers: true,
+          target: target === 'es2020' ? target : undefined
+        },
+        sourceMaps: process.env.ANALYZE === 'true',
+        env: target === 'es2020'
+          ? undefined
+          : {
+            // skip: ['core-js/modules/**'],
+            targets: 'chrome >= 79, firefox >= 60, edge >= 79, safari >= 11, not ie 11',
+            coreJs: coreJsVersion,
+            exclude: [
+            ],
+            mode: 'usage',
+            shippedProposals: true,
+            debug: false
+          }
+      })),
+      postcss({
+        plugins: [
+          cssnano()
         ]
-      }
-    })
-  ],
-  external: ['typed-query-selector'],
-  cache
-}]);
+      }),
+      rollupPluginSettingLiteral(),
+      metablock({
+        ...userScriptMetaBlockConfig,
+        ...(
+          target === 'es2020'
+            ? {}
+            : {
+              override: {
+                ...userScriptMetaBlockConfig.override,
+                grant: [
+                  'unsafeWindow',
+                  'GM.getValue',
+                  'GM_getValue', // GMv3 Legacy API support
+                  'GM.setValue',
+                  'GM_setValue', // GMv3 Legacy API support
+                  'GM.deleteValue',
+                  'GM_deleteValue' // GMv3 Legacy API support
+                ]
+              }
+            }
+        )
+      }),
+      process.env.ANALYZE === 'true'
+        ? adapter(analyzer({
+          openAnalyzer: true
+        }))
+        : null
+    ],
+    external: ['typed-query-selector']
+  });
+}
+
+export default defineConfig([
+  buildConfig('es2020'),
+  buildConfig('es2016')
+]);

@@ -16,6 +16,7 @@
   ],
   "scripts": {
     "build": "rollup --configPlugin rollup-plugin-swc3 -c --bundleConfigAsCjs",
+    "build:analyze": "ANALYZE=true pnpm run build",
     "doc": "typedoc",
     "lint": "eslint --format=sukka .",
     "prepublishOnly": "pnpm run build"
@@ -53,7 +54,8 @@
     "rollup-plugin-userscript-metablock": "^0.4.3",
     "typed-query-selector": "^2.12.0",
     "typedoc": "^0.28.14",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vite-bundle-analyzer": "^1.2.3"
   },
   "packageManager": "pnpm@10.19.0",
   "engines": {
