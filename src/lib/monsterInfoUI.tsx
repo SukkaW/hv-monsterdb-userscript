@@ -22,20 +22,23 @@ export function createMonsterInfoBox() {
 
   // Use saved position information
   // A fix to prevent the info box being drag into outer window
-  const { width: screenWidth, height: screenHeight } = window.screen;
+  const { width: winWidth, height: winHeight } = window.screen;
 
   let left = MONSTER_INFO_BOX_POSITION.x;
   let top = MONSTER_INFO_BOX_POSITION.y;
-  if (left > screenWidth - 120) {
-    left = screenWidth - 120;
-  } else if (left < 0) {
+  if (left > winWidth - 200) {
+    left = winWidth - 200;
+  }
+  if (left < 0) {
     left = 0;
   }
-  if (top > screenHeight - 590) {
-    top = screenHeight - 590;
-  } else if (top < 0) {
+  if (top > winHeight - 75) {
+    top = winHeight - 75;
+  }
+  if (top < 0) {
     top = 0;
   }
+
   boxEl.style.left = `${left}px`;
   boxEl.style.top = `${top}px`;
 
@@ -135,17 +138,30 @@ function makeMonsterInfoBoxDraggable(boxEl: HTMLDivElement, headerEl: HTMLDivEle
         const winWidth = window.innerWidth;
 
         let left = pageX - shiftX;
-        if (left > winWidth - 120) {
-          left = winWidth - 120;
-        } else if (left < 0) {
+        if (left > winWidth - 200) {
+          left = winWidth - 200;
+        }
+        if (left < 0) {
           left = 0;
         }
         let top = pageY - shiftY;
-        if (top > winHeight - 590) {
-          top = winHeight - 590;
-        } else if (top < 0) {
+        if (top > winHeight - 75) {
+          top = winHeight - 75;
+        }
+        if (top < 0) {
           top = 0;
         }
+
+        console.log({
+          winHeight,
+          winWidth,
+          pageX,
+          pageY,
+          shiftX,
+          shiftY,
+          left,
+          top
+        });
 
         boxEl.style.left = `${left}px`;
         MONSTER_INFO_BOX_POSITION.x = left;
