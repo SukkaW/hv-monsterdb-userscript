@@ -13,6 +13,7 @@ import { requestIdleCallback } from 'foxact/request-idle-callback';
 
 import 'typed-query-selector';
 import type { HVMonsterDatabase } from '../types';
+import { randomInt } from 'foxts/random-int';
 
 /** @jsxImportSource million */
 
@@ -76,8 +77,8 @@ export async function inBattle(): Promise<void> {
 /** To prevent multiple users scan the same monster over and over again, some randomness has been added. Generate it once per monster */
 function createRandomness() {
   return isIsekai()
-    ? Math.floor(Math.random() * Math.floor(SETTINGS.scanExpireDays / 3))
-    : Math.floor(Math.random() * Math.floor(SETTINGS.scanExpireDays / 5)) + 1;
+    ? randomInt(0, Math.floor(SETTINGS.scanExpireDays / 3))
+    : randomInt(1, Math.floor(SETTINGS.scanExpireDays / 5)) + 1;
 }
 
 /** Tasks like "get monster id and monster name" only have to run at the start of per round */

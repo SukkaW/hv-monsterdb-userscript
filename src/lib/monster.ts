@@ -1,3 +1,4 @@
+import { randomInt } from 'foxts/random-int';
 import type { HVMonsterDatabase } from '../types';
 import { isIsekai } from '../util/common';
 import { HowManyDaysSinceLastIsekaiReset } from './isekaiReset';
@@ -36,7 +37,7 @@ export function getMonsterHighlightColor(monsterInfo: HVMonsterDatabase.MonsterI
 }
 
 export function isMonsterNeedScan(randomness: number | undefined, lastUpdate?: number): boolean {
-  randomness ??= Math.floor(Math.random() * Math.floor(SETTINGS.scanExpireDays / 5)) + 1;
+  randomness ??= randomInt(0, Math.floor(SETTINGS.scanExpireDays / 5)) + 1;
 
   if (lastUpdate) {
     // How many days since lastUpdate to now.
