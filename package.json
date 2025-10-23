@@ -27,11 +27,11 @@
   "license": "MIT",
   "dependencies": {
     "foxact": "^0.2.49",
-    "foxts": "^3.15.0",
+    "foxts": "^5.0.0",
     "million": "^1.12.5"
   },
   "devDependencies": {
-    "@eslint-sukka/node": "^7.3.5",
+    "@eslint-sukka/node": "^8.0.1",
     "@rollup/plugin-commonjs": "^28.0.8",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-replace": "^6.0.2",
@@ -43,10 +43,10 @@
     "core-js": "^3.46.0",
     "cssnano": "^7.1.1",
     "eslint": "^9.38.0",
-    "eslint-config-sukka": "^7.3.5",
-    "eslint-formatter-sukka": "^7.3.5",
+    "eslint-config-sukka": "^8.0.1",
+    "eslint-formatter-sukka": "^8.0.1",
     "magic-string": "^0.30.19",
-    "nanostores": "^0.11.4",
+    "nanostores": "^1.0.1",
     "rollup": "^4.52.5",
     "rollup-plugin-postcss": "^4.0.2",
     "rollup-plugin-swc3": "^0.12.1",
@@ -55,12 +55,13 @@
     "typedoc": "^0.28.14",
     "typescript": "^5.9.3"
   },
-  "packageManager": "pnpm@10.18.3",
+  "packageManager": "pnpm@10.19.0",
   "engines": {
     "node": ">=14.0.0"
   },
   "pnpm": {
     "overrides": {
+      "cssnano": "$cssnano",
       "array-includes": "npm:@nolyfill/array-includes@latest",
       "array.prototype.findlastindex": "npm:@nolyfill/array.prototype.findlastindex@latest",
       "array.prototype.flat": "npm:@nolyfill/array.prototype.flat@latest",
