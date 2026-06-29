@@ -1,3 +1,15 @@
+## 2.1.0
+
+A long-awaited new version of the script!
+
+- Supports new version of HentaiVerse where the monster scan result HTML get updated.
+
+- Fixes a potential race condition during monster highlighting. Now the highlighting process will read monster in real time instead of beforehand.
+- Fixes a potential bug that the monster current status is not collected properly via HTML
+- Fixes the backward compatibility with old browsers where `requestIdleCallback` is not available
+- Fixes the configuration spacing for better readability
+- Fixes the d'n'd box may still be dragged out of the viewport. Now the d'n'd box will always stay in your viewport
+
 ## 2.0.0
 
 A brand new version of the script!
