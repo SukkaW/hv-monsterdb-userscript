@@ -28,52 +28,38 @@
   "license": "MIT",
   "dependencies": {
     "clsx": "^2.1.1",
-    "foxact": "^0.2.49",
-    "foxts": "^5.0.0",
+    "foxact": "^0.3.8",
+    "foxts": "^5.5.1",
     "million": "^1.12.5"
   },
   "devDependencies": {
-    "@eslint-sukka/node": "^8.0.1",
-    "@rollup/plugin-commonjs": "^28.0.8",
+    "@eslint-sukka/node": "^8.13.1",
+    "@rollup/plugin-commonjs": "^28.0.9",
     "@rollup/plugin-node-resolve": "^16.0.3",
-    "@rollup/plugin-replace": "^6.0.2",
-    "@swc/core": "^1.13.5",
-    "@swc/helpers": "^0.5.17",
+    "@rollup/plugin-replace": "^6.0.3",
+    "@swc/core": "^1.15.43",
+    "@swc/helpers": "^0.5.23",
     "@types/greasemonkey": "^4.0.7",
     "@types/greasemonkey3": "npm:@types/greasemonkey@^3.0.3",
-    "@types/node": "^22.18.12",
-    "core-js": "^3.46.0",
-    "cssnano": "^7.1.1",
-    "eslint": "^9.38.0",
-    "eslint-config-sukka": "^8.0.1",
-    "eslint-formatter-sukka": "^8.0.1",
-    "magic-string": "^0.30.19",
-    "nanostores": "^1.0.1",
-    "rollup": "^4.52.5",
+    "@types/node": "^22.20.0",
+    "core-js": "^3.49.0",
+    "cssnano": "^7.1.9",
+    "eslint": "^10.6.0",
+    "eslint-config-sukka": "^8.13.1",
+    "eslint-formatter-sukka": "^8.13.1",
+    "magic-string": "^0.30.21",
+    "nanostores": "^1.4.0",
+    "rollup": "^4.62.2",
     "rollup-plugin-postcss": "^4.0.2",
     "rollup-plugin-swc3": "^0.12.1",
     "rollup-plugin-userscript-metablock": "^0.4.3",
-    "typed-query-selector": "^2.12.0",
-    "typedoc": "^0.28.14",
+    "typed-query-selector": "^2.12.2",
+    "typedoc": "^0.28.19",
     "typescript": "^5.9.3",
-    "vite-bundle-analyzer": "^1.2.3"
+    "vite-bundle-analyzer": "^1.3.8"
   },
-  "packageManager": "pnpm@10.19.0",
+  "packageManager": "pnpm@10.34.4",
   "engines": {
     "node": ">=14.0.0"
-  },
-  "pnpm": {
-    "overrides": {
-      "cssnano": "$cssnano",
-      "array-includes": "npm:@nolyfill/array-includes@latest",
-      "array.prototype.findlastindex": "npm:@nolyfill/array.prototype.findlastindex@latest",
-      "array.prototype.flat": "npm:@nolyfill/array.prototype.flat@latest",
-      "array.prototype.flatmap": "npm:@nolyfill/array.prototype.flatmap@latest",
-      "eslint>chalk": "npm:picocolors@^1.1.1",
-      "has": "npm:@nolyfill/has@latest",
-      "object.fromentries": "npm:@nolyfill/object.fromentries@latest",
-      "object.groupby": "npm:@nolyfill/object.groupby@latest",
-      "object.values": "npm:@nolyfill/object.values@latest"
-    }
   }
 }
