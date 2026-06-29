@@ -4,25 +4,23 @@ on: [push]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
         with:
-          node-version-file: '.node-version'
+          node-version-file: ".node-version"
           check-latest: true
-          cache: 'pnpm'
-          registry-url: 'https://registry.npmjs.org'
-      - run: npm install npm -g
+          cache: "pnpm"
       - run: pnpm install
       - run: pnpm run doc
         env:
           CI: true
       - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs
-          user_name: 'SukkaBot'
+          user_name: "SukkaBot"
           user_email: ${{ secrets.GIT_EMAIL }}
