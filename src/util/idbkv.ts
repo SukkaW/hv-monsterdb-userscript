@@ -66,6 +66,7 @@ export class IDBKV<T> {
               resolve(IDBKV.promisifyRequest(store.transaction));
             }
           } catch (err) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion -- fuck typescript-eslint
             reject(err as Error);
           }
         };
@@ -124,12 +125,13 @@ export class IDBKV<T> {
           resolve(database);
         };
         // eslint-disable-next-line sukka/unicorn/prefer-add-event-listener -- file size hacks
-        request.onerror = () => reject(request.error as Error);
+        request.onerror = () => reject(request.error ?? new Error('Failed to open database'));
         request.onupgradeneeded = () => {
           try {
             // Whatever the KV instance is opened, always create all objectStore we needed
             OBJECT_STORES.forEach(storeName => request.result.createObjectStore(storeName));
           } catch (e) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion -- fuck typescript-eslint
             reject(e as Error);
           }
         };

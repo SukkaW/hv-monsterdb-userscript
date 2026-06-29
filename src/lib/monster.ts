@@ -45,7 +45,7 @@ export function isMonsterNeedScan(randomness: number | undefined, lastUpdate?: n
 
     if (isIsekai()) {
       const howManyDaysSinceLastIsekaiReset = HowManyDaysSinceLastIsekaiReset.get();
-      // eslint-disable-next-line sukka/prefer-single-boolean-return -- clarity
+
       if (
         howManyDaysSinceLastIsekaiReset
         // There is an Isekai Reset between last scan and now.

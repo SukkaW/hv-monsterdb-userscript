@@ -92,22 +92,20 @@ function buildConfig(target: 'es2020' | 'es2016') {
       metablock({
         ...userScriptMetaBlockConfig,
         ...(
-          target === 'es2020'
-            ? {}
-            : {
-              override: {
-                ...userScriptMetaBlockConfig.override,
-                grant: [
-                  'unsafeWindow',
-                  'GM.getValue',
-                  'GM_getValue', // GMv3 Legacy API support
-                  'GM.setValue',
-                  'GM_setValue', // GMv3 Legacy API support
-                  'GM.deleteValue',
-                  'GM_deleteValue' // GMv3 Legacy API support
-                ]
-              }
+          target === 'es2020' && {
+            override: {
+              ...userScriptMetaBlockConfig.override,
+              grant: [
+                'unsafeWindow',
+                'GM.getValue',
+                'GM_getValue', // GMv3 Legacy API support
+                'GM.setValue',
+                'GM_setValue', // GMv3 Legacy API support
+                'GM.deleteValue',
+                'GM_deleteValue' // GMv3 Legacy API support
+              ]
             }
+          }
         )
       }),
       process.env.ANALYZE === 'true'

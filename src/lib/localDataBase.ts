@@ -1,3 +1,4 @@
+import { extractErrorMessage } from 'foxts/extract-error-message';
 import type { HVMonsterDatabase } from '../types';
 import { getUTCDate, isIsekai, showPopup } from '../util/common';
 import { logger } from '../util/logger';
@@ -67,7 +68,7 @@ export async function updateLocalDatabase(force = false): Promise<void> {
     } catch (e) {
       logger.error(e);
 
-      showPopup(`There is something wrong when trying to update the local database from the server!\n\n${JSON.stringify(e)}`);
+      showPopup(`There is something wrong when trying to update the local database from the server!\n\n${extractErrorMessage(e, true, true)}`);
     }
   } else {
     logger.info('There is no need to update local database.');
@@ -90,7 +91,7 @@ async function databaseMigration() {
       logger.debug('Migrating old databaseV2 to IndexedDB'),
       LOCAL_MONSTER_DATABASE_PERSISTENT.updateMany(Object.entries(databaseV2).map(([k, v]) => {
         const newId = Number(k);
-        if (Number.isInteger(newId)) return [newId, v];
+        if (Number.isSafeInteger(newId)) return [newId, v];
         return null;
       }))
     ),
@@ -98,7 +99,7 @@ async function databaseMigration() {
       logger.debug('Migrating old databaseIsekaiV2 to IndexedDB'),
       LOCAL_MONSTER_DATABASE_ISEKAI.updateMany(Object.entries(databaseIsekaiV2).map(([k, v]) => {
         const newId = Number(k);
-        if (Number.isInteger(newId)) return [newId, v];
+        if (Number.isSafeInteger(newId)) return [newId, v];
         return null;
       }))
     ),

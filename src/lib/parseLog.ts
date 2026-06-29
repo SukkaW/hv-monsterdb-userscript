@@ -5,7 +5,7 @@ import { MONSTER_NAME_ID_MAP } from './store';
 const rMatchMonsterId = /MID=(\d+) \((.+)\)/;
 // eslint-disable-next-line regexp/no-super-linear-backtracking -- legacy format: Class → Trainer → Attack → Resists
 const rMatchScanLegacy = /Scanning (.+?)\.\.\..+?Monster Class.+>([A-Z][a-z]+)(?:, Power Level (\d+)<|<).+?Monster Trainer:<\/strong><\/td><td>([^<>]*)<.+?<\/strong><\/td><td>([A-Za-z]+)<.+?Fire:.+?>([+-])(\d+)%<.+?Cold:.+?>([+-])(\d+)%<.+?Elec:.+?>([+-])(\d+)%<.+?Wind:.+?>([+-])(\d+)%<.+?Holy:.+?>([+-])(\d+)%<.+?Dark:.+?>([+-])(\d+)%<.+?Crushing:.+?>([+-])(\d+)%<.+?Slashing:.+?>([+-])(\d+)%<.+?Piercing:.+?>([+-])(\d+)%/;
-// eslint-disable-next-line regexp/no-super-linear-backtracking, sukka/unicorn/better-regex -- new format: Trainer → Class → Melee Attack → Resists
+// eslint-disable-next-line regexp/no-super-linear-backtracking -- new format: Trainer → Class → Melee Attack → Resists
 const rMatchScanNew = /Scanning (.+?)\.\.\.[\s\S]+?Monster Trainer:<\/strong><\/td><td[^>]*>([^<>]*)<[\s\S]+?Monster Class:<\/strong><\/td>\s*<td[^>]*>([A-Z][a-z]+)(?:, Power Level (\d+))?<[\s\S]+?Melee Attack:<\/strong><\/td>\s*<td[^>]*>([A-Za-z]+)[;<][\s\S]+?Fire:[\s\S]+?>([+-])(\d+)%<[\s\S]+?Cold:[\s\S]+?>([+-])(\d+)%<[\s\S]+?Elec:[\s\S]+?>([+-])(\d+)%<[\s\S]+?Wind:[\s\S]+?>([+-])(\d+)%<[\s\S]+?Holy:[\s\S]+?>([+-])(\d+)%<[\s\S]+?Dark:[\s\S]+?>([+-])(\d+)%<[\s\S]+?Crushing:[\s\S]+?>([+-])(\d+)%<[\s\S]+?Slashing:[\s\S]+?>([+-])(\d+)%<[\s\S]+?Piercing:[\s\S]+?>([+-])(\d+)%/;
 
 export function parseMonsterNameAndId(singleLogText: string): {

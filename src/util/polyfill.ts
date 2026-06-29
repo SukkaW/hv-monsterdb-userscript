@@ -62,6 +62,7 @@ function promisify<TArgs extends any[], TResult>(fn?: (...args: TArgs) => TResul
         try {
           resolve(Reflect.apply(fn, globalThis, args));
         } catch (e) {
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion -- fuck typescript-eslint
           reject(e as Error);
         }
       });
@@ -75,9 +76,9 @@ function createNotification(options: {
   image?: string,
   onClick?: () => void
 }) {
-  globalThis.Notification.requestPermission().then(permission => {
+  Notification.requestPermission().then(permission => {
     if (permission === 'granted') {
-      const notification = new globalThis.Notification(options.title, {
+      const notification = new Notification(options.title, {
         body: options.text,
         icon: options.image
       });

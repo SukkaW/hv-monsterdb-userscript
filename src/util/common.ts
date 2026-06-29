@@ -7,7 +7,7 @@ export function isFightingInBattle(): boolean {
 }
 
 export function getUTCDate(): string {
-  return new Date().toISOString().split('T')[0];
+  return new Date().toISOString().split('T', 1)[0];
 }
 
 const MonsterDatabaseCompatibleDateCache = new Map();
