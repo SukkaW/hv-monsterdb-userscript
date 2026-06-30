@@ -19,6 +19,9 @@ jobs:
           CI: true
   build:
     runs-on: ubuntu-slim
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
