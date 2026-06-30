@@ -1,3 +1,10 @@
+## 2.1.1
+
+Minor bug fixes and more
+
+- Fixes duplicated `-` symbol
+- `@downloadURL` and `@updateURL` support for auto update check within UserScript Manager
+
 ## 2.1.0
 
 A long-awaited new version of the script!
