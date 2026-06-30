@@ -18,14 +18,34 @@ import { defineConfig } from 'rollup';
 
 import { version as coreJsVersion } from 'core-js/package.json';
 
-const userScriptMetaBlockConfig = {
-  file: './userscript.meta.json',
-  override: {
+const UNPKG_DIST_BASE = `https://unpkg.com/${pkgJson.name}@latest/dist`;
+
+function userScriptMetaBlockConfig(target: 'es2020' | 'es2016') {
+  const override: Record<string, unknown> = {
     version: pkgJson.version,
     description: pkgJson.description,
-    author: pkgJson.author
+    author: pkgJson.author,
+    updateURL: `${UNPKG_DIST_BASE}/hv-monsterdb.${target}.meta.js`,
+    downloadURL: `${UNPKG_DIST_BASE}/hv-monsterdb.${target}.user.js`
+  };
+
+  if (target === 'es2020') {
+    override.grant = [
+      'unsafeWindow',
+      'GM.getValue',
+      'GM_getValue', // GMv3 Legacy API support
+      'GM.setValue',
+      'GM_setValue', // GMv3 Legacy API support
+      'GM.deleteValue',
+      'GM_deleteValue' // GMv3 Legacy API support
+    ];
   }
-};
+
+  return {
+    file: './userscript.meta.json',
+    override
+  };
+}
 
 function rollupPluginSettingLiteral(): Plugin {
   const settingsLiteral = readFileSync('src/settings.js', 'utf-8');
@@ -89,25 +109,7 @@ function buildConfig(target: 'es2020' | 'es2016') {
         ]
       }),
       rollupPluginSettingLiteral(),
-      metablock({
-        ...userScriptMetaBlockConfig,
-        ...(
-          target === 'es2020' && {
-            override: {
-              ...userScriptMetaBlockConfig.override,
-              grant: [
-                'unsafeWindow',
-                'GM.getValue',
-                'GM_getValue', // GMv3 Legacy API support
-                'GM.setValue',
-                'GM_setValue', // GMv3 Legacy API support
-                'GM.deleteValue',
-                'GM_deleteValue' // GMv3 Legacy API support
-              ]
-            }
-          }
-        )
-      }),
+      metablock(userScriptMetaBlockConfig(target)),
       process.env.ANALYZE === 'true'
         ? adapter(analyzer({
           openAnalyzer: true
@@ -118,7 +120,22 @@ function buildConfig(target: 'es2020' | 'es2016') {
   });
 }
 
+function metaConfig(target: 'es2020' | 'es2016') {
+  return defineConfig({
+    input: 'src/meta.js',
+    output: {
+      file: `dist/hv-monsterdb.${target}.meta.js`,
+      format: 'es'
+    },
+    plugins: [
+      metablock(userScriptMetaBlockConfig(target))
+    ]
+  });
+}
+
 export default defineConfig([
   buildConfig('es2020'),
-  buildConfig('es2016')
+  buildConfig('es2016'),
+  metaConfig('es2020'),
+  metaConfig('es2016')
 ]);
