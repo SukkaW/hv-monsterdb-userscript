@@ -2,7 +2,7 @@
 
 A HentaiVerse in-battle userscript that displays monster information from the rebuilt hentaiVerse monster database.
 
-![npm](https://img.shields.io/npm/v/hv-monsterdb-userscript?style=flat-square) [![GitHub license](https://img.shields.io/github/license/SukkaW/hv-monsterdb-userscript?style=flat-square)](https://github.com/SukkaW/hv-monsterdb-userscript/blob/master/LICENSE) [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/sukkaw/hv-monsterdb-userscript/Test?label=GitHub%20Action&style=flat-square)](https://github.com/SukkaW/hv-monsterdb-userscript/actions/workflows/test.yml)
+![npm](https://img.shields.io/npm/v/hv-monsterdb-userscript?style=flat-square) [![GitHub license](https://img.shields.io/github/license/SukkaW/hv-monsterdb-userscript?style=flat-square)](https://github.com/SukkaW/hv-monsterdb-userscript/blob/master/LICENSE)
 
 ## Download
 
@@ -10,8 +10,6 @@ Download the script from [UNPKG](https://unpkg.com/browse/hv-monsterdb-userscrip
 
 - `hv-monsterdb.es2020.user.js` (Recommended for better performance): Only compatible with latest modern browsers.
 - `hv-monsterdb.es5.user.js`: Compatible with old browsers as well.
-
-> You can also download the "nightly" build from [GitHub Action](https://github.com/SukkaW/hv-monsterdb-userscript/actions).
 
 ## Installation
 
@@ -38,7 +36,7 @@ There is nothing else you need to do! The script will handle everything for you!
 
 ## API
 
-If you are a script writer or an advanced player, you might be interested in the [API Documents](https://suka.js.org/hv-monsterdb-userscript/).
+If you are a script writer or an advanced player, you might be interested in the [API Documents](https://sukkaw.github.io/hv-monsterdb-userscript/).
 
 ## Build
 
