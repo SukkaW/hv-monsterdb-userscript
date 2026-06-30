@@ -18,7 +18,7 @@ jobs:
         env:
           CI: true
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -41,3 +41,17 @@ jobs:
         with:
           name: hv-monsterdb.es2020.user.js
           path: dist/hv-monsterdb.es2020.user.js
+      - name: Publish
+        if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+        run: |
+          if git log -1 --pretty=%B | grep "^release: [0-9]\+\.[0-9]\+\.[0-9]\+$";
+          then
+            pnpm publish -r --provenance --access public
+          elif git log -1 --pretty=%B | grep "^release: [0-9]\+\.[0-9]\+\.[0-9]\+";
+          then
+            pnpm publish -r --provenance --access public --tag next
+          else
+            echo "Not a release, skipping publish"
+          fi
+        env:
+          NPM_CONFIG_PROVENANCE: true

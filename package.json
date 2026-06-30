@@ -19,7 +19,8 @@
     "build:analyze": "ANALYZE=true pnpm run build",
     "doc": "typedoc",
     "lint": "eslint --format=sukka .",
-    "prepublishOnly": "pnpm run build"
+    "prerelease": "pnpm run lint && pnpm run build",
+    "release": "bumpp --install -r --all --commit \"release: %s\" --tag \"%s\""
   },
   "keywords": [
     "HentaiVerse"
@@ -42,6 +43,7 @@
     "@types/greasemonkey": "^4.0.7",
     "@types/greasemonkey3": "npm:@types/greasemonkey@^3.0.3",
     "@types/node": "^22.20.0",
+    "bumpp": "^10.4.1",
     "core-js": "^3.49.0",
     "cssnano": "^7.1.9",
     "eslint": "^10.6.0",
