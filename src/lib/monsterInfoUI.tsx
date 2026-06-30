@@ -58,15 +58,10 @@ export function createMonsterInfoBox() {
 }
 
 const isCompactMonsterInfoBox = !SETTINGS.compactMonsterInfoBox;
-function padStr(num?: number) {
+function renderNum(num?: number) {
   if (typeof num !== 'number') return '';
-  return String(num).padStart(2, ' ');
-}
-
-function symbolNum(num?: number) {
-  if (typeof num !== 'number') return '';
-  if (num === 0) return ' ';
-  return num > 0 ? '+' : '-';
+  const sign = num > 0 ? '+' : (num < 0 ? '-' : ' ');
+  return sign + String(Math.abs(num)).padStart(2, ' ');
 }
 
 function MonsterTable(props: { monsterInfo: HVMonsterDatabase.MonsterInfo | null }) {
@@ -76,7 +71,7 @@ function MonsterTable(props: { monsterInfo: HVMonsterDatabase.MonsterInfo | null
         <tr>
           {isCompactMonsterInfoBox && (['fire', 'cold', 'elec'] as const).map(i => (
             <td className={styles[i]}>
-              {i[0]}:{symbolNum(props.monsterInfo?.[i])}{padStr(props.monsterInfo?.[i])}
+              {i[0]}:{renderNum(props.monsterInfo?.[i])}
             </td>
           ))}
           <td>
@@ -87,7 +82,7 @@ function MonsterTable(props: { monsterInfo: HVMonsterDatabase.MonsterInfo | null
         <tr>
           {isCompactMonsterInfoBox && (['wind', 'holy', 'dark'] as const).map(i => (
             <td className={styles[i]}>
-              {i[0]}:{symbolNum(props.monsterInfo?.[i])}{padStr(props.monsterInfo?.[i])}
+              {i[0]}:{renderNum(props.monsterInfo?.[i])}
             </td>
           ))}
           <td>
@@ -97,7 +92,7 @@ function MonsterTable(props: { monsterInfo: HVMonsterDatabase.MonsterInfo | null
         <tr>
           {isCompactMonsterInfoBox && (['crushing', 'slashing', 'piercing'] as const).map(i => (
             <td>
-              {i[0]}:{symbolNum(props.monsterInfo?.[i])}{padStr(props.monsterInfo?.[i])}
+              {i[0]}:{renderNum(props.monsterInfo?.[i])}
             </td>
           ))}
           <td>
